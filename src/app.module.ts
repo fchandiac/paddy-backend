@@ -41,9 +41,9 @@ import { envs } from 'libs/config';
       username: envs.database.user,
       password: envs.database.password,
       database: envs.database.DatabaseName,
-      ssl: {
-        ca: fs.readFileSync(envs.database.caCertPath || './cert/ca.pem').toString(),
-      },
+      // ssl: {
+      //   ca: fs.readFileSync(envs.database.caCertPath || './cert/ca.pem').toString(),
+      // },
       extra: {
         enableKeepAlive: true,
         keepAliveInitialDelay: 10000,
