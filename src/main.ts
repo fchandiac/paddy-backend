@@ -13,11 +13,11 @@ async function bootstrap() {
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
-    })
+    }),
   );
 
   app.enableCors({
-    origin: ['http://localhost:3000'], // o '*' para todos los orígenes
+    origin: ['http://localhost:3000', 'https://paddy-psi.vercel.app/'], // o '*' para todos los orígenes
     credentials: true,
   });
 
