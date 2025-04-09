@@ -1,0 +1,97 @@
+felipe@MacBook-Pro-de-Felipe-2 paddy-backend % tree -I "node_modules|dist|.git"
+.
+├── README.md
+├── cert
+│   └── ca.pem
+├── libs
+│   ├── config
+│   │   ├── envs.ts
+│   │   └── index.ts
+│   ├── dto
+│   │   ├── common
+│   │   │   ├── by-id.dto.ts
+│   │   │   ├── login.dto.ts
+│   │   │   └── search-term.dto.ts
+│   │   ├── discount.dto.ts
+│   │   ├── producer.dto.ts
+│   │   ├── reception-calculation.dto.ts
+│   │   ├── reception.dto.ts
+│   │   ├── record.dto.ts
+│   │   ├── rice-price.dto.ts
+│   │   ├── rice-type.dto.ts
+│   │   ├── transaction-reference.dto.ts
+│   │   ├── transaction.dto.ts
+│   │   └── user.dto.ts
+│   ├── entities
+│   │   ├── discount-percent.entity.ts
+│   │   ├── discount-template.entity.ts
+│   │   ├── producer.entity.ts
+│   │   ├── reception-calculation.entity.ts
+│   │   ├── reception.entity.ts
+│   │   ├── record.entity.ts
+│   │   ├── rice-price.entity.ts
+│   │   ├── rice-type.entity.ts
+│   │   ├── transaction-reference.entity.ts
+│   │   ├── transaction.entity.ts
+│   │   └── user.entity.ts
+│   └── enums.ts
+├── nest-cli.json
+├── package-lock.json
+├── package.json
+├── src
+│   ├── app.module.ts
+│   ├── auth
+│   │   ├── auth
+│   │   │   ├── auth.controller.ts
+│   │   │   ├── auth.module.ts
+│   │   │   └── auth.service.ts
+│   │   ├── producer
+│   │   │   ├── producer.controller.ts
+│   │   │   ├── producer.module.ts
+│   │   │   └── producer.service.ts
+│   │   ├── record
+│   │   │   ├── record.controller.ts
+│   │   │   ├── record.module.ts
+│   │   │   └── record.service.ts
+│   │   └── user
+│   │       ├── user.controller.ts
+│   │       ├── user.module.ts
+│   │       └── user.service.ts
+│   ├── main.ts
+│   ├── receptions
+│   │   ├── discountTemplate
+│   │   │   ├── discount-template.controller.ts
+│   │   │   ├── discount-template.module.ts
+│   │   │   └── discount-template.service.ts
+│   │   ├── discountsPercent
+│   │   │   ├── discountPercent.controller.ts
+│   │   │   ├── discountPercent.service.ts
+│   │   │   └── discountsPercent.module.ts
+│   │   ├── reception
+│   │   │   ├── receptions.controller.ts
+│   │   │   ├── receptions.module.ts
+│   │   │   └── receptions.service.ts
+│   │   ├── ricePrice
+│   │   │   ├── ricePrice.controller.ts
+│   │   │   ├── ricePrice.module.ts
+│   │   │   └── ricePrice.service.ts
+│   │   └── riceType
+│   │       ├── riceType.controller.ts
+│   │       ├── riceType.module.ts
+│   │       └── riceType.service.ts
+│   └── transactions
+│       ├── receptionCalculation
+│       │   ├── receptionCalculation.controller.ts
+│       │   ├── receptionCalculation.module.ts
+│       │   └── receptionCalculation.service.ts
+│       ├── transaction
+│       │   ├── transaction.controller.ts
+│       │   ├── transaction.module.ts
+│       │   └── transaction.service.ts
+│       └── transactionReference
+│           ├── transactionReference.controller.ts
+│           ├── transactionReference.module.ts
+│           └── transactionReference.service.ts
+├── tree.txt
+├── tsconfig.build.json
+└── tsconfig.json

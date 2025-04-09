@@ -1,0 +1,60 @@
+import {
+  IsNumber,
+  IsPositive,
+  IsOptional,
+  Min,
+  Max,
+} from 'class-validator';
+import { Type } from 'class-transformer';
+
+export class CreateDiscountPercentDto {
+  @Type(() => Number)
+  @IsNumber()
+  discountCode: number;
+
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  start: number;
+
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  end: number;
+
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  percent: number;
+}
+
+export class UpdateDiscountPercentDto {
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  discountCode?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  start?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  end?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  percent?: number;
+}
