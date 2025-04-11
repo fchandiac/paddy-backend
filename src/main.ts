@@ -16,8 +16,9 @@ async function bootstrap() {
     }),
   );
 
+  // CORS para aceptar desde cualquier origen
   app.enableCors({
-    origin: ['http://localhost:3000', 'https://paddy-psi.vercel.app', '*'], // o '*' para todos los orígenes
+    origin: true,
     credentials: true,
   });
 
