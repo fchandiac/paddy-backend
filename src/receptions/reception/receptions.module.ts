@@ -5,10 +5,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Reception } from '../../../libs/entities/reception.entity'; 
 import { Producer } from '../../../libs/entities/producer.entity';
 import { RiceType } from '../../../libs/entities/rice-type.entity'; // ✅ corrige la ruta si estás dentro de src/receptions/reception/
+import { Template } from '../../../libs/entities/template.entity'; // ✅ corrige la ruta si estás dentro de src/receptions/reception/
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Reception, Producer, RiceType]), // ✅ este es el fix real
+    TypeOrmModule.forFeature([Reception, Producer, RiceType, Template]), // ✅ este es el fix real
   ],
   controllers: [ReceptionController],
   providers: [ReceptionService],
