@@ -10,8 +10,11 @@ import {
 import { Producer } from './producer.entity';
 import { RiceType } from './rice-type.entity';
 import { Expose } from 'class-transformer';
+import { Template } from './template.entity';
 
 export type ReceptionStatus = 'pending' | 'settled' | 'canceled';
+
+// ... (importaciones iguales)
 
 @Entity('reception')
 export class Reception {
@@ -53,7 +56,11 @@ export class Reception {
   @Expose()
   grossWeight: number;
 
-  @Column('decimal', { precision: 10, scale: 2 })
+  @Column('decimal', {
+    precision: 10,
+    scale: 2,
+    default: 0,
+  })
   @Expose()
   tare: number;
 
@@ -61,49 +68,117 @@ export class Reception {
   @Expose()
   netWeight: number;
 
-  // 🧪 Análisis de granos
-  @Column('decimal', { precision: 5, scale: 2 })
+  // 🧪 Análisis de granos (percent + tolerance)
+  @Column('float', { default: 0 })
   @Expose()
-  humedad: number;
+  percentHumedad: number;
 
-  @Column('decimal', { precision: 5, scale: 2 })
+  @Column('float', { default: 0 })
   @Expose()
-  granosVerdes: number;
+  toleranceHumedad: number;
 
-  @Column('decimal', { precision: 5, scale: 2 })
+  @Column('float', { default: 0 })
   @Expose()
-  impurezas: number;
+  percentGranosVerdes: number;
 
-  @Column('decimal', { precision: 5, scale: 2 })
+  @Column('float', { default: 0 })
   @Expose()
-  granosManchados: number;
+  toleranceGranosVerdes: number;
 
-  @Column('decimal', { precision: 5, scale: 2 })
+  @Column('float', { default: 0 })
   @Expose()
-  hualcacho: number;
+  percentImpurezas: number;
 
-  @Column('decimal', { precision: 5, scale: 2 })
+  @Column('float', { default: 0 })
   @Expose()
-  granosPelados: number;
+  toleranceImpurezas: number;
 
-  @Column('decimal', { precision: 5, scale: 2 })
+  @Column('float', { default: 0 })
   @Expose()
-  granosYesosos: number;
+  percentGranosManchados: number;
 
-  // ➕ Bonificación
-  @Column('decimal', { precision: 5, scale: 2 })
+  @Column('float', { default: 0 })
   @Expose()
-  bonificacion: number;
+  toleranceGranosManchados: number;
 
-  // 🌡 Secado (independiente)
-  @Column('decimal', { precision: 5, scale: 2 })
+  @Column('float', { default: 0 })
   @Expose()
-  secado: number;
+  percentHualcacho: number;
+
+  @Column('float', { default: 0 })
+  @Expose()
+  toleranceHualcacho: number;
+
+  @Column('float', { default: 0 })
+  @Expose()
+  percentGranosPelados: number;
+
+  @Column('float', { default: 0 })
+  @Expose()
+  toleranceGranosPelados: number;
+
+  @Column('float', { default: 0 })
+  @Expose()
+  percentGranosYesosos: number;
+
+  @Column('float', { default: 0 })
+  @Expose()
+  toleranceGranosYesosos: number;
+
+  // Nuevo: Vano
+  @Column('float', { default: 0 })
+  @Expose()
+  percentVano: number;
+
+  @Column('float', { default: 0 })
+  @Expose()
+  toleranceVano: number;
+
+  // ➕ Bonificación (solo tolerancia)
+  @Column('float', { default: 0 })
+  @Expose()
+  toleranceBonificacion: number;
+
+  // 🌡 Secado (solo percent)
+  @Column('float', { default: 0 })
+  @Expose()
+  percentSecado: number;
+
+  // � Cálculos derivados
+  @Column('decimal', { precision: 10, scale: 2, default: 0 })
+  @Expose()
+  totalDiscount: number;
+
+  @Column('decimal', { precision: 10, scale: 2, default: 0 })
+  @Expose()
+  bonus: number;
+
+  @Column('decimal', { precision: 10, scale: 2, default: 0 })
+  @Expose()
+  paddyNet: number;
+
+  // �📝 Nota u observación del usuario
+  @Column('text', { nullable: true })
+  @Expose()
+  note?: string;
 
   // 📌 Estado de la recepción
-  @Column({ type: 'enum', enum: ['pending', 'settled', 'canceled'], default: 'pending' })
+  @Column({
+    type: 'enum',
+    enum: ['pending', 'settled', 'canceled'],
+    default: 'pending',
+  })
   @Expose()
   status: ReceptionStatus;
+
+  @ManyToOne(() => Template, { nullable: true , onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'templateId' })
+  @Expose()
+  template: Template;
+
+  @Column({ nullable: true })
+  @Expose()
+  templateId: number;
 
   @CreateDateColumn()
   @Expose()
@@ -113,5 +188,3 @@ export class Reception {
   @Expose()
   updatedAt: Date;
 }
-
-

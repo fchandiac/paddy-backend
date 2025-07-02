@@ -90,6 +90,15 @@ export class CreateReceptionDto {
   @IsNumber()
   percentSecado: number;
 
+  @IsNumber()
+  totalDiscount: number;
+
+  @IsNumber()
+  bonus: number;
+
+  @IsNumber()
+  paddyNet: number;
+
   @IsEnum(['pending', 'settled', 'canceled'])
   status: ReceptionStatus;
 
@@ -198,6 +207,18 @@ export class UpdateReceptionDto {
   @IsOptional()
   @IsNumber()
   percentSecado?: number;
+
+  @IsOptional()
+  @IsNumber()
+  totalDiscount?: number;
+
+  @IsOptional()
+  @IsNumber()
+  bonus?: number;
+
+  @IsOptional()
+  @IsNumber()
+  paddyNet?: number;
 
   @IsOptional()
   @IsEnum(['pending', 'settled', 'canceled'])

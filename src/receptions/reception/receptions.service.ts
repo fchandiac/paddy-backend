@@ -121,52 +121,5 @@ export class ReceptionService {
       order: { createdAt: 'DESC' },
     });
   }
-
-  async getReceptionResumen(): Promise<any[]> {
-    const receptions = await this.receptionRepo.find({
-      relations: ['producer', 'riceType'],
-      order: { createdAt: 'DESC' },
-    });
-  
-    return receptions.map((r) => {
-      const net = Number(r.netWeight);
-      const price = Number(r.price);
-      
-      const descuentos = [
-        ((r.percentHumedad - r.toleranceHumedad) / 100) * net,
-        ((r.percentGranosVerdes - r.toleranceGranosVerdes) / 100) * net,
-        ((r.percentImpurezas - r.toleranceImpurezas) / 100) * net,
-        ((r.percentGranosManchados - r.toleranceGranosManchados) / 100) * net,
-        ((r.percentHualcacho - r.toleranceHualcacho) / 100) * net,
-        ((r.percentGranosPelados - r.toleranceGranosPelados) / 100) * net,
-        ((r.percentGranosYesosos - r.toleranceGranosYesosos) / 100) * net,
-      ];
-  
-      const totalDescuento = descuentos.reduce(
-        (acc, val) => acc + Math.max(0, val),
-        0,
-      );
-      const bonificacion = (r.toleranceBonificacion / 100) * net;
-      const allDesc = totalDescuento - bonificacion;
-      const totalConDescuentos = net - allDesc;
-      
-      // Calculamos el totalToPay basado en el precio y el peso neto con descuentos
-      const totalToPay = Math.round(totalConDescuentos * price);
-  
-      return {
-        id: r.id,
-        riceType: r.riceType?.name,
-        producer: `${r.producer?.name} (${r.producer?.rut})`,
-        guide: r.guide,
-        licensePlate: r.licensePlate,
-        price: Number(price),
-        grossWeight: Number(r.grossWeight),
-        netWeight: net,
-        totalConDescuentos: Math.round(totalConDescuentos),
-        totalToPay: totalToPay,
-        createdAt: r.createdAt, // 👈 Agregado
-      };
-    });
-  }
   
 }
