@@ -1,25 +1,28 @@
+/**
+ * Códigos y tipos de transacciones del sistema
+ * 
+ * Código  | Tipo          | Traducción        | Descripción
+ * --------|---------------|-------------------|------------------------------------------
+ * 1       | ADVANCE       | Anticipo          | Pago anticipado antes de una operación completa.
+ * 2       | SETTLEMENT    | Liquidación       | Liquidación de una operación o cuenta.
+ * 3       | INTEREST      | Interés           | Cargo aplicado sobre el capital prestado o saldo pendiente.
+ * 4       | CREDIT_NOTE   | Nota de crédito   | Documento que refleja un crédito a favor.
+ * 5       | DEBIT_NOTE    | Nota de débito    | Documento que refleja un débito o cargo.
+ */
 export enum TransactionTypeCode {
-  INCOME = 1,
-  EXPENSE = 2,
-  OPEN_ACCOUNT = 3,
-  RECEPTION = 4,
-  ADVANCE = 5,
-  SETTLEMENT = 6,
-  CREDIT_NOTE = 7,
-  DEBIT_NOTE = 8,
-  PRE_SETTLEMENT = 9,
+  ADVANCE = 1,
+  SETTLEMENT = 2,
+  INTEREST = 3,
+  CREDIT_NOTE = 4,
+  DEBIT_NOTE = 5,
 }
 
 export enum TransactionType {
-  INCOME = 'Ingreso',
-  EXPENSE = 'Gasto',
-  OPEN_ACCOUNT = 'Apertura de cuenta',
-  RECEPTION = 'Recepción de dinero',
   ADVANCE = 'Anticipo',
   SETTLEMENT = 'Liquidación',
+  INTEREST = 'Interés',
   CREDIT_NOTE = 'Nota de crédito',
   DEBIT_NOTE = 'Nota de débito',
-  PRE_SETTLEMENT = 'Preliquidación',
 }
 
 

@@ -54,7 +54,7 @@ export class UpdateDiscountPercentDto {
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  @Min(0)
-  @Max(100)
+  @Min(0, { message: 'El porcentaje no puede ser menor que 0' })
+  @Max(100, { message: 'El porcentaje no puede ser mayor que 100' })
   percent?: number;
 }

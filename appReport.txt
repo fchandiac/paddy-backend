@@ -1,0 +1,1155 @@
+Entidad: Transaction
+
+Descripción:
+La entidad Transaction representa una transacción en el sistema. Puede estar relacionada con operaciones financieras, movimientos de productos o cualquier tipo de intercambio registrado en el sistema.
+
+Atributos:
+1. id:
+   - Descripción: Identificador único de la transacción.
+   - Tipo: number.
+   - Propiedades: Primary Key, Auto-generado.
+
+2. amount:
+   - Descripción: Monto de la transacción.
+   - Tipo: decimal.
+   - Propiedades: Precisión configurable (por ejemplo, decimal(10, 2)), No puede ser negativo.
+
+3. date:
+   - Descripción: Fecha y hora en que se realizó la transacción.
+   - Tipo: Date.
+   - Propiedades: Obligatorio, Se registra automáticamente al crear la transacción.
+
+4. type:
+   - Descripción: Tipo de transacción.
+   - Tipo: enum.
+   - Valores posibles: credit (entrada de dinero o producto), debit (salida de dinero o producto).
+   - Propiedades: Obligatorio.
+
+5. description:
+   - Descripción: Descripción o notas adicionales sobre la transacción.
+   - Tipo: string.
+   - Propiedades: Longitud máxima configurable (por ejemplo, 255 caracteres), Opcional.
+
+6. status:
+   - Descripción: Estado actual de la transacción.
+   - Tipo: enum.
+   - Valores posibles: pending (pendiente), completed (completada), canceled (cancelada).
+   - Propiedades: Obligatorio.
+
+Relaciones:
+1. Relación con User:
+   - Tipo: Muchos a Uno (ManyToOne).
+   - Descripción: La transacción está asociada a un usuario que la realizó.
+   - Campo relacionado: user.
+
+2. Relación con Producer:
+   - Tipo: Muchos a Uno (ManyToOne).
+   - Descripción: La transacción puede estar asociada a un productor.
+   - Campo relacionado: producer.
+
+3. Relación con TransactionReference:
+   - Tipo: Uno a Muchos (OneToMany).
+   - Descripción: Una transacción puede tener múltiples referencias asociadas.
+   - Campo relacionado: references.
+
+Validaciones:
+- amount:
+  - Debe ser mayor a 0.
+  - Precisión limitada a dos decimales.
+- date:
+  - Debe ser una fecha válida.
+  - No puede ser una fecha futura.
+- type:
+  - Debe ser uno de los valores definidos en el enumerador.
+- status:
+  - Debe ser uno de los valores definidos en el enumerador.
+
+Ejemplo de Implementación:
+@Entity('transactions')
+export class Transaction {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column('decimal', { precision: 10, scale: 2 })
+  amount: number;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  date: Date;
+
+  @Column({ type: 'enum', enum: ['credit', 'debit'] })
+  type: 'credit' | 'debit';
+
+  @Column({ type: 'enum', enum: ['pending', 'completed', 'canceled'] })
+  status: 'pending' | 'completed' | 'canceled';
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  description?: string;
+
+  @ManyToOne(() => User, (user) => user.transactions)
+  user: User;
+
+  @ManyToOne(() => Producer, (producer) => producer.transactions)
+  producer: Producer;
+
+  @OneToMany(() => TransactionReference, (reference) => reference.transaction)
+  references: TransactionReference[];
+}
+
+Propósito:
+La entidad Transaction es fundamental para:
+- Registrar y rastrear todas las transacciones realizadas en el sistema.
+- Asociar transacciones con usuarios y productores.
+- Proveer un historial detallado de las operaciones financieras o de productos.
+
+Entidad: Reception
+
+Descripción:
+La entidad Reception representa una recepción de productos, específicamente arroz, en el sistema. Incluye información sobre el productor, el tipo de arroz, el peso, análisis de calidad, bonificaciones, y el estado de la recepción.
+
+Atributos:
+1. id:
+   - Descripción: Identificador único de la recepción.
+   - Tipo: number.
+   - Propiedades: Primary Key, Auto-generado.
+
+2. producer:
+   - Descripción: Productor asociado a la recepción.
+   - Tipo: Relación con la entidad Producer.
+   - Propiedades: Obligatorio.
+
+3. producerId:
+   - Descripción: Identificador del productor.
+   - Tipo: number.
+
+4. riceType:
+   - Descripción: Tipo de arroz recibido.
+   - Tipo: Relación con la entidad RiceType.
+   - Propiedades: Obligatorio.
+
+5. riceTypeId:
+   - Descripción: Identificador del tipo de arroz.
+   - Tipo: number.
+
+6. price:
+   - Descripción: Precio del arroz por unidad.
+   - Tipo: decimal(10,2).
+
+7. guide:
+   - Descripción: Guía de transporte asociada a la recepción.
+   - Tipo: string.
+   - Propiedades: Longitud máxima de 100 caracteres.
+
+8. licensePlate:
+   - Descripción: Placa del vehículo que transporta el arroz.
+   - Tipo: string.
+   - Propiedades: Longitud máxima de 20 caracteres.
+
+9. grossWeight:
+   - Descripción: Peso bruto del arroz recibido.
+   - Tipo: decimal(10,2).
+
+10. tare:
+    - Descripción: Tara del transporte.
+    - Tipo: decimal(10,2).
+
+11. netWeight:
+    - Descripción: Peso neto del arroz recibido.
+    - Tipo: decimal(10,2).
+
+12. Análisis de calidad:
+    - percentHumedad: Porcentaje de humedad.
+    - toleranceHumedad: Tolerancia de humedad.
+    - percentGranosVerdes: Porcentaje de granos verdes.
+    - toleranceGranosVerdes: Tolerancia de granos verdes.
+    - percentImpurezas: Porcentaje de impurezas.
+    - toleranceImpurezas: Tolerancia de impurezas.
+    - percentGranosManchados: Porcentaje de granos manchados.
+    - toleranceGranosManchados: Tolerancia de granos manchados.
+    - percentHualcacho: Porcentaje de hualcacho.
+    - toleranceHualcacho: Tolerancia de hualcacho.
+    - percentGranosPelados: Porcentaje de granos pelados.
+    - toleranceGranosPelados: Tolerancia de granos pelados.
+    - percentGranosYesosos: Porcentaje de granos yesosos.
+    - toleranceGranosYesosos: Tolerancia de granos yesosos.
+    - percentVano: Porcentaje de vano.
+    - toleranceVano: Tolerancia de vano.
+
+13. toleranceBonificacion:
+    - Descripción: Tolerancia para bonificaciones.
+    - Tipo: float.
+
+14. percentSecado:
+    - Descripción: Porcentaje de secado.
+    - Tipo: float.
+
+15. note:
+    - Descripción: Nota u observación del usuario.
+    - Tipo: string.
+    - Propiedades: Opcional.
+
+16. status:
+    - Descripción: Estado de la recepción.
+    - Tipo: enum.
+    - Valores posibles: pending, settled, canceled.
+    - Propiedades: Valor por defecto: pending.
+
+17. discountTemplate:
+    - Descripción: Plantilla de descuento asociada a la recepción.
+    - Tipo: Relación con la entidad DiscountTemplate.
+    - Propiedades: Opcional.
+
+18. discountTemplateId:
+    - Descripción: Identificador de la plantilla de descuento.
+    - Tipo: number.
+
+19. totalToPay:
+    - Descripción: Total a pagar por la recepción.
+    - Tipo: int.
+
+20. createdAt:
+    - Descripción: Fecha de creación de la recepción.
+    - Tipo: Date.
+
+21. updatedAt:
+    - Descripción: Fecha de última actualización de la recepción.
+    - Tipo: Date.
+
+Relaciones:
+1. Relación con Producer:
+   - Tipo: Muchos a Uno (ManyToOne).
+   - Descripción: La recepción está asociada a un productor.
+
+2. Relación con RiceType:
+   - Tipo: Muchos a Uno (ManyToOne).
+   - Descripción: La recepción está asociada a un tipo de arroz.
+
+3. Relación con DiscountTemplate:
+   - Tipo: Muchos a Uno (ManyToOne).
+   - Descripción: La recepción puede tener asociada una plantilla de descuento.
+
+Validaciones:
+- price, grossWeight, tare, netWeight:
+  - Deben ser mayores o iguales a 0.
+- status:
+  - Debe ser uno de los valores definidos en el enumerador.
+- guide, licensePlate:
+  - Longitud máxima de 100 y 20 caracteres, respectivamente.
+
+Propósito:
+La entidad Reception es fundamental para:
+- Registrar y gestionar las recepciones de productos.
+- Realizar análisis de calidad del arroz recibido.
+- Asociar recepciones con productores, tipos de arroz y descuentos.
+- Calcular el total a pagar basado en el peso, calidad y descuentos aplicados.
+
+Entidad: Producer
+
+Descripción:
+La entidad Producer representa a un productor en el sistema, que puede ser un proveedor o cliente relacionado con las transacciones y recepciones de productos.
+
+Atributos:
+1. id:
+   - Descripción: Identificador único del productor.
+   - Tipo: number.
+   - Propiedades: Primary Key, Auto-generado.
+
+2. name:
+   - Descripción: Nombre del productor.
+   - Tipo: string.
+   - Propiedades: Obligatorio.
+
+3. businessName:
+   - Descripción: Nombre comercial del productor.
+   - Tipo: string.
+   - Propiedades: Opcional.
+
+4. rut:
+   - Descripción: Identificación única del productor (RUT).
+   - Tipo: string.
+   - Propiedades: Único, longitud máxima de 12 caracteres.
+
+5. address:
+   - Descripción: Dirección del productor.
+   - Tipo: string.
+   - Propiedades: Opcional.
+
+6. phone:
+   - Descripción: Teléfono de contacto del productor.
+   - Tipo: string.
+   - Propiedades: Opcional.
+
+7. bankAccounts:
+   - Descripción: Información de las cuentas bancarias del productor.
+   - Tipo: json.
+   - Propiedades: Opcional.
+   - Estructura:
+     - bank: Nombre del banco.
+     - accountNumber: Número de cuenta.
+     - accountType: Tipo de cuenta.
+     - holderName: Nombre del titular (opcional).
+
+8. createdAt:
+   - Descripción: Fecha de creación del registro del productor.
+   - Tipo: Date.
+
+9. updatedAt:
+   - Descripción: Fecha de última actualización del registro del productor.
+   - Tipo: Date.
+
+10. deletedAt:
+    - Descripción: Fecha de eliminación lógica del registro del productor.
+    - Tipo: Date.
+    - Propiedades: Excluido en las respuestas serializadas.
+
+Relaciones:
+1. Relación con Transaction:
+   - Tipo: Uno a Muchos (OneToMany).
+   - Descripción: Un productor puede estar asociado a múltiples transacciones.
+
+2. Relación con TransactionReference:
+   - Tipo: Uno a Muchos (OneToMany).
+   - Descripción: Un productor puede tener múltiples referencias de transacciones.
+
+3. Relación con DiscountTemplate:
+   - Tipo: Uno a Muchos (OneToMany).
+   - Descripción: Un productor puede tener múltiples plantillas de descuento asociadas.
+
+Propósito:
+La entidad Producer es fundamental para:
+- Gestionar la información de los productores involucrados en el sistema.
+- Asociar productores con transacciones, referencias de transacciones y plantillas de descuento.
+- Proveer datos relevantes para operaciones financieras y logísticas.
+
+Entidad: RiceType
+
+Descripción:
+La entidad RiceType representa un tipo de arroz en el sistema. Incluye información básica como el nombre, descripción, precio y estado habilitado/deshabilitado.
+
+Atributos:
+1. id:
+   - Descripción: Identificador único del tipo de arroz.
+   - Tipo: number.
+   - Propiedades: Primary Key, Auto-generado.
+
+2. name:
+   - Descripción: Nombre del tipo de arroz.
+   - Tipo: string.
+   - Propiedades: Obligatorio.
+
+3. description:
+   - Descripción: Descripción opcional del tipo de arroz.
+   - Tipo: string.
+   - Propiedades: Opcional.
+
+4. price:
+   - Descripción: Precio del tipo de arroz.
+   - Tipo: decimal.
+   - Propiedades: Obligatorio.
+
+5. enable:
+   - Descripción: Indica si el tipo de arroz está habilitado o deshabilitado.
+   - Tipo: boolean.
+   - Propiedades: Obligatorio.
+
+6. createdAt:
+   - Descripción: Fecha de creación del registro del tipo de arroz.
+   - Tipo: Date.
+
+7. updatedAt:
+   - Descripción: Fecha de última actualización del registro del tipo de arroz.
+   - Tipo: Date.
+
+8. deletedAt:
+   - Descripción: Fecha de eliminación lógica del registro del tipo de arroz.
+   - Tipo: Date.
+   - Propiedades: Excluido en las respuestas serializadas.
+
+Propósito:
+La entidad RiceType es fundamental para:
+- Clasificar los diferentes tipos de arroz disponibles en el sistema.
+- Proveer información relevante para la gestión de precios y disponibilidad.
+- Facilitar la asociación de tipos de arroz con recepciones y transacciones.
+
+Entidad: RicePrice (Eliminada)
+
+Descripción:
+Esta entidad fue eliminada del sistema. Originalmente, se utilizaba para gestionar los precios del arroz, posiblemente con variaciones a lo largo del tiempo o según diferentes criterios.
+
+Motivo de Eliminación:
+La funcionalidad de gestión de precios del arroz ha sido reevaluada o integrada en otras entidades (posiblemente en `RiceType` o directamente en `Reception`), lo que hizo que la entidad `RicePrice` fuera redundante.
+
+Impacto de la Eliminación:
+- Se eliminó la tabla `rice_prices` de la base de datos.
+- Se eliminaron los servicios, controladores y DTOs asociados a `RicePrice`.
+- Se actualizaron las referencias en otras entidades y módulos para reflejar esta eliminación.
+- La lógica de precios ahora se maneja de una manera diferente dentro del sistema.
+
+Entidad: DiscountPercent
+
+Descripción:
+La entidad `DiscountPercent` se utiliza para definir y gestionar rangos específicos para la aplicación de descuentos porcentuales en el sistema. Cada registro representa un tramo o nivel dentro de una política de descuentos más amplia, identificada por un código de descuento.
+
+Atributos:
+1. id:
+   - Descripción: Identificador único del registro de porcentaje de descuento.
+   - Tipo: number.
+   - Propiedades: Primary Key, Auto-generado.
+
+2. discountCode:
+   - Descripción: Código numérico que agrupa o identifica un conjunto de reglas de descuento. Permite asociar varios rangos (registros de `DiscountPercent`) a una misma política de descuento (por ejemplo, descuentos por "Humedad", "Impurezas", etc.).
+   - Tipo: number.
+   - Propiedades: Obligatorio.
+
+3. start:
+   - Descripción: Valor inicial del rango (inclusive) para el cual se aplica este porcentaje de descuento. El tipo de valor (porcentaje, cantidad, etc.) dependerá del contexto del `discountCode`.
+   - Tipo: decimal (precisión 5, escala 2).
+   - Propiedades: Obligatorio.
+
+4. end:
+   - Descripción: Valor final del rango (inclusive) para el cual se aplica este porcentaje de descuento.
+   - Tipo: decimal (precisión 5, escala 2).
+   - Propiedades: Obligatorio.
+
+5. percent:
+   - Descripción: El porcentaje de descuento que se aplicará si un valor medido cae dentro del rango definido por `start` y `end` para el `discountCode` correspondiente.
+   - Tipo: decimal (precisión 5, escala 2).
+   - Propiedades: Obligatorio.
+
+6. createdAt:
+   - Descripción: Fecha y hora de creación del registro.
+   - Tipo: Date.
+   - Propiedades: Auto-generado.
+
+7. updatedAt:
+   - Descripción: Fecha y hora de la última actualización del registro.
+   - Tipo: Date.
+   - Propiedades: Auto-generado en cada actualización.
+
+8. deletedAt:
+   - Descripción: Fecha y hora en que el registro fue eliminado lógicamente (soft delete).
+   - Tipo: Date.
+   - Propiedades: Opcional, se usa para borrado suave.
+
+Relaciones:
+- No posee relaciones directas definidas con otras entidades a través de decoradores como `@ManyToOne` o `@OneToMany` en su definición, pero lógicamente está vinculada a `DiscountTemplate` a través del `discountCode` (aunque esta vinculación no es una restricción de clave foránea directa en este modelo de entidad).
+
+Propósito:
+La entidad `DiscountPercent` es crucial para:
+- Implementar políticas de descuento detalladas y escalonadas.
+- Definir cómo varía un porcentaje de descuento en función de diferentes umbrales o rangos de un parámetro medible (ej. porcentaje de impurezas, volumen de compra, etc.).
+- Facilitar la administración y ajuste de las condiciones de descuento sin modificar la lógica de negocio principal.
+
+Entidad: DiscountTemplate
+
+Descripción:
+La entidad `DiscountTemplate` (plantilla de descuento) define un conjunto de parámetros y tolerancias para diferentes defectos o características de un producto (presumiblemente arroz, dado el contexto del proyecto). Estas plantillas pueden ser asignadas a productores o recepciones para estandarizar cómo se aplican los descuentos o castigos basados en la calidad.
+
+Atributos:
+1. id:
+   - Descripción: Identificador único de la plantilla de descuento.
+   - Tipo: number.
+   - Propiedades: Primary Key, Auto-generado.
+
+2. name:
+   - Descripción: Nombre único de la plantilla de descuento.
+   - Tipo: string (longitud máxima 255).
+   - Propiedades: Obligatorio, Único.
+
+3. useToleranceGroup:
+   - Descripción: Indica si se debe usar un grupo de tolerancia general para esta plantilla.
+   - Tipo: boolean.
+   - Propiedades: Valor por defecto `false`.
+
+4. groupToleranceValue:
+   - Descripción: Valor de la tolerancia agrupada, si `useToleranceGroup` es `true`.
+   - Tipo: float (precisión 5, escala 2).
+   - Propiedades: Valor por defecto `0`.
+
+5. producerId:
+   - Descripción: ID del productor al que podría estar asociada esta plantilla (opcional).
+   - Tipo: number.
+   - Propiedades: Nulable.
+
+6. Atributos específicos por tipo de defecto/característica (ej. Humedad, Granos Verdes, etc.):
+   Cada tipo de defecto (Humedad, Granos Verdes, Impurezas, Granos Manchados, Hualcacho, Granos Pelados, Granos Yesosos, Vano) tiene un conjunto similar de atributos:
+   - available[Defecto]:
+     - Descripción: Indica si este defecto está activo o se considera en esta plantilla.
+     - Tipo: boolean.
+     - Propiedades: Valor por defecto `true`.
+   - percent[Defecto]:
+     - Descripción: Porcentaje base o de referencia para este defecto en la plantilla.
+     - Tipo: float (precisión 5, escala 2).
+     - Propiedades: Valor por defecto `0`.
+   - tolerance[Defecto]:
+     - Descripción: Valor de tolerancia para este defecto específico.
+     - Tipo: float (precisión 5, escala 2).
+     - Propiedades: Valor por defecto `0`.
+   - showTolerance[Defecto]:
+     - Descripción: Indica si la tolerancia para este defecto debe mostrarse o considerarse visiblemente.
+     - Tipo: boolean.
+     - Propiedades: Nulable.
+   - groupTolerance[Defecto]:
+     - Descripción: Indica si este defecto participa en el grupo de tolerancia (si `useToleranceGroup` es `true`).
+     - Tipo: boolean.
+     - Propiedades: Nulable.
+
+7. Bonificación (Bonus):
+   - availableBonus:
+     - Descripción: Indica si la bonificación está activa en esta plantilla.
+     - Tipo: boolean.
+     - Propiedades: Valor por defecto `true`.
+   - toleranceBonus:
+     - Descripción: Valor de tolerancia para la bonificación.
+     - Tipo: float (precisión 5, escala 2).
+     - Propiedades: Valor por defecto `0`.
+
+8. Secado (Dry):
+   - availableDry:
+     - Descripción: Indica si el concepto de secado está activo en esta plantilla.
+     - Tipo: boolean.
+     - Propiedades: Valor por defecto `true`.
+   - percentDry:
+     - Descripción: Porcentaje asociado al secado.
+     - Tipo: float (precisión 5, escala 2).
+     - Propiedades: Valor por defecto `0`.
+
+9. default:
+   - Descripción: Indica si esta plantilla es la plantilla por defecto del sistema.
+   - Tipo: boolean.
+   - Propiedades: Valor por defecto `false`.
+
+10. createdAt, updatedAt, deletedAt:
+    - Descripción: Campos estándar para el seguimiento de la creación, actualización y borrado lógico del registro.
+    - Tipos: Date.
+
+Relaciones:
+1. Relación con Producer (Muchos a Uno):
+   - Campo: `producer`.
+   - Descripción: Una plantilla puede estar asociada opcionalmente a un productor. Si el productor se elimina, `producerId` se establece a `NULL`.
+
+2. Relación con Reception (Uno a Muchos):
+   - Campo: `receptions`.
+   - Descripción: Una plantilla de descuento puede ser utilizada por múltiples recepciones.
+
+Propósito:
+La entidad `DiscountTemplate` es fundamental para:
+- Estandarizar y centralizar las reglas de calidad y los descuentos asociados.
+- Permitir la creación de múltiples perfiles de descuento que pueden ser asignados a diferentes productores o situaciones.
+- Facilitar el cálculo de descuentos en las recepciones de productos basándose en parámetros predefinidos.
+- Gestionar de forma flexible las tolerancias y aplicabilidad de diversos factores de calidad.
+
+Entidad: Record
+
+Descripción:
+La entidad `Record` se utiliza para registrar un historial o bitácora de acciones significativas realizadas dentro del sistema. Cada registro captura qué usuario realizó una acción, sobre qué entidad o tabla se efectuó, una descripción de la acción y cuándo ocurrió.
+
+Atributos:
+1. id:
+   - Descripción: Identificador único del registro de auditoría.
+   - Tipo: number.
+   - Propiedades: Primary Key, Auto-generado.
+
+2. user:
+   - Descripción: El usuario que realizó la acción registrada.
+   - Tipo: Relación con la entidad `User`.
+   - Propiedades: Obligatorio. La información del usuario se carga automáticamente (`eager: true`).
+
+3. entity:
+   - Descripción: Nombre de la entidad o tabla del sistema que fue afectada o está relacionada con la acción registrada (por ejemplo, "Reception", "Producer", "User").
+   - Tipo: string.
+   - Propiedades: Obligatorio.
+
+4. description:
+   - Descripción: Texto descriptivo de la acción realizada (por ejemplo, "Creación de nueva recepción", "Actualización de datos de productor", "Intento de login fallido").
+   - Tipo: string.
+   - Propiedades: Obligatorio.
+
+5. createdAt:
+   - Descripción: Fecha y hora en que se creó el registro de la acción.
+   - Tipo: Date.
+   - Propiedades: Auto-generado en la creación.
+
+Relaciones:
+1. Relación con User (Muchos a Uno):
+   - Campo: `user`.
+   - Descripción: Múltiples registros de auditoría pueden estar asociados a un mismo usuario.
+
+Propósito:
+La entidad `Record` es fundamental para:
+- Mantener una traza de auditoría de las operaciones importantes del sistema.
+- Identificar qué usuario realizó qué cambios y cuándo.
+- Ayudar en la depuración de problemas o en la reconstrucción de eventos.
+- Cumplir con posibles requisitos de seguimiento y seguridad.
+
+Entidad: TransactionReference
+
+Descripción:
+La entidad `TransactionReference` se utiliza para establecer y describir relaciones entre diferentes transacciones o entre transacciones y otras entidades como productores. Actúa como un nexo que provee contexto sobre cómo se vinculan dos o más elementos transaccionales.
+
+Atributos:
+1. id:
+   - Descripción: Identificador único de la referencia de transacción.
+   - Tipo: number.
+   - Propiedades: Primary Key, Auto-generado.
+
+2. transactionCode:
+   - Descripción: Un código o tipo que describe la naturaleza de la referencia (ej. "liquidación", "nota de crédito", "nota de débito", "anticipo aplicado a recepción").
+   - Tipo: string.
+   - Propiedades: Obligatorio.
+
+3. producer:
+   - Descripción: El productor involucrado o asociado con esta referencia transaccional.
+   - Tipo: Relación con la entidad `Producer`.
+   - Propiedades: La información del productor se carga automáticamente (`eager: true`).
+
+4. parentId:
+   - Descripción: Identificador de la transacción principal o "padre" en la relación.
+   - Tipo: number.
+   - Propiedades: Obligatorio.
+
+5. childId:
+   - Descripción: Identificador de la transacción secundaria o "hija" que se relaciona con la principal.
+   - Tipo: number.
+   - Propiedades: Obligatorio.
+
+6. parentType:
+   - Descripción: Describe el tipo de entidad a la que pertenece `parentId` (ej. "Transaction", "Reception", "AdvancePayment"). Esto ayuda a contextualizar la relación si `parentId` puede referirse a diferentes tipos de entidades.
+   - Tipo: string.
+   - Propiedades: Obligatorio.
+
+7. createdAt, updatedAt, deletedAt:
+   - Descripción: Campos estándar para el seguimiento de la creación, actualización y borrado lógico del registro.
+   - Tipos: Date.
+   - Propiedades: `deletedAt` se excluye de las respuestas serializadas.
+
+Relaciones:
+1. Relación con Producer (Muchos a Uno):
+   - Campo: `producer`.
+   - Descripción: Múltiples referencias de transacciones pueden estar asociadas a un mismo productor.
+
+Propósito:
+La entidad `TransactionReference` es fundamental para:
+- Vincular transacciones entre sí (ej. una nota de crédito aplicada a una factura, una liquidación que agrupa varias recepciones).
+- Conectar transacciones con otras entidades relevantes (ej. asociar un pago a un productor específico en el contexto de una transacción particular).
+- Proveer un mecanismo flexible para modelar flujos de trabajo complejos que involucran múltiples pasos o documentos transaccionales.
+- Mantener la integridad y trazabilidad de las relaciones entre diferentes operaciones financieras o de inventario.
+
+Entidad: User
+
+Descripción:
+La entidad `User` representa a un usuario del sistema. Contiene la información básica de identificación, credenciales (implícitamente, ya que hay un campo `pass`) y el rol que desempeña dentro de la aplicación.
+
+Atributos:
+1. id:
+   - Descripción: Identificador único del usuario.
+   - Tipo: number.
+   - Propiedades: Primary Key, Auto-generado.
+
+2. name:
+   - Descripción: Nombre completo del usuario.
+   - Tipo: string.
+   - Propiedades: Obligatorio.
+
+3. email:
+   - Descripción: Dirección de correo electrónico del usuario. Se utiliza como identificador único para el login.
+   - Tipo: string.
+   - Propiedades: Obligatorio, Único.
+
+4. role:
+   - Descripción: Rol asignado al usuario dentro del sistema (ej. "admin", "operador", "consulta"). Determina los permisos y accesos del usuario.
+   - Tipo: string.
+   - Propiedades: Obligatorio.
+
+5. pass:
+   - Descripción: Contraseña del usuario. Debería almacenarse de forma segura (hasheada).
+   - Tipo: string.
+   - Propiedades: Obligatorio.
+
+6. createdAt:
+   - Descripción: Fecha y hora de creación de la cuenta de usuario.
+   - Tipo: Date.
+   - Propiedades: Auto-generado.
+
+7. updatedAt:
+   - Descripción: Fecha y hora de la última actualización de los datos del usuario.
+   - Tipo: Date.
+   - Propiedades: Auto-generado en cada actualización.
+
+8. deletedAt:
+   - Descripción: Fecha y hora en que la cuenta de usuario fue eliminada lógicamente (soft delete).
+   - Tipo: Date.
+   - Propiedades: Opcional, se usa para borrado suave.
+
+Relaciones:
+- La entidad `User` es referenciada por otras entidades como `Transaction` (quién realizó la transacción) y `Record` (quién realizó la acción registrada), pero no tiene relaciones salientes directas definidas con decoradores `@ManyToOne`, `@OneToMany` o `@ManyToMany` en el extracto de código proporcionado (aunque podría tenerlas implícitamente o en otras partes del código no mostradas).
+
+Propósito:
+La entidad `User` es fundamental para:
+- Gestionar el acceso al sistema mediante autenticación y autorización.
+- Identificar a los usuarios que realizan operaciones dentro de la aplicación.
+- Asignar responsabilidades y permisos basados en roles.
+- Mantener un registro de quién ha interactuado con los datos y funcionalidades del sistema.
+
+Resumen de Simplificación del Modelo de Datos:
+
+Durante la revisión y reestructuración del proyecto, se tomó la decisión de simplificar el modelo de datos eliminando las entidades `RicePrice` y `ReceptionCalculation`.
+
+Motivos de la Simplificación:
+1.  **`RicePrice`**: Esta entidad se consideró redundante. La gestión de precios del arroz se puede manejar de forma más directa y sencilla:
+    *   El precio base de un tipo de arroz se almacena directamente en la entidad `RiceType`.
+    *   Al momento de crear una `Reception`, el precio aplicable para ese tipo de arroz se puede copiar desde `RiceType` y registrarse en la propia recepción. Esto captura el precio histórico en el momento de la transacción sin necesidad de una entidad separada para el historial de precios, que no era un requisito explícito.
+    *   Esta eliminación reduce la complejidad de las consultas y la lógica de negocio asociada a la obtención de precios.
+
+2.  **`ReceptionCalculation`**: Esta entidad estaba destinada a almacenar los resultados de los cálculos de una recepción (descuentos, bonificaciones, total a pagar). Se determinó que estos cálculos pueden realizarse "al vuelo" cuando se necesita mostrar o procesar una recepción, o sus resultados pueden almacenarse directamente en campos dentro de la entidad `Reception` (como ya se hace con `totalToPay` y los campos de análisis de calidad).
+    *   Eliminar `ReceptionCalculation` evita la duplicación de datos y la necesidad de mantener sincronizada una entidad separada con la `Reception` principal.
+    *   Simplifica el proceso de liquidación y consulta de recepciones, ya que toda la información relevante está contenida o se deriva directamente de la entidad `Reception`.
+
+Impacto General de la Simplificación:
+La eliminación de estas dos entidades conlleva los siguientes beneficios:
+*   **Modelo de datos más ligero y comprensible**: Menos tablas en la base de datos y menos relaciones que gestionar.
+*   **Lógica de negocio simplificada**: Menos servicios, DTOs y lógica de sincronización entre entidades.
+*   **Mantenimiento reducido**: Menos código que mantener y probar.
+
+Archivos y Estructuras Afectadas:
+Para lograr esta simplificación, se realizaron los siguientes cambios:
+*   **Eliminación de archivos de entidad**:
+    *   `libs/entities/rice-price.entity.ts`
+    *   `libs/entities/reception-calculation.entity.ts`
+*   **Eliminación de archivos DTO**:
+    *   `libs/dto/rice-price.dto.ts`
+    *   `libs/dto/reception-calculation.dto.ts`
+*   **Eliminación de módulos y servicios**:
+    *   Directorio `src/receptions/ricePrice/` (contenía el módulo, servicio y controlador de `RicePrice`).
+    *   Directorio `src/transactions/receptionCalculation/` (contenía el módulo, servicio y controlador de `ReceptionCalculation`).
+*   **Actualización de `src/app.module.ts`**: Se eliminaron las importaciones y declaraciones de los módulos y entidades eliminadas.
+*   **Actualización de `src/scripts/clear.ts`**: Se eliminaron las referencias a `ReceptionCalculation` en el script de limpieza de la base de datos.
+*   **Actualización de `appReport.txt`**: Se documentó la eliminación de `RicePrice` y se añade este resumen.
+
+En resumen, la simplificación busca un modelo más eficiente y fácil de gestionar, enfocándose en las funcionalidades cruciales del sistema sin añadir complejidad innecesaria.
+
+# Cambios y Simplificación del Sistema de Transacciones e Interés
+
+## 1. Tipos de Transacciones Actuales
+
+Se han simplificado los tipos de transacciones a los siguientes:
+
+```typescript
+export enum TransactionTypeCode {
+  ADVANCE = 1,     // Anticipo
+  SETTLEMENT = 2,  // Liquidación
+  INTEREST = 3,    // Interés
+  CREDIT_NOTE = 4, // Nota de crédito
+  DEBIT_NOTE = 5,  // Nota de débito
+}
+```
+
+El tipo `DRYING` (Secado) ha sido eliminado completamente, y los códigos de los tipos posteriores se han ajustado para mantener la continuidad.
+
+## 2. Estructura de Detalles de Transacciones
+
+### 2.1 Detalles para Anticipos (ADVANCE)
+
+```typescript
+export interface AdvanceDetails {
+  receptionIds?: number[];
+  advanceRate?: number;
+  notes?: string;
+  
+  interest?: {
+    dailyRate: number;
+    startDate: string | Date;
+    endDate?: string | Date;
+    minimumAmount?: number;
+    maximumAmount?: number;
+  };
+}
+```
+
+La configuración de interés ha sido simplificada eliminando:
+- `gracePeriod`: Ya no se utilizan períodos de gracia.
+- `isCompound`: Todos los intereses son simples (no compuestos).
+- `isActive`: Si no se desea aplicar interés, simplemente se establece `dailyRate` en 0.
+
+### 2.2 Detalles para Interés (INTEREST)
+
+Cuando se genera un cargo por interés, se crea una transacción independiente de tipo `INTEREST` con estos detalles:
+
+```typescript
+export interface InterestDetails {
+  baseTransactionId: number;  // ID del anticipo sobre el que se aplica el interés
+  baseAmount: number;         // Monto base del anticipo
+  interestRate: number;       // Tasa aplicada
+  days: number;               // Días transcurridos
+  startDate: string;          // Inicio del período
+  endDate: string;            // Fin del período
+  notes?: string;             // Comentarios
+}
+```
+
+## 3. Funcionamiento del Sistema de Interés
+
+Es importante entender que el interés opera en dos niveles distintos:
+
+1. **Configuración del interés**: Es parte de los detalles de un anticipo (tipo `ADVANCE`).
+   - Define cómo se calculará el interés para ese anticipo específico.
+   - Se configura al crear o modificar un anticipo.
+
+2. **Transacciones de interés**: Son transacciones independientes de tipo `INTEREST`.
+   - Se generan cuando se decide registrar un cargo por el interés acumulado.
+   - Contienen información sobre el anticipo original y el cálculo realizado.
+
+## 4. Cálculo de Interés Simplificado
+
+El cálculo de interés ahora utiliza exclusivamente interés simple con esta fórmula:
+
+```
+interestAmount = capital × dailyRate × daysElapsed
+```
+
+donde:
+- `capital`: Es el monto del anticipo (transaction.debit)
+- `dailyRate`: Es la tasa diaria de interés (configurada en el anticipo)
+- `daysElapsed`: Es el número de días entre la fecha de inicio y la fecha de referencia
+
+## 5. Beneficios de la Simplificación
+
+- **Mayor claridad**: El sistema es más fácil de entender y mantener.
+- **Menos código**: Se eliminó lógica compleja relacionada con interés compuesto y períodos de gracia.
+- **Mejor rendimiento**: Cálculos más directos y menos condiciones a evaluar.
+- **Menor margen de error**: Al simplificar la lógica, se reduce la posibilidad de errores.
+- **Consistencia**: Todas las transacciones de interés se calculan de la misma manera.
+
+## 6. Impacto en el Código
+
+Los cambios realizados afectaron principalmente:
+- `libs/enums.ts`: Actualización de los tipos de transacción.
+- `libs/interfaces/transaction-details.interface.ts`: Simplificación de interfaces.
+- `src/transactions/transaction/transaction.service.ts`: Simplificación del cálculo de interés.
+
+Esta simplificación está alineada con el objetivo general de hacer que el sistema sea más mantenible, claro y enfocado en las necesidades reales del negocio.
+
+# Entidad: Reception
+
+## Descripción
+La entidad Reception representa la recepción de arroz de un productor en la planta. Registra toda la información relacionada con la entrega, incluyendo datos de peso, análisis de calidad y cálculos de pagos.
+
+## Atributos
+
+### Información Básica
+1. **id**:
+   - Descripción: Identificador único de la recepción.
+   - Tipo: number.
+   - Propiedades: Primary Key, Auto-generado.
+
+2. **producer**:
+   - Descripción: Relación con la entidad Productor.
+   - Tipo: Entidad Producer.
+   - Propiedades: ManyToOne.
+
+3. **producerId**:
+   - Descripción: ID del productor que entregó el arroz.
+   - Tipo: number.
+   - Propiedades: Foreign Key.
+
+4. **riceType**:
+   - Descripción: Relación con la entidad RiceType (tipo/variedad de arroz).
+   - Tipo: Entidad RiceType.
+   - Propiedades: ManyToOne.
+
+5. **riceTypeId**:
+   - Descripción: ID del tipo de arroz recibido.
+   - Tipo: number.
+   - Propiedades: Foreign Key.
+
+6. **price**:
+   - Descripción: Precio base por unidad del arroz recibido.
+   - Tipo: decimal.
+   - Propiedades: Precisión 10, escala 2.
+
+7. **guide**:
+   - Descripción: Número de guía o documento de remisión.
+   - Tipo: string.
+   - Propiedades: Longitud máxima 100 caracteres.
+
+8. **licensePlate**:
+   - Descripción: Placa del vehículo que transportó el arroz.
+   - Tipo: string.
+   - Propiedades: Longitud máxima 20 caracteres.
+
+### Información de Peso
+9. **grossWeight**:
+   - Descripción: Peso bruto del cargamento.
+   - Tipo: decimal.
+   - Propiedades: Precisión 10, escala 2.
+
+10. **tare**:
+    - Descripción: Peso de la tara o vehículo vacío.
+    - Tipo: decimal.
+    - Propiedades: Precisión 10, escala 2, Valor predeterminado 0.
+
+11. **netWeight**:
+    - Descripción: Peso neto del arroz (grossWeight - tare).
+    - Tipo: decimal.
+    - Propiedades: Precisión 10, escala 2.
+
+### Análisis de Calidad
+12. **percentHumedad** / **toleranceHumedad**:
+    - Descripción: Porcentaje de humedad y su tolerancia.
+    - Tipo: float.
+    - Propiedades: Valor predeterminado 0.
+
+13. **percentGranosVerdes** / **toleranceGranosVerdes**:
+    - Descripción: Porcentaje de granos verdes y su tolerancia.
+    - Tipo: float.
+    - Propiedades: Valor predeterminado 0.
+
+14. **percentImpurezas** / **toleranceImpurezas**:
+    - Descripción: Porcentaje de impurezas y su tolerancia.
+    - Tipo: float.
+    - Propiedades: Valor predeterminado 0.
+
+15. **percentGranosManchados** / **toleranceGranosManchados**:
+    - Descripción: Porcentaje de granos manchados y su tolerancia.
+    - Tipo: float.
+    - Propiedades: Valor predeterminado 0.
+
+16. **percentHualcacho** / **toleranceHualcacho**:
+    - Descripción: Porcentaje de hualcacho y su tolerancia.
+    - Tipo: float.
+    - Propiedades: Valor predeterminado 0.
+
+17. **percentGranosPelados** / **toleranceGranosPelados**:
+    - Descripción: Porcentaje de granos pelados y su tolerancia.
+    - Tipo: float.
+    - Propiedades: Valor predeterminado 0.
+
+18. **percentGranosYesosos** / **toleranceGranosYesosos**:
+    - Descripción: Porcentaje de granos yesosos y su tolerancia.
+    - Tipo: float.
+    - Propiedades: Valor predeterminado 0.
+
+19. **percentVano** / **toleranceVano**:
+    - Descripción: Porcentaje de vano (granos vacíos) y su tolerancia.
+    - Tipo: float.
+    - Propiedades: Valor predeterminado 0.
+
+### Bonificaciones y Secado
+20. **toleranceBonificacion**:
+    - Descripción: Tolerancia para bonificaciones.
+    - Tipo: float.
+    - Propiedades: Valor predeterminado 0.
+
+21. **percentSecado**:
+    - Descripción: Porcentaje de secado aplicado.
+    - Tipo: float.
+    - Propiedades: Valor predeterminado 0.
+
+### Información de Cálculo y Estado
+22. **discountTemplate**:
+    - Descripción: Relación con la plantilla de descuentos aplicada.
+    - Tipo: Entidad DiscountTemplate.
+    - Propiedades: ManyToOne, Nullable, OnDelete SET NULL.
+
+23. **discountTemplateId**:
+    - Descripción: ID de la plantilla de descuentos utilizada.
+    - Tipo: number.
+    - Propiedades: Nullable.
+
+24. **totalToPay**:
+    - Descripción: Monto total a pagar por la recepción.
+    - Tipo: int.
+    - Propiedades: Valor predeterminado 0.
+
+25. **status**:
+    - Descripción: Estado de la recepción.
+    - Tipo: enum.
+    - Valores: 'pending' (pendiente), 'settled' (liquidada), 'canceled' (cancelada).
+    - Propiedades: Valor predeterminado 'pending'.
+
+26. **note**:
+    - Descripción: Nota u observación opcional.
+    - Tipo: text.
+    - Propiedades: Nullable.
+
+### Metadatos
+27. **createdAt**:
+    - Descripción: Fecha y hora de creación del registro.
+    - Tipo: Date.
+    - Propiedades: CreateDateColumn.
+
+28. **updatedAt**:
+    - Descripción: Fecha y hora de la última actualización.
+    - Tipo: Date.
+    - Propiedades: UpdateDateColumn.
+
+## Proceso de Recepción
+
+El proceso de recepción de arroz funciona de la siguiente manera:
+
+1. Se registra la llegada del productor con su cargamento de arroz.
+2. Se pesa el vehículo con carga (grossWeight) y sin carga (tare) para determinar el peso neto del arroz.
+3. Se realiza un análisis de calidad para determinar diversos factores (humedad, impurezas, granos dañados, etc.).
+4. Se aplica una plantilla de descuentos según los resultados del análisis.
+5. Se calcula el monto total a pagar considerando el precio base, los descuentos y posibles bonificaciones.
+6. La recepción queda en estado "pendiente" hasta que se realice su liquidación.
+
+Los campos de porcentajes y tolerancias son utilizados para calcular descuentos o bonificaciones según la calidad del arroz recibido, lo que impacta directamente en el valor final a pagar al productor.
+
+## Relación con otras Entidades
+
+- **Producer**: Una recepción pertenece a un productor (ManyToOne).
+- **RiceType**: Una recepción está asociada a un tipo de arroz específico (ManyToOne).
+- **DiscountTemplate**: Una recepción puede tener asociada una plantilla de descuentos (ManyToOne).
+- **Transaction**: Las recepciones pueden estar asociadas a transacciones (a través de los campos details.receptionIds en las transacciones).
+
+# Sistema de Referencias de Transacción
+
+## Descripción
+El sistema de referencias de transacción (`TransactionReference`) proporciona un mecanismo para establecer y rastrear relaciones entre diferentes transacciones en el sistema. Permite vincular transacciones relacionadas y mantener la trazabilidad de las operaciones financieras.
+
+## Estructura de TransactionReference
+
+La entidad `TransactionReference` actúa como una tabla de relación que contiene:
+
+1. **id**:
+   - Descripción: Identificador único de la referencia.
+   - Tipo: number.
+   - Propiedades: Primary Key, Auto-generado.
+
+2. **transactionCode**:
+   - Descripción: Código que indica el tipo de relación.
+   - Tipo: string.
+   - Ejemplos: "liquidación", "anticipo", "nota de crédito".
+
+3. **producer**:
+   - Descripción: Relación con el productor involucrado en ambas transacciones.
+   - Tipo: Entidad Producer.
+   - Propiedades: ManyToOne, Eager loading.
+
+4. **parentId**:
+   - Descripción: ID de la transacción principal o "padre".
+   - Tipo: number.
+
+5. **childId**:
+   - Descripción: ID de la transacción relacionada o "hija".
+   - Tipo: number.
+
+6. **parentType**:
+   - Descripción: Tipo de entidad del padre.
+   - Tipo: string.
+   - Valor predeterminado: "Transaction".
+
+7. **createdAt/updatedAt/deletedAt**:
+   - Descripción: Marcas de tiempo para auditoría.
+   - Tipo: Date.
+   - Propiedades: CreateDateColumn, UpdateDateColumn, DeleteDateColumn.
+
+## Funcionamiento del Sistema de Referencias
+
+### Creación de Referencias
+
+Cuando se necesita establecer una relación entre dos transacciones, como cuando:
+- Se liquida un anticipo
+- Se crea una nota de crédito/débito asociada a una transacción
+- Se registra un interés relacionado con un anticipo
+
+El sistema:
+1. Verifica que exista el productor y ambas transacciones.
+2. Crea un registro en la tabla `TransactionReference` que vincula ambas transacciones.
+3. Establece una relación jerárquica padre-hijo entre las transacciones.
+
+### Consulta de Referencias
+
+El sistema permite consultar referencias de tres maneras:
+1. **Por transacción padre**: Encuentra todas las transacciones "hijas" vinculadas a una transacción principal.
+2. **Por transacción hija**: Encuentra la transacción "padre" a la que está vinculada una transacción.
+3. **Por productor**: Encuentra todas las referencias asociadas a un productor específico.
+
+## Casos de Uso Típicos
+
+### Liquidaciones, Anticipos y Recepciones
+
+Las liquidaciones (tipo SETTLEMENT) son un caso especial que ilustra la complejidad de las relaciones en el sistema:
+
+1. **Relación con Anticipos**:
+   - Una liquidación puede estar vinculada a uno o varios anticipos previos (transacciones de tipo ADVANCE).
+   - Esta relación se establece de dos formas:
+     - A través del campo `details.advanceIds` en la transacción de liquidación, que almacena los IDs de los anticipos relacionados.
+     - Mediante registros en `TransactionReference` donde la liquidación es el padre y los anticipos son los hijos.
+   - Esto permite rastrear qué anticipos se están liquidando con una liquidación específica.
+
+2. **Relación con Recepciones**:
+   - Una liquidación también está vinculada a una o varias recepciones de arroz.
+   - Esta relación se establece a través del campo `details.receptionIds` en la transacción de liquidación.
+   - Las recepciones proporcionan la base para calcular el valor total de la liquidación.
+
+3. **Flujo completo**:
+   - Un productor entrega arroz → Se generan recepciones
+   - El productor solicita anticipos → Se generan transacciones de tipo ADVANCE vinculadas a recepciones específicas
+   - Posteriormente, se liquidan las recepciones → Se genera una transacción de tipo SETTLEMENT que:
+     - Está vinculada a las recepciones que se están liquidando
+     - Está vinculada a los anticipos que se están descontando de la liquidación
+   - Si se generaron intereses sobre los anticipos, también aparecerán como transacciones de tipo INTEREST vinculadas a los anticipos.
+
+Este flujo muestra cómo una liquidación sirve como punto central que conecta recepciones, anticipos e intereses en una operación comercial completa.
+
+### Ejemplo de Estructura de Datos
+
+1. **En una transacción de tipo SETTLEMENT (Liquidación)**:
+```json
+{
+  "id": 123,
+  "typeCode": 2, // SETTLEMENT
+  "details": {
+    "receptionIds": [1001, 1002, 1003], // Recepciones que se están liquidando
+    "advanceIds": [501, 502],           // Anticipos que se están descontando
+    "retentions": [
+      { "type": "impuesto", "percentage": 0.03, "amount": 15000 }
+    ],
+    "document": {
+      "number": "LIQ-2023-123",
+      "date": "2023-05-15"
+    },
+    "notes": "Liquidación final de campaña"
+  }
+}
+```
+
+2. **Referencias en TransactionReference**:
+```
+| id | transactionCode | producerId | parentId | childId | parentType  |
+|----|----------------|------------|----------|---------|-------------|
+| 1  | "liquidación"  | 42         | 123      | 501     | "Transaction"|
+| 2  | "liquidación"  | 42         | 123      | 502     | "Transaction"|
+```
+
+Estas referencias establecen la relación entre la liquidación (ID 123) y los anticipos (IDs 501 y 502), permitiendo rastrear fácilmente qué anticipos se han liquidado.
+
+### Notas de Crédito/Débito
+
+- Una nota de crédito o débito (transacción hija) está vinculada a una transacción original (transacción padre).
+- Permite identificar a qué transacción original se aplica un ajuste.
+
+### Intereses
+
+- Una transacción de interés (transacción hija) está vinculada a un anticipo (transacción padre).
+- Facilita el seguimiento de los intereses generados por un anticipo específico.
+
+## Ventajas del Sistema de Referencias
+
+1. **Trazabilidad completa**: Permite rastrear todas las relaciones entre transacciones.
+2. **Flexibilidad**: No impone restricciones rígidas en la estructura de datos de las transacciones.
+3. **Consultas eficientes**: Facilita la búsqueda de transacciones relacionadas.
+4. **Integridad referencial**: Garantiza que las relaciones sean válidas mediante verificaciones.
+
+## Implementación Técnica
+
+La implementación se divide en:
+- **Entidad**: `transaction-reference.entity.ts` define la estructura de datos.
+- **Servicio**: `transactionReference.service.ts` contiene la lógica de negocio.
+- **Controlador**: `transactionReference.controller.ts` expone endpoints REST para crear y consultar referencias.
+
+Los métodos principales del servicio son:
+- `createReference`: Crea una nueva referencia entre dos transacciones.
+- `findReferencesForTransaction`: Busca referencias para una transacción específica (como padre o como hijo).
+- `findByProducer`: Busca todas las referencias asociadas a un productor.

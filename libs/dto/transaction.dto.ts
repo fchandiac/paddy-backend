@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, IsString, IsEnum } from 'class-validator';
+import { IsNumber, IsOptional, IsString, IsEnum, ValidateNested, IsObject } from 'class-validator';
 import { Type } from 'class-transformer';
 import { TransactionTypeCode } from 'libs/enums';
 
@@ -40,6 +40,14 @@ export class CreateTransactionDto {
 
   @IsOptional()
   isDraft?: boolean;
+  
+  /**
+   * Detalles específicos según el tipo de transacción
+   * El contenido variará dependiendo del valor de typeCode
+   */
+  @IsOptional()
+  @IsObject()
+  details?: any;
 }
 
 export class FilterTransactionDto {

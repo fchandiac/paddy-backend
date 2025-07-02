@@ -2,8 +2,6 @@ import {
   IsString,
   IsNotEmpty,
   IsOptional,
-  IsPhoneNumber,
-  Length,
   Matches,
 } from 'class-validator';
 
@@ -16,24 +14,20 @@ export class CreateProducerDto {
   @IsNotEmpty()
   businessName: string;
 
+  @IsString()
+  @IsNotEmpty()
+  @Matches(/^\d{7,8}-[\dKk]$/, {
+    message: 'El RUT debe tener un formato válido. Ej: 12345678-9 o 12345678-K',
+  })
+  rut: string;
+
   @IsOptional()
   @IsString()
-  @Matches(/^(\d{1,2}\.?\d{3}\.?\d{3}-[\dkK])$/, {
-    message: 'El RUT debe tener un formato válido, por ejemplo: 12.345.678-9',
-  })
-  rut?: string;
+  address?: string;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  address: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @Matches(/^[9|2]\d{8}$/, {
-    message:
-      'Debe ser un número de 9 dígitos válido. Ej: 912345678 o 222345678',
-  })
-  phone: string;
+  phone?: string;
 }
 
 export class UpdateProducerDto {
@@ -47,8 +41,8 @@ export class UpdateProducerDto {
 
   @IsOptional()
   @IsString()
-  @Matches(/^(\d{1,2}\.?\d{3}\.?\d{3}-[\dkK])$/, {
-    message: 'El RUT debe tener un formato válido, por ejemplo: 12.345.678-9',
+  @Matches(/^\d{7,8}-[\dKk]$/, {
+    message: 'El RUT debe tener un formato válido. Ej: 12345678-9 o 12345678-K',
   })
   rut?: string;
 
@@ -56,13 +50,9 @@ export class UpdateProducerDto {
   @IsString()
   address?: string;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  @Matches(/^[9|2]\d{8}$/, {
-    message:
-      'Debe ser un número de 9 dígitos válido. Ej: 912345678 o 222345678',
-  })
-  phone: string;
+  phone?: string;
 }
 
 export class FilterProducerDto {
@@ -77,4 +67,63 @@ export class FilterProducerDto {
   @IsOptional()
   @IsString()
   businessName?: string;
+}
+
+export class CreateProducerWithBankDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsString()
+  @IsNotEmpty()
+  businessName: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @Matches(/^\d{7,8}-[\dKk]$/, {
+    message: 'El RUT debe tener un formato válido. Ej: 12345678-9 o 12345678-K',
+  })
+  rut: string;
+
+  @IsOptional()
+  @IsString()
+  address?: string;
+
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @IsOptional()
+  @IsString()
+  bank?: string;
+
+  @IsOptional()
+  @IsString()
+  accountNumber?: string;
+
+  @IsOptional()
+  @IsString()
+  accountType?: string;
+
+  @IsOptional()
+  @IsString()
+  holderName?: string;
+}
+
+export class AddBankAccountDto {
+  @IsString()
+  @IsNotEmpty()
+  bank: string;
+
+  @IsString()
+  @IsNotEmpty()
+  accountNumber: string;
+
+  @IsString()
+  @IsNotEmpty()
+  accountType: string;
+
+  @IsString()
+  @IsNotEmpty()
+  holderName: string;
 }

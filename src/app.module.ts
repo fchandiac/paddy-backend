@@ -9,23 +9,18 @@ import { RecordModule } from './auth/record/record.module';
 
 import { ReceptionsModule } from './receptions/reception/receptions.module';
 import { DiscountPercentModule } from './receptions/discountsPercent/discountPercent.module';
-import { RicePriceModule } from './receptions/ricePrice/ricePrice.module';
 import { RiceTypeModule } from './receptions/riceType/riceType.module';
-import { DiscountTemplate } from 'libs/entities/discount-template.entity';
-import { DiscountTemplateModule } from './receptions/discountTemplate/discount-template.module';
+import { Template } from 'libs/entities/template.entity';
+import { TemplateModule } from './receptions/template/template.module';
 
-
-import { ReceptionCalculationModule } from './transactions/receptionCalculation/receptionCalculation.module';
 import { TransactionModule } from './transactions/transaction/transaction.module';
 import { TransactionReferenceModule } from './transactions/transactionReference/transactionReference.module';
 
 import { User } from '../libs/entities/user.entity';
 import { Producer } from '../libs/entities/producer.entity';
 import { RiceType } from '../libs/entities/rice-type.entity';
-import { RicePrice } from '../libs/entities/rice-price.entity';
 import { DiscountPercent } from '../libs/entities/discount-percent.entity';
 import { Reception } from '../libs/entities/reception.entity';
-import { ReceptionCalculation } from '../libs/entities/reception-calculation.entity';
 import { Transaction } from '../libs/entities/transaction.entity';
 import { TransactionReference } from '../libs/entities/transaction-reference.entity';
 import { Record } from '../libs/entities/record.entity';
@@ -41,28 +36,17 @@ import { envs } from 'libs/config';
       username: envs.database.user,
       password: envs.database.password,
       database: envs.database.DatabaseName,
-      // ssl: {
-      //   ca: fs.readFileSync(envs.database.caCertPath || './cert/ca.pem').toString(),
-      // },
-      extra: {
-        enableKeepAlive: true,
-        keepAliveInitialDelay: 10000,
-        connectionLimit: 10,
-      },
       synchronize: true,
-
       entities: [
         User,
         Producer,
         RiceType,
-        RicePrice,
         DiscountPercent,
         Reception,
-        ReceptionCalculation,
         Transaction,
         TransactionReference,
         Record,
-        DiscountTemplate,
+        Template,
       ],
     }),
 
@@ -74,11 +58,9 @@ import { envs } from 'libs/config';
 
     ReceptionsModule,
     DiscountPercentModule,
-    RicePriceModule,
     RiceTypeModule,
-    DiscountTemplateModule,
+    TemplateModule,
 
-    ReceptionCalculationModule,
     TransactionReferenceModule,
     TransactionModule,
   ],

@@ -8,7 +8,6 @@ interface EnvVars {
   DATABASE_USER: string;
   DATABASE_PASSWORD: string;
   DATABASE_NAME: string;
-  DB_CA_CERT_PATH: string;
 }
 
 const envVarsSchema: joi.ObjectSchema = joi
@@ -19,7 +18,6 @@ const envVarsSchema: joi.ObjectSchema = joi
     DATABASE_USER: joi.string().required(),
     DATABASE_PASSWORD: joi.string().required(),
     DATABASE_NAME: joi.string().required(),
-    DB_CA_CERT_PATH: joi.string().required(),
   })
   .unknown(true);
 
@@ -42,6 +40,5 @@ export const envs = {
     user: envVars.DATABASE_USER,
     password: envVars.DATABASE_PASSWORD,
     DatabaseName: envVars.DATABASE_NAME,
-    caCertPath: envVars.DB_CA_CERT_PATH,
   },
 };

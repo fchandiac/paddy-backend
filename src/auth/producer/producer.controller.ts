@@ -9,10 +9,13 @@ import {
   ParseIntPipe,
   UsePipes,
   ValidationPipe,
+  Patch,
 } from '@nestjs/common';
 import { ProducerService } from './producer.service';
 import {
+  AddBankAccountDto,
   CreateProducerDto,
+  CreateProducerWithBankDto,
   UpdateProducerDto,
 } from '../../../libs/dto/producer.dto';
 import { Producer } from '../../../libs/entities/producer.entity';
@@ -40,6 +43,21 @@ export class ProducerController {
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   async create(@Body() dto: CreateProducerDto): Promise<Producer> {
     return this.producerService.create(dto);
+  }
+
+  @Post('with-bank')
+  async createWithBankAccount(
+    @Body() dto: CreateProducerWithBankDto,
+  ): Promise<Producer> {
+    return this.producerService.createWithBankAccount(dto);
+  }
+
+  @Patch(':id/add-bank-account')
+  async addBankAccount(
+    @Param('id') producerId: number,
+    @Body() dto: AddBankAccountDto,
+  ): Promise<Producer> {
+    return this.producerService.addBankAccount(producerId, dto);
   }
 
   @Put(':id')

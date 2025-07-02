@@ -47,7 +47,10 @@ export class UserService {
 
   // ✅ Listar todos los usuarios
   async findAll(): Promise<User[]> {
-    return this.userRepo.find();
+    return this.userRepo.find({
+      where: { deletedAt: null }, // ✅ solo los no eliminados
+      order: { createdAt: 'DESC' },
+    });
   }
 
   // ✅ Buscar usuario por ID (usado como base en otros métodos)
