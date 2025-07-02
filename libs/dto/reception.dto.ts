@@ -1,4 +1,9 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsEnum,
+  IsOptional,
+} from 'class-validator';
 import { ReceptionStatus } from '../entities/reception.entity';
 
 export class CreateReceptionDto {
@@ -8,15 +13,17 @@ export class CreateReceptionDto {
   @IsNumber()
   riceTypeId: number;
 
+  @IsOptional()
+  @IsNumber()
+  templateId?: number;
+
   @IsNumber()
   price: number;
 
   @IsString()
-  @IsNotEmpty()
   guide: string;
 
   @IsString()
-  @IsNotEmpty()
   licensePlate: string;
 
   @IsNumber()
@@ -28,38 +35,175 @@ export class CreateReceptionDto {
   @IsNumber()
   netWeight: number;
 
-  // 🧪 Análisis de granos
   @IsNumber()
-  humedad: number;
+  percentHumedad: number;
 
   @IsNumber()
-  granosVerdes: number;
+  toleranceHumedad: number;
 
   @IsNumber()
-  impurezas: number;
+  percentGranosVerdes: number;
 
   @IsNumber()
-  granosManchados: number;
+  toleranceGranosVerdes: number;
 
   @IsNumber()
-  hualcacho: number;
+  percentImpurezas: number;
 
   @IsNumber()
-  granosPelados: number;
+  toleranceImpurezas: number;
 
   @IsNumber()
-  granosYesosos: number;
+  percentGranosManchados: number;
 
-  // ➕ Bonificación
   @IsNumber()
-  bonificacion: number;
+  toleranceGranosManchados: number;
 
-  // 🌡 Secado
   @IsNumber()
-  secado: number;
+  percentHualcacho: number;
+
+  @IsNumber()
+  toleranceHualcacho: number;
+
+  @IsNumber()
+  percentGranosPelados: number;
+
+  @IsNumber()
+  toleranceGranosPelados: number;
+
+  @IsNumber()
+  percentGranosYesosos: number;
+
+  @IsNumber()
+  toleranceGranosYesosos: number;
+
+  @IsNumber()
+  percentVano: number;
+
+  @IsNumber()
+  toleranceVano: number;
+
+  @IsNumber()
+  toleranceBonificacion: number;
+
+
+  @IsNumber()
+  percentSecado: number;
 
   @IsEnum(['pending', 'settled', 'canceled'])
   status: ReceptionStatus;
+
+  @IsOptional()
+  @IsString()
+  note?: string;
 }
 
-export class UpdateReceptionDto extends CreateReceptionDto {}
+export class UpdateReceptionDto {
+  @IsOptional()
+  @IsNumber()
+  producerId?: number;
+
+  @IsOptional()
+  @IsNumber()
+  riceTypeId?: number;
+
+  @IsOptional()
+  @IsNumber()
+  templateId?: number;
+
+  @IsOptional()
+  @IsNumber()
+  price?: number;
+
+  @IsOptional()
+  @IsString()
+  guide?: string;
+
+  @IsOptional()
+  @IsString()
+  licensePlate?: string;
+
+  @IsOptional()
+  @IsNumber()
+  grossWeight?: number;
+
+  @IsOptional()
+  @IsNumber()
+  tare?: number;
+
+  @IsOptional()
+  @IsNumber()
+  netWeight?: number;
+
+  @IsOptional()
+  @IsNumber()
+  percentHumedad?: number;
+
+  @IsOptional()
+  @IsNumber()
+  toleranceHumedad?: number;
+
+  @IsOptional()
+  @IsNumber()
+  percentGranosVerdes?: number;
+
+  @IsOptional()
+  @IsNumber()
+  toleranceGranosVerdes?: number;
+
+  @IsOptional()
+  @IsNumber()
+  percentImpurezas?: number;
+
+  @IsOptional()
+  @IsNumber()
+  toleranceImpurezas?: number;
+
+  @IsOptional()
+  @IsNumber()
+  percentGranosManchados?: number;
+
+  @IsOptional()
+  @IsNumber()
+  toleranceGranosManchados?: number;
+
+  @IsOptional()
+  @IsNumber()
+  percentHualcacho?: number;
+
+  @IsOptional()
+  @IsNumber()
+  toleranceHualcacho?: number;
+
+  @IsOptional()
+  @IsNumber()
+  percentGranosPelados?: number;
+
+  @IsOptional()
+  @IsNumber()
+  toleranceGranosPelados?: number;
+
+  @IsOptional()
+  @IsNumber()
+  percentGranosYesosos?: number;
+
+  @IsOptional()
+  @IsNumber()
+  toleranceGranosYesosos?: number;
+
+  @IsOptional()
+  @IsNumber()
+  toleranceBonificacion?: number;
+
+  @IsOptional()
+  @IsNumber()
+  percentSecado?: number;
+
+  @IsOptional()
+  @IsEnum(['pending', 'settled', 'canceled'])
+  status?: ReceptionStatus;
+
+  @IsOptional()
+  @IsString()
+  note?: string;
+}

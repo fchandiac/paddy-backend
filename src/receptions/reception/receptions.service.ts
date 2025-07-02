@@ -1,14 +1,14 @@
-import {
-  Injectable,
-  NotFoundException,
-  ConflictException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Reception } from '../../../libs/entities/reception.entity';
-import { CreateReceptionDto, UpdateReceptionDto } from '../../../libs/dto/reception.dto';
+import {
+  CreateReceptionDto,
+  UpdateReceptionDto,
+} from '../../../libs/dto/reception.dto';
 import { Producer } from '../../../libs/entities/producer.entity';
 import { RiceType } from '../../../libs/entities/rice-type.entity';
+import { Template } from '../../../libs/entities/template.entity';
 
 @Injectable()
 export class ReceptionService {
@@ -21,14 +21,61 @@ export class ReceptionService {
 
     @InjectRepository(RiceType)
     private readonly riceTypeRepo: Repository<RiceType>,
+
+    @InjectRepository(Template)
+    private readonly templateRepo: Repository<Template>,
+
+
   ) {}
 
-  async health() {
+  async health(): Promise<string> {
     return 'Reception service is running';
   }
 
+  async create(dto: CreateReceptionDto): Promise<Reception> {
+    const producer = await this.producerRepo.findOne({
+      where: { id: dto.producerId },
+    });
+    if (!producer) {
+      throw new NotFoundException('Productor no encontrado');
+    }
+  
+    const riceType = await this.riceTypeRepo.findOne({
+      where: { id: dto.riceTypeId },
+    });
+    if (!riceType) {
+      throw new NotFoundException('Tipo de arroz no encontrado');
+    }
+  
+    let template = null;
+    if (dto.templateId) {
+      template = await this.templateRepo.findOne({
+        where: { id: dto.templateId },
+      });
+      if (!template) {
+        throw new NotFoundException('Plantilla no encontrada');
+      }
+    }
+  
+    const {
+      templateId, // extraemos y descartamos para no pasarlo directo
+      ...rest
+    } = dto;
+  
+    const newReception = this.receptionRepo.create({
+      ...rest,
+      producer,
+      riceType,
+      template: template || null,
+    });
+
+  
+    return await this.receptionRepo.save(newReception);
+  }
+  
+
   async findAll(): Promise<Reception[]> {
-    return this.receptionRepo.find({
+    return await this.receptionRepo.find({
       relations: ['producer', 'riceType'],
       order: { createdAt: 'DESC' },
     });
@@ -37,7 +84,8 @@ export class ReceptionService {
   async findOne(id: number): Promise<Reception> {
     const reception = await this.receptionRepo.findOne({
       where: { id },
-      relations: ['producer', 'riceType'],
+      relations: ['producer', 'riceType', 'template'],
+      order: { createdAt: 'DESC' },
     });
 
     if (!reception) {
@@ -47,26 +95,9 @@ export class ReceptionService {
     return reception;
   }
 
-  async create(dto: CreateReceptionDto): Promise<Reception> {
-    const producer = await this.producerRepo.findOne({ where: { id: dto.producerId } });
-    if (!producer) {
-      throw new NotFoundException('Productor no encontrado');
-    }
-
-    const riceType = await this.riceTypeRepo.findOne({ where: { id: dto.riceTypeId } });
-    if (!riceType) {
-      throw new NotFoundException('Tipo de arroz no encontrado');
-    }
-
-    const reception = this.receptionRepo.create({ ...dto });
-    return await this.receptionRepo.save(reception);
-  }
-
   async update(id: number, dto: UpdateReceptionDto): Promise<Reception> {
     const reception = await this.findOne(id);
-
     Object.assign(reception, dto);
-
     return await this.receptionRepo.save(reception);
   }
 
@@ -74,4 +105,68 @@ export class ReceptionService {
     const reception = await this.findOne(id);
     await this.receptionRepo.remove(reception);
   }
+
+  async findAllByProducer(producerId: number): Promise<Reception[]> {
+    return await this.receptionRepo.find({
+      where: { producerId },
+      relations: ['riceType'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async findAllPendingByProducer(producerId: number): Promise<Reception[]> {
+    return await this.receptionRepo.find({
+      where: { producerId, status: 'pending' },
+      relations: ['riceType'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async getReceptionResumen(): Promise<any[]> {
+    const receptions = await this.receptionRepo.find({
+      relations: ['producer', 'riceType'],
+      order: { createdAt: 'DESC' },
+    });
+  
+    return receptions.map((r) => {
+      const net = Number(r.netWeight);
+      const price = Number(r.price);
+      
+      const descuentos = [
+        ((r.percentHumedad - r.toleranceHumedad) / 100) * net,
+        ((r.percentGranosVerdes - r.toleranceGranosVerdes) / 100) * net,
+        ((r.percentImpurezas - r.toleranceImpurezas) / 100) * net,
+        ((r.percentGranosManchados - r.toleranceGranosManchados) / 100) * net,
+        ((r.percentHualcacho - r.toleranceHualcacho) / 100) * net,
+        ((r.percentGranosPelados - r.toleranceGranosPelados) / 100) * net,
+        ((r.percentGranosYesosos - r.toleranceGranosYesosos) / 100) * net,
+      ];
+  
+      const totalDescuento = descuentos.reduce(
+        (acc, val) => acc + Math.max(0, val),
+        0,
+      );
+      const bonificacion = (r.toleranceBonificacion / 100) * net;
+      const allDesc = totalDescuento - bonificacion;
+      const totalConDescuentos = net - allDesc;
+      
+      // Calculamos el totalToPay basado en el precio y el peso neto con descuentos
+      const totalToPay = Math.round(totalConDescuentos * price);
+  
+      return {
+        id: r.id,
+        riceType: r.riceType?.name,
+        producer: `${r.producer?.name} (${r.producer?.rut})`,
+        guide: r.guide,
+        licensePlate: r.licensePlate,
+        price: Number(price),
+        grossWeight: Number(r.grossWeight),
+        netWeight: net,
+        totalConDescuentos: Math.round(totalConDescuentos),
+        totalToPay: totalToPay,
+        createdAt: r.createdAt, // 👈 Agregado
+      };
+    });
+  }
+  
 }
