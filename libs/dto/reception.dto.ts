@@ -3,8 +3,11 @@ import {
   IsNumber,
   IsEnum,
   IsOptional,
+  IsObject,
+  IsArray,
 } from 'class-validator';
 import { ReceptionStatus } from '../entities/reception.entity';
+import { ReceptionHistory } from '../interfaces/reception-history.interface';
 
 export class CreateReceptionDto {
   @IsNumber()
@@ -227,4 +230,14 @@ export class UpdateReceptionDto {
   @IsOptional()
   @IsString()
   note?: string;
+}
+
+// DTO para registrar un motivo de cambio al actualizar
+export class UpdateReasonDto {
+  @IsString()
+  reason: string;
+  
+  @IsOptional()
+  @IsString()
+  changedBy?: string;
 }

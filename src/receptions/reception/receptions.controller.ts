@@ -7,9 +7,10 @@ import {
   Patch,
   Delete,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { ReceptionService } from './receptions.service';
-import { CreateReceptionDto, UpdateReceptionDto } from '../../../libs/dto/reception.dto';
+import { CreateReceptionDto, UpdateReceptionDto, UpdateReasonDto } from '../../../libs/dto/reception.dto';
 
 @Controller('receptions')
 export class ReceptionController {
@@ -44,8 +45,9 @@ export class ReceptionController {
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateReceptionDto,
+    @Query() updateReason: UpdateReasonDto,
   ) {
-    return this.receptionService.update(id, dto);
+    return this.receptionService.update(id, dto, updateReason);
   }
 
   // ❌ Eliminar por ID
@@ -65,10 +67,10 @@ export class ReceptionController {
   findAllPendingByProducer(@Param('producerId', ParseIntPipe) producerId: number) {
     return this.receptionService.findAllPendingByProducer(producerId);
   }
-
-
-
-
-
-
+  
+  // 📜 Historial de cambios por recepción
+  @Get(':id/history')
+  getReceptionHistory(@Param('id', ParseIntPipe) id: number) {
+    return this.receptionService.getReceptionHistory(id);
+  }
 }

@@ -11,6 +11,7 @@ import { Producer } from './producer.entity';
 import { RiceType } from './rice-type.entity';
 import { Expose } from 'class-transformer';
 import { Template } from './template.entity';
+import { ReceptionHistory } from '../interfaces/reception-history.interface';
 
 export type ReceptionStatus = 'pending' | 'settled' | 'canceled';
 
@@ -144,18 +145,18 @@ export class Reception {
   @Expose()
   percentSecado: number;
 
-  // � Cálculos derivados
+  // 💰 Cálculos derivados (en Kg)
   @Column('decimal', { precision: 10, scale: 2, default: 0 })
   @Expose()
-  totalDiscount: number;
+  totalDiscount: number; // Kg de descuento total aplicado
 
   @Column('decimal', { precision: 10, scale: 2, default: 0 })
   @Expose()
-  bonus: number;
+  bonus: number; // Kg de bonificación obtenida
 
   @Column('decimal', { precision: 10, scale: 2, default: 0 })
   @Expose()
-  paddyNet: number;
+  paddyNet: number; // Kg netos de arroz a pagar al productor
 
   // �📝 Nota u observación del usuario
   @Column('text', { nullable: true })
@@ -187,4 +188,9 @@ export class Reception {
   @UpdateDateColumn()
   @Expose()
   updatedAt: Date;
+
+  // Historial de cambios de la recepción en formato JSON
+  @Column('json', { nullable: true })
+  @Expose()
+  historyLog: ReceptionHistory;
 }
