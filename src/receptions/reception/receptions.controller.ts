@@ -25,7 +25,8 @@ export class ReceptionController {
   // 📥 Crear una recepción
   @Post()
   create(@Body() dto: CreateReceptionDto) {
-    return this.receptionService.create(dto);
+    // TODO: Obtener userId del contexto de autenticación
+    return this.receptionService.create(dto, undefined);
   }
 
   // 📄 Listar todas las recepciones
@@ -47,13 +48,15 @@ export class ReceptionController {
     @Body() dto: UpdateReceptionDto,
     @Query() updateReason: UpdateReasonDto,
   ) {
-    return this.receptionService.update(id, dto, updateReason);
+    // TODO: Obtener userId del contexto de autenticación
+    return this.receptionService.update(id, dto, updateReason, undefined);
   }
 
   // ❌ Eliminar por ID
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
-    return this.receptionService.remove(id);
+    // TODO: Obtener userId del contexto de autenticación
+    return this.receptionService.remove(id, undefined);
   }
 
   // 📄 Recepciones por productor

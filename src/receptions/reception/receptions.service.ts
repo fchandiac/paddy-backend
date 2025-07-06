@@ -11,6 +11,7 @@ import { Producer } from '../../../libs/entities/producer.entity';
 import { RiceType } from '../../../libs/entities/rice-type.entity';
 import { Template } from '../../../libs/entities/template.entity';
 import { ReceptionHistoryEntry } from '../../../libs/interfaces/reception-history.interface';
+import { AuditService } from '../../audit/audit.service';
 
 @Injectable()
 export class ReceptionService {
@@ -27,54 +28,87 @@ export class ReceptionService {
     @InjectRepository(Template)
     private readonly templateRepo: Repository<Template>,
 
-
+    private readonly auditService: AuditService,
   ) {}
 
   async health(): Promise<string> {
     return 'Reception service is running';
   }
 
-  async create(dto: CreateReceptionDto): Promise<Reception> {
-    const producer = await this.producerRepo.findOne({
-      where: { id: dto.producerId },
-    });
-    if (!producer) {
-      throw new NotFoundException('Productor no encontrado');
-    }
-  
-    const riceType = await this.riceTypeRepo.findOne({
-      where: { id: dto.riceTypeId },
-    });
-    if (!riceType) {
-      throw new NotFoundException('Tipo de arroz no encontrado');
-    }
-  
-    let template = null;
-    if (dto.templateId) {
-      template = await this.templateRepo.findOne({
-        where: { id: dto.templateId },
+  async create(dto: CreateReceptionDto, userId?: number): Promise<Reception> {
+    try {
+      const producer = await this.producerRepo.findOne({
+        where: { id: dto.producerId },
       });
-      if (!template) {
-        throw new NotFoundException('Plantilla no encontrada');
+      if (!producer) {
+        throw new NotFoundException('Productor no encontrado');
       }
-    }
-  
-    const {
-      templateId, // extraemos y descartamos para no pasarlo directo
-      ...rest
-    } = dto;
-  
-    const newReception = this.receptionRepo.create({
-      ...rest,
-      producer,
-      riceType,
-      template: template || null,
-    });
+    
+      const riceType = await this.riceTypeRepo.findOne({
+        where: { id: dto.riceTypeId },
+      });
+      if (!riceType) {
+        throw new NotFoundException('Tipo de arroz no encontrado');
+      }
+    
+      let template = null;
+      if (dto.templateId) {
+        template = await this.templateRepo.findOne({
+          where: { id: dto.templateId },
+        });
+        if (!template) {
+          throw new NotFoundException('Plantilla no encontrada');
+        }
+      }
+    
+      const {
+        templateId, // extraemos y descartamos para no pasarlo directo
+        ...rest
+      } = dto;
+    
+      const newReception = this.receptionRepo.create({
+        ...rest,
+        producer,
+        riceType,
+        template: template || null,
+      });
 
-  
-    return await this.receptionRepo.save(newReception);
+      const savedReception = await this.receptionRepo.save(newReception);
+
+      // Auditoría: registrar creación exitosa
+      await this.auditService.createAuditLog({
+        userId,
+        action: 'CREATE',
+        entityType: 'RECEPTION',
+        entityId: savedReception.id,
+        description: `Recepción creada para productor ${producer.name}`,
+        newValues: {
+          id: savedReception.id,
+          producerId: dto.producerId,
+          riceTypeId: dto.riceTypeId,
+          guide: dto.guide,
+          licensePlate: dto.licensePlate,
+          grossWeight: dto.grossWeight,
+          netWeight: dto.netWeight,
+        },
+        success: true,
+      });
+
+      return savedReception;
+    } catch (error) {
+      // Auditoría: registrar error
+      await this.auditService.createAuditLog({
+        userId,
+        action: 'CREATE',
+        entityType: 'RECEPTION',
+        description: `Error al crear recepción: ${error.message}`,
+        newValues: dto,
+        success: false,
+        errorMessage: error.message,
+      });
+      throw error;
+    }
   }
-  
 
   async findAll(): Promise<Reception[]> {
     return await this.receptionRepo.find({
@@ -97,60 +131,128 @@ export class ReceptionService {
     return reception;
   }
 
-  async update(id: number, dto: UpdateReceptionDto, updateReason?: UpdateReasonDto): Promise<Reception> {
-    const reception = await this.findOne(id);
-    
-    // Crear entrada del historial antes de actualizar
-    const historyEntry: ReceptionHistoryEntry = {
-      timestamp: new Date().toISOString(),
-      price: reception.price,
-      grossWeight: reception.grossWeight,
-      tare: reception.tare,
-      netWeight: reception.netWeight,
-      percentHumedad: reception.percentHumedad,
-      toleranceHumedad: reception.toleranceHumedad,
-      percentGranosVerdes: reception.percentGranosVerdes,
-      toleranceGranosVerdes: reception.toleranceGranosVerdes,
-      percentImpurezas: reception.percentImpurezas,
-      toleranceImpurezas: reception.toleranceImpurezas,
-      percentGranosManchados: reception.percentGranosManchados,
-      toleranceGranosManchados: reception.toleranceGranosManchados,
-      percentHualcacho: reception.percentHualcacho,
-      toleranceHualcacho: reception.toleranceHualcacho,
-      percentGranosPelados: reception.percentGranosPelados,
-      toleranceGranosPelados: reception.toleranceGranosPelados,
-      percentGranosYesosos: reception.percentGranosYesosos,
-      toleranceGranosYesosos: reception.toleranceGranosYesosos,
-      percentVano: reception.percentVano,
-      toleranceVano: reception.toleranceVano,
-      toleranceBonificacion: reception.toleranceBonificacion,
-      percentSecado: reception.percentSecado,
-      totalDiscount: reception.totalDiscount,
-      bonus: reception.bonus,
-      paddyNet: reception.paddyNet,
-      status: reception.status,
-      note: reception.note,
-      changedBy: updateReason?.changedBy || 'system',
-      reason: updateReason?.reason || 'Actualización de recepción',
-    };
-    
-    // Inicializar historyLog si es null
-    if (!reception.historyLog) {
-      reception.historyLog = [];
+  async update(id: number, dto: UpdateReceptionDto, updateReason?: UpdateReasonDto, userId?: number): Promise<Reception> {
+    try {
+      const reception = await this.findOne(id);
+      
+      // Guardar valores anteriores para auditoría
+      const oldValues = {
+        price: reception.price,
+        grossWeight: reception.grossWeight,
+        tare: reception.tare,
+        netWeight: reception.netWeight,
+        percentHumedad: reception.percentHumedad,
+        toleranceHumedad: reception.toleranceHumedad,
+        percentGranosVerdes: reception.percentGranosVerdes,
+        toleranceGranosVerdes: reception.toleranceGranosVerdes,
+        percentImpurezas: reception.percentImpurezas,
+        toleranceImpurezas: reception.toleranceImpurezas,
+        percentGranosManchados: reception.percentGranosManchados,
+        toleranceGranosManchados: reception.toleranceGranosManchados,
+        percentHualcacho: reception.percentHualcacho,
+        toleranceHualcacho: reception.toleranceHualcacho,
+        percentGranosPelados: reception.percentGranosPelados,
+        toleranceGranosPelados: reception.toleranceGranosPelados,
+        percentGranosYesosos: reception.percentGranosYesosos,
+        toleranceGranosYesosos: reception.toleranceGranosYesosos,
+        percentVano: reception.percentVano,
+        toleranceVano: reception.toleranceVano,
+        toleranceBonificacion: reception.toleranceBonificacion,
+        percentSecado: reception.percentSecado,
+        totalDiscount: reception.totalDiscount,
+        bonus: reception.bonus,
+        paddyNet: reception.paddyNet,
+        status: reception.status,
+        note: reception.note,
+      };
+      
+      // Crear entrada del historial antes de actualizar
+      const historyEntry: ReceptionHistoryEntry = {
+        timestamp: new Date().toISOString(),
+        ...oldValues,
+        changedBy: updateReason?.changedBy || 'system',
+        reason: updateReason?.reason || 'Actualización de recepción',
+      };
+      
+      // Inicializar historyLog si es null
+      if (!reception.historyLog) {
+        reception.historyLog = [];
+      }
+      
+      // Agregar la entrada al historial
+      reception.historyLog.push(historyEntry);
+      
+      // Aplicar los cambios del DTO
+      Object.assign(reception, dto);
+      
+      const updatedReception = await this.receptionRepo.save(reception);
+
+      // Auditoría: registrar actualización exitosa
+      await this.auditService.createAuditLog({
+        userId,
+        action: 'UPDATE',
+        entityType: 'RECEPTION',
+        entityId: id,
+        description: `Recepción actualizada: ${updateReason?.reason || 'Actualización de parámetros'}`,
+        oldValues,
+        newValues: dto,
+        metadata: {
+          changedBy: updateReason?.changedBy,
+          reason: updateReason?.reason,
+        },
+        success: true,
+      });
+
+      return updatedReception;
+    } catch (error) {
+      // Auditoría: registrar error
+      await this.auditService.createAuditLog({
+        userId,
+        action: 'UPDATE',
+        entityType: 'RECEPTION',
+        entityId: id,
+        description: `Error al actualizar recepción: ${error.message}`,
+        newValues: dto,
+        success: false,
+        errorMessage: error.message,
+      });
+      throw error;
     }
-    
-    // Agregar la entrada al historial
-    reception.historyLog.push(historyEntry);
-    
-    // Aplicar los cambios del DTO
-    Object.assign(reception, dto);
-    
-    return await this.receptionRepo.save(reception);
   }
 
-  async remove(id: number): Promise<void> {
-    const reception = await this.findOne(id);
-    await this.receptionRepo.remove(reception);
+  async remove(id: number, userId?: number): Promise<void> {
+    try {
+      const reception = await this.findOne(id);
+      await this.receptionRepo.remove(reception);
+
+      // Auditoría: registrar eliminación exitosa
+      await this.auditService.createAuditLog({
+        userId,
+        action: 'DELETE',
+        entityType: 'RECEPTION',
+        entityId: id,
+        description: `Recepción eliminada: ${reception.guide}`,
+        oldValues: {
+          id: reception.id,
+          guide: reception.guide,
+          producerId: reception.producerId,
+          riceTypeId: reception.riceTypeId,
+        },
+        success: true,
+      });
+    } catch (error) {
+      // Auditoría: registrar error
+      await this.auditService.createAuditLog({
+        userId,
+        action: 'DELETE',
+        entityType: 'RECEPTION',
+        entityId: id,
+        description: `Error al eliminar recepción: ${error.message}`,
+        success: false,
+        errorMessage: error.message,
+      });
+      throw error;
+    }
   }
 
   async findAllByProducer(producerId: number): Promise<Reception[]> {

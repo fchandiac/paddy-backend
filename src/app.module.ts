@@ -16,6 +16,9 @@ import { TemplateModule } from './receptions/template/template.module';
 import { TransactionModule } from './transactions/transaction/transaction.module';
 import { TransactionReferenceModule } from './transactions/transactionReference/transactionReference.module';
 
+// Audit module
+import { AuditModule } from './audit/audit.module';
+
 import { User } from '../libs/entities/user.entity';
 import { Producer } from '../libs/entities/producer.entity';
 import { RiceType } from '../libs/entities/rice-type.entity';
@@ -24,6 +27,7 @@ import { Reception } from '../libs/entities/reception.entity';
 import { Transaction } from '../libs/entities/transaction.entity';
 import { TransactionReference } from '../libs/entities/transaction-reference.entity';
 import { Record } from '../libs/entities/record.entity';
+import { AuditLog } from '../libs/entities/audit-log.entity';
 
 import { envs } from 'libs/config';
 
@@ -47,6 +51,7 @@ import { envs } from 'libs/config';
         TransactionReference,
         Record,
         Template,
+        AuditLog,
       ],
     }),
 
@@ -63,6 +68,9 @@ import { envs } from 'libs/config';
 
     TransactionReferenceModule,
     TransactionModule,
+
+    // Audit module
+    AuditModule,
   ],
 })
 export class AppModule {}
