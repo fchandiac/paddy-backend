@@ -10,12 +10,14 @@ import {
   CreateDiscountPercentDto,
   UpdateDiscountPercentDto,
 } from '../../../libs/dto/discount.dto';
+import { AuditService } from '../../audit/audit.service';
 
 @Injectable()
 export class DiscountPercentService {
   constructor(
     @InjectRepository(DiscountPercent)
     private readonly discountRepo: Repository<DiscountPercent>,
+    private readonly auditService: AuditService,
   ) {}
 
   async health(): Promise<string> {
@@ -66,7 +68,7 @@ export class DiscountPercentService {
   }
   
 
-  async create(dto: CreateDiscountPercentDto): Promise<DiscountPercent> {
+  async create(dto: CreateDiscountPercentDto, userId?: number): Promise<DiscountPercent> {
     // Verifica si el rango se solapa con otro existente
     await this.ensureNoOverlap(dto.discountCode, dto.start, dto.end);
     
@@ -85,15 +87,30 @@ export class DiscountPercentService {
     }
 
     const discount = this.discountRepo.create(dto);
-    return this.discountRepo.save(discount);
+    const savedDiscount = await this.discountRepo.save(discount);
+
+    // Registrar auditoría
+    await this.auditService.createAuditLog({
+      userId,
+      action: 'CREATE',
+      entityType: 'DISCOUNT_PERCENT',
+      entityId: savedDiscount.id,
+      description: `Rango de descuento creado: Código ${savedDiscount.discountCode}, ${savedDiscount.start}%-${savedDiscount.end}%, Descuento ${savedDiscount.percent}%`,
+      newValues: savedDiscount,
+      success: true,
+    });
+
+    return savedDiscount;
   }
 
   async update(
     id: number,
     dto: UpdateDiscountPercentDto,
+    userId?: number,
   ): Promise<DiscountPercent> {
     // 1) Obtengo el registro actual
     const discount = await this.findById(id);
+    const oldValues = { ...discount };
   
     // 2) Determino los valores finales a validar
     const code  = dto.discountCode ?? discount.discountCode;
@@ -121,12 +138,38 @@ export class DiscountPercentService {
   
     // 5) Asigno los cambios y guardo
     Object.assign(discount, dto);
-    return this.discountRepo.save(discount);
+    const savedDiscount = await this.discountRepo.save(discount);
+
+    // Registrar auditoría
+    await this.auditService.createAuditLog({
+      userId,
+      action: 'UPDATE',
+      entityType: 'DISCOUNT_PERCENT',
+      entityId: savedDiscount.id,
+      description: `Rango de descuento actualizado: Código ${savedDiscount.discountCode}, ${savedDiscount.start}%-${savedDiscount.end}%, Descuento ${savedDiscount.percent}%`,
+      oldValues,
+      newValues: savedDiscount,
+      success: true,
+    });
+
+    return savedDiscount;
   }
   
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number, userId?: number): Promise<void> {
     const discount = await this.findById(id);
+    
+    // Registrar auditoría antes de eliminar
+    await this.auditService.createAuditLog({
+      userId,
+      action: 'DELETE',
+      entityType: 'DISCOUNT_PERCENT',
+      entityId: discount.id,
+      description: `Rango de descuento eliminado: Código ${discount.discountCode}, ${discount.start}%-${discount.end}%, Descuento ${discount.percent}%`,
+      oldValues: discount,
+      success: true,
+    });
+
     await this.discountRepo.softRemove(discount);
   }
 }

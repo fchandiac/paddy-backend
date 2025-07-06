@@ -49,22 +49,28 @@ export class DiscountPercentController {
   @Post()
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   async create(
-    @Body() dto: CreateDiscountPercentDto,
+    @Body() dto: CreateDiscountPercentDto & { userId?: number },
   ): Promise<DiscountPercent> {
-    return this.discountPercentService.create(dto);
+    const { userId, ...discountData } = dto;
+    return this.discountPercentService.create(discountData, userId);
   }
 
   @Put(':id')
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: UpdateDiscountPercentDto,
+    @Body() dto: UpdateDiscountPercentDto & { userId?: number },
   ): Promise<DiscountPercent> {
-    return this.discountPercentService.update(id, dto);
+    const { userId, ...discountData } = dto;
+    return this.discountPercentService.update(id, discountData, userId);
   }
 
   @Delete(':id')
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    return this.discountPercentService.remove(id);
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body?: { userId?: number },
+  ): Promise<void> {
+    const userId = body?.userId;
+    return this.discountPercentService.remove(id, userId);
   }
 }

@@ -45,10 +45,15 @@ export class AuditService {
     success?: boolean;
     errorMessage?: string;
   }): Promise<AuditLog> {
-    const auditLog = this.auditRepo.create({
+    // Limpiar campos con valores N/A o vacíos
+    const cleanData = {
       ...data,
+      ipAddress: data.ipAddress && data.ipAddress !== 'N/A' && data.ipAddress.trim() !== '' ? data.ipAddress : undefined,
+      userAgent: data.userAgent && data.userAgent !== 'N/A' && data.userAgent.trim() !== '' ? data.userAgent : undefined,
       success: data.success ?? true,
-    });
+    };
+
+    const auditLog = this.auditRepo.create(cleanData);
     
     return await this.auditRepo.save(auditLog);
   }
@@ -213,5 +218,61 @@ export class AuditService {
       .execute();
 
     return result.affected || 0;
+  }
+
+  // Obtener estadísticas de auditoría
+  async getStats(days: number = 30): Promise<AuditStatsDto> {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+
+    // Total de acciones en el período
+    const totalActions = await this.auditRepo.count({
+      where: { createdAt: Between(cutoffDate, new Date()) },
+    });
+
+    // Acciones por tipo
+    const actionsByType: Record<AuditAction, number> = {} as any;
+    const actions = ['LOGIN', 'LOGOUT', 'CREATE', 'UPDATE', 'DELETE', 'VIEW', 'EXPORT', 'IMPORT'] as AuditAction[];
+    
+    for (const action of actions) {
+      actionsByType[action] = await this.auditRepo.count({
+        where: { 
+          action,
+          createdAt: Between(cutoffDate, new Date()),
+        },
+      });
+    }
+
+    // Acciones por entidad
+    const actionsByEntity: Record<AuditEntityType, number> = {} as any;
+    const entities = ['USER', 'PRODUCER', 'RECEPTION', 'RICE_TYPE', 'TEMPLATE', 'TRANSACTION', 'DISCOUNT_PERCENT', 'SYSTEM'] as AuditEntityType[];
+    
+    for (const entity of entities) {
+      actionsByEntity[entity] = await this.auditRepo.count({
+        where: { 
+          entityType: entity,
+          createdAt: Between(cutoffDate, new Date()),
+        },
+      });
+    }
+
+    // Top usuarios (simplificado por ahora)
+    const topUsers: Array<{ userId: number; userName: string; actionCount: number }> = [];
+
+    // Actividad reciente
+    const recentActivity = await this.auditRepo.find({
+      where: { createdAt: Between(cutoffDate, new Date()) },
+      order: { createdAt: 'DESC' },
+      take: 10,
+      relations: ['user'],
+    });
+
+    return {
+      totalActions,
+      actionsByType,
+      actionsByEntity,
+      topUsers,
+      recentActivity,
+    };
   }
 }

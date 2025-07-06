@@ -115,8 +115,8 @@ export class AuditInterceptor implements NestInterceptor {
 
       const auditLog = this.auditRepo.create({
         userId: user?.id || null,
-        ipAddress: ip,
-        userAgent,
+        ipAddress: ip && ip !== 'N/A' && ip.trim() !== '' ? ip : null,
+        userAgent: userAgent && userAgent !== 'N/A' && userAgent.trim() !== '' ? userAgent : null,
         action: auditData.action,
         entityType: auditData.entityType,
         entityId,

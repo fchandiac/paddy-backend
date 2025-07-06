@@ -5,6 +5,9 @@ import {
   Param,
   ParseIntPipe,
   UseGuards,
+  Post,
+  Body,
+  Req,
 } from '@nestjs/common';
 import { AuditService, AuditFilterDto } from './audit.service';
 import { AuditAction, AuditEntityType } from '../../libs/entities/audit-log.entity';
@@ -36,9 +39,8 @@ export class AuditController {
 
   // Obtener estadísticas de auditoría
   @Get('stats')
-  async getAuditStats(@Query('days') days?: string) {
-    const daysNumber = days ? parseInt(days) : 30;
-    return await this.auditService.getAuditStats(daysNumber);
+  async getStats(@Query('days') days: number = 30) {
+    return this.auditService.getStats(days);
   }
 
   // Obtener logs de un usuario específico
@@ -67,5 +69,32 @@ export class AuditController {
       deleted: await this.auditService.cleanOldLogs(days),
       message: `Logs older than ${days} days have been deleted`,
     };
+  }
+
+  // Crear log de auditoría manual desde frontend
+  @Post('manual')
+  async createManualLog(
+    @Body() logData: {
+      userId?: number;
+      action: AuditAction;
+      entityType: AuditEntityType;
+      entityId?: number;
+      description: string;
+      metadata?: any;
+      oldValues?: any;
+      newValues?: any;
+      success?: boolean;
+      errorMessage?: string;
+    },
+    @Req() req: any,
+  ) {
+    const ip = req.ip || req.connection?.remoteAddress;
+    const userAgent = req.get('User-Agent');
+    
+    return this.auditService.createAuditLog({
+      ...logData,
+      ipAddress: ip && ip !== '::1' && ip !== '127.0.0.1' ? ip : undefined,
+      userAgent: userAgent && userAgent.trim() !== '' ? userAgent : undefined,
+    });
   }
 }
