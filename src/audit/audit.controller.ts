@@ -97,4 +97,13 @@ export class AuditController {
       userAgent: userAgent && userAgent.trim() !== '' ? userAgent : undefined,
     });
   }
+
+  // Limpiar valores inválidos en registros existentes
+  @Post('cleanup-invalid-values')
+  async cleanupInvalidValues() {
+    return {
+      cleaned: await this.auditService.cleanupInvalidValues(),
+      message: 'Invalid IP addresses and user agents have been cleaned',
+    };
+  }
 }

@@ -275,4 +275,33 @@ export class AuditService {
       recentActivity,
     };
   }
+
+  // Limpiar valores inválidos en registros existentes
+  async cleanupInvalidValues(): Promise<number> {
+    const result = await this.auditRepo.createQueryBuilder()
+      .update(AuditLog)
+      .set({
+        ipAddress: null,
+      })
+      .where('ipAddress = :na OR ipAddress = :empty OR ipAddress = :localhost1 OR ipAddress = :localhost2', {
+        na: 'N/A',
+        empty: '',
+        localhost1: '::1',
+        localhost2: '127.0.0.1'
+      })
+      .execute();
+
+    const result2 = await this.auditRepo.createQueryBuilder()
+      .update(AuditLog)
+      .set({
+        userAgent: null,
+      })
+      .where('userAgent = :na OR userAgent = :empty', {
+        na: 'N/A',
+        empty: ''
+      })
+      .execute();
+
+    return (result.affected || 0) + (result2.affected || 0);
+  }
 }

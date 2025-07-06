@@ -46,10 +46,34 @@ export class AuditLog {
   userId: number;
 
   // Información de la sesión/IP
-  @Column({ length: 45, nullable: true }) // IPv6 compatible
+  @Column({ 
+    length: 45, 
+    nullable: true,
+    transformer: {
+      to: (value: string | null) => {
+        if (!value || value === 'N/A' || value.trim() === '' || value === '::1' || value === '127.0.0.1') {
+          return null;
+        }
+        return value;
+      },
+      from: (value: string | null) => value
+    }
+  }) // IPv6 compatible
   ipAddress: string;
 
-  @Column({ length: 500, nullable: true })
+  @Column({ 
+    length: 500, 
+    nullable: true,
+    transformer: {
+      to: (value: string | null) => {
+        if (!value || value === 'N/A' || value.trim() === '') {
+          return null;
+        }
+        return value;
+      },
+      from: (value: string | null) => value
+    }
+  })
   userAgent: string;
 
   // Detalles de la acción
