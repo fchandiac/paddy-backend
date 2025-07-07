@@ -8,6 +8,7 @@ import {
   Delete,
   ParseIntPipe,
   Query,
+  Headers,
 } from '@nestjs/common';
 import { ReceptionService } from './receptions.service';
 import { CreateReceptionDto, UpdateReceptionDto, UpdateReasonDto } from '../../../libs/dto/reception.dto';
@@ -24,9 +25,30 @@ export class ReceptionController {
 
   // 📥 Crear una recepción
   @Post()
-  create(@Body() dto: CreateReceptionDto) {
-    // TODO: Obtener userId del contexto de autenticación
-    return this.receptionService.create(dto, undefined);
+  create(
+    @Body() dto: CreateReceptionDto,
+    @Headers('x-user-email') userEmail?: string,
+    @Headers('x-created-by') createdBy?: string,
+    @Headers('x-user-id') headerUserId?: string,
+    @Query('createdBy') queryCreatedBy?: string,
+    @Query('userId') queryUserId?: string,
+  ) {
+    // Obtener información del usuario desde headers o query parameters
+    const finalCreatedBy = createdBy || queryCreatedBy || userEmail || 'Sistema';
+    const finalUserId = headerUserId || queryUserId;
+    
+    console.log('🔐 BACKEND DEBUG - Información de usuario recibida:');
+    console.log('Headers - userEmail:', userEmail);
+    console.log('Headers - createdBy:', createdBy);
+    console.log('Headers - userId:', headerUserId);
+    console.log('Query - createdBy:', queryCreatedBy);
+    console.log('Query - userId:', queryUserId);
+    console.log('Final - createdBy:', finalCreatedBy);
+    console.log('Final - userId:', finalUserId);
+    
+    const userId = finalUserId ? parseInt(finalUserId, 10) : undefined;
+    
+    return this.receptionService.create(dto, userId, userEmail || queryCreatedBy);
   }
 
   // 📄 Listar todas las recepciones

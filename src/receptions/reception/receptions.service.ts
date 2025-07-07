@@ -10,6 +10,7 @@ import {
 import { Producer } from '../../../libs/entities/producer.entity';
 import { RiceType } from '../../../libs/entities/rice-type.entity';
 import { Template } from '../../../libs/entities/template.entity';
+import { User } from '../../../libs/entities/user.entity';
 import { ReceptionHistoryEntry } from '../../../libs/interfaces/reception-history.interface';
 import { AuditService } from '../../audit/audit.service';
 
@@ -28,6 +29,9 @@ export class ReceptionService {
     @InjectRepository(Template)
     private readonly templateRepo: Repository<Template>,
 
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
+
     private readonly auditService: AuditService,
   ) {}
 
@@ -35,7 +39,26 @@ export class ReceptionService {
     return 'Reception service is running';
   }
 
-  async create(dto: CreateReceptionDto, userId?: number): Promise<Reception> {
+  async create(dto: CreateReceptionDto, userId?: number, userEmail?: string): Promise<Reception> {
+    // Si no tenemos userId pero tenemos email, buscar el usuario por email
+    let finalUserId = userId;
+    if (!finalUserId && userEmail) {
+      console.log('🔍 BACKEND DEBUG - Buscando usuario por email:', userEmail);
+      try {
+        const user = await this.userRepo.findOne({ where: { email: userEmail } });
+        if (user) {
+          finalUserId = user.id;
+          console.log('✅ BACKEND DEBUG - Usuario encontrado:', user.id, user.name || user.email);
+        } else {
+          console.log('❌ BACKEND DEBUG - Usuario no encontrado para email:', userEmail);
+        }
+      } catch (userError) {
+        console.log('⚠️ BACKEND DEBUG - Error buscando usuario:', userError.message);
+      }
+    }
+    
+    console.log('🔐 BACKEND DEBUG - userId final para auditoría:', finalUserId);
+    
     try {
       const producer = await this.producerRepo.findOne({
         where: { id: dto.producerId },
@@ -77,7 +100,7 @@ export class ReceptionService {
 
       // Auditoría: registrar creación exitosa
       await this.auditService.createAuditLog({
-        userId,
+        userId: finalUserId,
         action: 'CREATE',
         entityType: 'RECEPTION',
         entityId: savedReception.id,
@@ -98,7 +121,7 @@ export class ReceptionService {
     } catch (error) {
       // Auditoría: registrar error
       await this.auditService.createAuditLog({
-        userId,
+        userId: finalUserId,
         action: 'CREATE',
         entityType: 'RECEPTION',
         description: `Error al crear recepción: ${error.message}`,
