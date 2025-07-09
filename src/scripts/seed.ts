@@ -221,30 +221,38 @@ async function bootstrap() {
 
   // 3. Seed RiceType data
   console.log('Seeding RiceType data...');
-  const riceTypeNames = [
-    'Diamante',
-    'Zafiro',
-    'Pantera',
-    'Cuarzo',
-    'Quella',
-    'Ámbar',
+  const riceTypesData = [
+    { code: 101, name: 'Diamante', description: 'Arroz Premium Diamante - Grano largo y fino' },
+    { code: 102, name: 'Zafiro', description: 'Arroz Zafiro - Calidad superior, grano mediano' },
+    { code: 103, name: 'Pantera', description: 'Arroz Pantera - Variedad resistente, alto rendimiento' },
+    { code: 104, name: 'Cuarzo', description: 'Arroz Cuarzo - Grano cristalino, excelente cocción' },
+    { code: 105, name: 'Quella', description: 'Arroz Quella - Variedad tradicional, sabor característico' },
+    { code: 106, name: 'Ámbar', description: 'Arroz Ámbar - Grano dorado, textura suave' },
   ];
 
-  for (const name of riceTypeNames) {
-    let riceType = await riceTypeRepository.findOne({ where: { name } });
+  for (const riceData of riceTypesData) {
+    // Check by code first, then by name to avoid duplicates
+    let riceType = await riceTypeRepository.findOne({ 
+      where: [
+        { code: riceData.code },
+        { name: riceData.name }
+      ]
+    });
+    
     if (!riceType) {
       // Generate a random price between 450 and 750, with the last digit being 0
       const randomPrice = Math.floor(Math.random() * (75 - 45 + 1) + 45) * 10;
       riceType = riceTypeRepository.create({
-        name,
+        code: riceData.code,
+        name: riceData.name,
         price: randomPrice,
         enable: true,
-        description: `Descripción para ${name}`, // Optional: Add a generic description
+        description: riceData.description,
       });
       await riceTypeRepository.save(riceType);
-      console.log(`Created RiceType: ${name} with price ${randomPrice}`);
+      console.log(`Created RiceType: ${riceData.name} (Code: ${riceData.code}) with price ${randomPrice}`);
     } else {
-      console.log(`RiceType ${name} already exists.`);
+      console.log(`RiceType ${riceData.name} (Code: ${riceData.code}) already exists.`);
     }
   }
   console.log('RiceType data seeding finished.');

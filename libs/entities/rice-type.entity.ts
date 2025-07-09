@@ -13,7 +13,7 @@ export class RiceType {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true })
+  @Column()
   code: number;
 
   @Column()
