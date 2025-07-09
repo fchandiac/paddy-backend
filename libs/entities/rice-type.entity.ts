@@ -13,6 +13,9 @@ export class RiceType {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ unique: true })
+  code: number;
+
   @Column()
   name: string;
 

@@ -37,13 +37,25 @@ export class RiceTypeService {
   }
 
   async create(dto: CreateRiceTypeDto): Promise<RiceType> {
-    const existing = await this.riceTypeRepo.findOne({
+    // Validar nombre único
+    const existingByName = await this.riceTypeRepo.findOne({
       where: { name: dto.name },
     });
 
-    if (existing) {
+    if (existingByName) {
       throw new ConflictException(
         `Ya existe un tipo de arroz con el nombre "${dto.name}".`,
+      );
+    }
+
+    // Validar código único
+    const existingByCode = await this.riceTypeRepo.findOne({
+      where: { code: dto.code },
+    });
+
+    if (existingByCode) {
+      throw new ConflictException(
+        `Ya existe un tipo de arroz con el código "${dto.code}".`,
       );
     }
 
@@ -53,6 +65,32 @@ export class RiceTypeService {
 
   async update(id: number, dto: UpdateRiceTypeDto): Promise<RiceType> {
     const riceType = await this.findById(id);
+
+    // Si se está actualizando el nombre, validar que no exista otro con ese nombre
+    if (dto.name && dto.name !== riceType.name) {
+      const existingByName = await this.riceTypeRepo.findOne({
+        where: { name: dto.name },
+      });
+
+      if (existingByName) {
+        throw new ConflictException(
+          `Ya existe un tipo de arroz con el nombre "${dto.name}".`,
+        );
+      }
+    }
+
+    // Si se está actualizando el código, validar que no exista otro con ese código
+    if (dto.code && dto.code !== riceType.code) {
+      const existingByCode = await this.riceTypeRepo.findOne({
+        where: { code: dto.code },
+      });
+
+      if (existingByCode) {
+        throw new ConflictException(
+          `Ya existe un tipo de arroz con el código "${dto.code}".`,
+        );
+      }
+    }
 
     Object.assign(riceType, dto);
 

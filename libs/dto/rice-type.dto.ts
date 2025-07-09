@@ -4,10 +4,16 @@ import {
   IsBoolean,
   IsNumber,
   IsPositive,
+  IsInt,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateRiceTypeDto {
+  @Type(() => Number)
+  @IsInt()
+  @IsPositive()
+  code: number;
+
   @IsString()
   name: string;
 
@@ -25,6 +31,12 @@ export class CreateRiceTypeDto {
 }
 
 export class UpdateRiceTypeDto {
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @IsPositive()
+  code?: number;
+
   @IsOptional()
   @IsString()
   name?: string;
