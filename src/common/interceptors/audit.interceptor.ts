@@ -12,13 +12,10 @@ import { AuditLog, AuditAction, AuditEntityType } from '../../../libs/entities/a
 import { Reflector } from '@nestjs/core';
 
 // Decorator para marcar endpoints que deben ser auditados
-export const Audit = (action: AuditAction, entityType: AuditEntityType, description?: string) => {
-  return Reflector.createDecorator<{ action: AuditAction; entityType: AuditEntityType; description?: string }>()({
-    action,
-    entityType,
-    description,
-  });
-};
+import { SetMetadata } from '@nestjs/common';
+export const AUDIT_METADATA_KEY = 'audit_metadata';
+export const Audit = (action: AuditAction, entityType: AuditEntityType, description?: string) =>
+  SetMetadata(AUDIT_METADATA_KEY, { action, entityType, description });
 
 @Injectable()
 export class AuditInterceptor implements NestInterceptor {
@@ -29,20 +26,18 @@ export class AuditInterceptor implements NestInterceptor {
   ) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    const auditData = this.reflector.get(Audit, context.getHandler());
-    
+    const auditData = this.reflector.get('audit_metadata', context.getHandler());
     if (!auditData) {
       return next.handle(); // No audit needed
     }
-
     const request = context.switchToHttp().getRequest();
     const { user, ip, headers, method, url, body, params } = request;
-    
     const startTime = Date.now();
-    
+    // ...existing code...
     return next.handle().pipe(
       tap(async (response) => {
         // Operación exitosa
+        // ...existing code...
         await this.createAuditLog({
           auditData,
           user,
@@ -59,6 +54,7 @@ export class AuditInterceptor implements NestInterceptor {
       }),
       catchError(async (error) => {
         // Operación fallida
+        // ...existing code...
         await this.createAuditLog({
           auditData,
           user,
@@ -105,7 +101,6 @@ export class AuditInterceptor implements NestInterceptor {
       // Preparar valores anteriores y nuevos según la acción
       let oldValues = null;
       let newValues = null;
-      
       if (auditData.action === 'CREATE') {
         newValues = this.sanitizeData(body);
       } else if (auditData.action === 'UPDATE') {
@@ -132,11 +127,10 @@ export class AuditInterceptor implements NestInterceptor {
         success,
         errorMessage,
       });
-
       await this.auditRepo.save(auditLog);
     } catch (error) {
       // No fallar la operación principal si falla el audit
-      console.error('Error creating audit log:', error);
+      console.error('[AUDIT] Error creando log de auditoría:', error);
     }
   }
 

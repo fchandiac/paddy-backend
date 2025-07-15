@@ -1,17 +1,21 @@
-import { Controller, Get, Post, Body, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, ParseIntPipe, UseInterceptors } from '@nestjs/common';
+import { AuditInterceptor, Audit } from '../../common/interceptors/audit.interceptor';
 import { TransactionReferenceService } from './transactionReference.service';
 import { TransactionReference } from '../../../libs/entities/transaction-reference.entity';
 
 @Controller('transaction-reference')
+@UseInterceptors(AuditInterceptor)
 export class TransactionReferenceController {
   constructor(private readonly transactionReferenceService: TransactionReferenceService) {}
 
   @Get('health')
+  @Audit('VIEW', 'TRANSACTION', 'Verificar salud del servicio de referencias de transacción')
   async getHealth(): Promise<string> {
     return await this.transactionReferenceService.health();
   }
 
   @Post()
+  @Audit('CREATE', 'TRANSACTION', 'Crear referencia de transacción')
   async createReference(
     @Body() data: { transactionCode: string; producerId: number; parentId: number; childId: number; parentType?: string }
   ): Promise<TransactionReference> {

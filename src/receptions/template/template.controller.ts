@@ -9,18 +9,22 @@ import {
   ParseIntPipe,
   HttpCode,
   NotFoundException,
+  UseInterceptors,
 } from '@nestjs/common';
+import { AuditInterceptor, Audit } from '../../common/interceptors/audit.interceptor';
 import { TemplateService } from './template.service';
 import { CreateTemplateDto } from 'libs/dto/template.dto';
 import { Template } from 'libs/entities/template.entity';
 
 @Controller('template')
+@UseInterceptors(AuditInterceptor)
 export class TemplateController {
   constructor(
     private readonly templateService: TemplateService,
   ) {}
 
   @Post()
+  @Audit('CREATE', 'TEMPLATE', 'Crear plantilla')
   async create(
     @Body() dto: CreateTemplateDto,
   ): Promise<Template> {
@@ -28,18 +32,21 @@ export class TemplateController {
   }
 
   @Delete(':id')
+  @Audit('DELETE', 'TEMPLATE', 'Eliminar plantilla')
   @HttpCode(204)
   async delete(@Param('id', ParseIntPipe) id: number): Promise<void> {
     await this.templateService.delete(id);
   }
 
   @Get()
+  @Audit('VIEW', 'TEMPLATE', 'Listar todas las plantillas')
   async findAll(): Promise<Template[]> {
     return await this.templateService.findAll();
   }
 
    // Obtener plantilla por ID
    @Get('find-by-id/:id')
+   @Audit('VIEW', 'TEMPLATE', 'Buscar plantilla por ID')
    async findById(@Param('id', ParseIntPipe) id: number) {
      return this.templateService.findById(id);
    }

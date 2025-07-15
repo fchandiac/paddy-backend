@@ -1,3 +1,5 @@
+
+
 import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -303,5 +305,31 @@ export class TransactionService {
     });
     
     return this.transactionRepo.save(interestTransaction);
+  }
+
+    /**
+   * Crea un anticipo y lo vincula a un pago mediante TransactionReference
+   * @param advanceDto DTO para la transacción de anticipo
+   * @param paymentDto DTO para la transacción de pago
+   * @param transactionReferenceService Servicio para crear la referencia
+   * @returns { advance: Transaction, payment: Transaction, reference: TransactionReference }
+   */
+  async createAdvanceWithPayment(
+    advanceDto: CreateTransactionDto,
+    paymentDto: CreateTransactionDto,
+    transactionReferenceService: any
+  ): Promise<{ advance: Transaction; payment: Transaction; reference: any }> {
+    paymentDto.typeCode = TransactionTypeCode.PAYMENT;
+    const payment = await this.create(paymentDto);
+    advanceDto.typeCode = TransactionTypeCode.ADVANCE;
+    const advance = await this.create(advanceDto);
+    const reference = await transactionReferenceService.createReference(
+      'payment',
+      advanceDto.producerId,
+      advance.id,
+      payment.id,
+      'ADVANCE'
+    );
+    return { advance, payment, reference };
   }
 }

@@ -3,7 +3,7 @@ import {
     Get,
     Post,
     Body,
-  } from '@nestjs/common';
+} from '@nestjs/common';
   import { RecordService } from './record.service';
   import { CreateRecordDto } from '../../../libs/dto/record.dto';
   import { Record } from '../../../libs/entities/record.entity';

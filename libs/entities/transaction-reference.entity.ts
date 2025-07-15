@@ -10,6 +10,14 @@ import {
 import { Producer } from './producer.entity';
 import { Exclude, Type } from 'class-transformer';
 
+/**
+ * Lógica de referencias:
+ * - Las liquidaciones (settlements) tienen referencias a otras entidades.
+ * - Estas referencias pueden ser anticipos (advances) y recepciones (receptions).
+ * - Es decir, una liquidación puede estar asociada a uno o varios anticipos y/o recepciones.
+ * - La relación se representa mediante los campos parentId (liquidación), childId (anticipo o recepción) y parentType.
+ * - Esto permite rastrear qué anticipos y recepciones fueron liquidados en una operación.
+ */
 @Entity()
 export class TransactionReference {
   @PrimaryGeneratedColumn()
