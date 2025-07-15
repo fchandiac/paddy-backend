@@ -1,3 +1,4 @@
+
 import {
   Controller,
   Get,
@@ -14,6 +15,7 @@ import {
 import { AuditInterceptor, Audit } from '../../common/interceptors/audit.interceptor';
 import { TransactionService } from './transaction.service';
 import { CreateTransactionDto, FilterTransactionDto } from 'libs/dto/transaction.dto';
+import { TransactionTypeCode } from 'libs/enums';
 import { Transaction } from 'libs/entities/transaction.entity';
 import { GenerateInterestDto } from 'libs/dto/interest.dto';
 
@@ -92,5 +94,14 @@ export class TransactionController {
       throw new BadRequestException('Formato de fecha inválido. Use YYYY-MM-DD');
     }
     return this.transactionService.generateInterestTransaction(id, dto.userId, referenceDate);
+  }
+
+    // Crear un anticipo (ADVANCE) con auditoría específica
+  @Post('advance')
+  @Audit('CREATE', 'TRANSACTION', 'Crear anticipo')
+  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
+  async createAdvance(@Body() dto: CreateTransactionDto): Promise<Transaction> {
+    dto.typeCode = TransactionTypeCode.ADVANCE;
+    return this.transactionService.create(dto);
   }
 }
