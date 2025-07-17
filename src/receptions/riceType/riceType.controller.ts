@@ -10,14 +10,17 @@ import {
   UsePipes,
   ValidationPipe,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { RiceTypeService } from './riceType.service';
 import { CreateRiceTypeDto, UpdateRiceTypeDto } from '../../../libs/dto/rice-type.dto';
 import { RiceType } from '../../../libs/entities/rice-type.entity';
 import { AuditInterceptor, Audit } from '../../common/interceptors/audit.interceptor';
+import { JwtAuthGuard } from '../../auth/auth/jwt-auth.guard';
 
 @Controller('rice-types')
 @UseInterceptors(AuditInterceptor)
+@UseGuards(JwtAuthGuard)
 export class RiceTypeController {
   constructor(private readonly riceTypeService: RiceTypeService) {}
 

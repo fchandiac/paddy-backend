@@ -28,19 +28,6 @@ describe('RiceType + Auditoría (e2e)', () => {
     await app.init();
     httpServer = app.getHttpServer();
     dataSource = app.get(DataSource);
-
-    // Obtener los códigos y nombres ya usados
-    const res = await request(httpServer)
-      .get('/rice-types')
-      .set('Authorization', `Bearer ${adminToken}`);
-    usedCodes = (res.body || []).map((rt: any) => rt.code);
-    usedNames = (res.body || []).map((rt: any) => rt.name);
-
-    // Generar código y nombre únicos
-    do {
-      randomRiceCode = Math.floor(Math.random() * 1000000) + 1000;
-      randomRiceName = 'TestArroz_' + Math.floor(Math.random() * 1000000);
-    } while (usedCodes.includes(randomRiceCode) || usedNames.includes(randomRiceName));
   });
 
   afterAll(async () => {
@@ -54,6 +41,19 @@ describe('RiceType + Auditoría (e2e)', () => {
     expect(res.status).toBe(201);
     expect(res.body).toHaveProperty('userId');
     adminToken = res.body.access_token || '';
+    
+    // Ahora obtener los códigos y nombres ya usados
+    const riceTypesRes = await request(httpServer)
+      .get('/rice-types')
+      .set('Authorization', `Bearer ${adminToken}`);
+    usedCodes = (riceTypesRes.body || []).map((rt: any) => rt.code);
+    usedNames = (riceTypesRes.body || []).map((rt: any) => rt.name);
+
+    // Generar código y nombre únicos
+    do {
+      randomRiceCode = Math.floor(Math.random() * 1000000) + 1000;
+      randomRiceName = 'TestArroz_' + Math.floor(Math.random() * 1000000);
+    } while (usedCodes.includes(randomRiceCode) || usedNames.includes(randomRiceName));
   });
 
   it('Debe crear un tipo de arroz', async () => {
@@ -94,8 +94,16 @@ describe('RiceType + Auditoría (e2e)', () => {
     if (!found) {
       console.error('No se encontró log de auditoría para el tipo de arroz creado. Logs recibidos:', logs);
     }
+    console.log('Log de auditoría encontrado:', {
+      entityId: found?.entityId,
+      userId: found?.userId,
+      action: found?.action,
+      entityType: found?.entityType,
+      createdAt: found?.createdAt
+    });
     expect(found).toBeDefined();
     expect(found.userId).toBeDefined();
+    expect(found.userId).not.toBeNull();
     // Comparar los datos relevantes del arroz creado con los del log
     expect(found.entityId).toBe(createdRiceTypeId);
     expect(found.entityType).toBe('RICE_TYPE');
