@@ -90,12 +90,17 @@ export class AuditInterceptor implements NestInterceptor {
         duration,
       } = data;
 
-      // Extraer ID de la entidad de los parámetros o respuesta
+      // Extraer ID de la entidad de los parámetros, respuesta o body
       let entityId = null;
       if (params?.id) {
-        entityId = parseInt(params.id);
-      } else if (response?.id) {
+        const parsedId = parseInt(params.id);
+        entityId = !isNaN(parsedId) ? parsedId : null;
+      } else if (response?.id && typeof response.id === 'number') {
         entityId = response.id;
+      } else if (body?.id && typeof body.id === 'number') {
+        entityId = body.id;
+      } else if (body?.userId && typeof body.userId === 'number') {
+        entityId = body.userId;
       }
 
       // Preparar valores anteriores y nuevos según la acción
@@ -138,7 +143,7 @@ export class AuditInterceptor implements NestInterceptor {
     if (!data) return null;
     
     // Remover campos sensibles
-    const sensitiveFields = ['password', 'token', 'secret', 'key'];
+    const sensitiveFields = ['password', 'pass', 'token', 'secret', 'key'];
     const sanitized = { ...data };
     
     sensitiveFields.forEach(field => {

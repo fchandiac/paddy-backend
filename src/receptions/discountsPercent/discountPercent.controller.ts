@@ -11,8 +11,10 @@ import {
   UsePipes,
   ValidationPipe,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { AuditInterceptor, Audit } from '../../common/interceptors/audit.interceptor';
+import { JwtAuthGuard } from '../../auth/auth/jwt-auth.guard';
 import { DiscountPercentService } from './discountPercent.service';
 import {
   CreateDiscountPercentDto,
@@ -22,6 +24,7 @@ import { DiscountPercent } from '../../../libs/entities/discount-percent.entity'
 
 @Controller('discounts-percent')
 @UseInterceptors(AuditInterceptor)
+@UseGuards(JwtAuthGuard)
 export class DiscountPercentController {
   constructor(
     private readonly discountPercentService: DiscountPercentService,

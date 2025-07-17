@@ -4,18 +4,18 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { AppModule } from '../../../src/app.module';
 import { DataSource } from 'typeorm';
 
-describe('RiceType CRUD + Auditoría (e2e)', () => {
+describe('Producer CRUD + Auditoría (e2e)', () => {
   let app: INestApplication;
   let httpServer: any;
   let dataSource: DataSource;
   let adminToken: string;
-  let createdRiceTypeId: number;
-  let createdRiceType: any;
-  let randomRiceCode: number;
-  let randomRiceName: string;
-  let usedCodes: number[] = [];
+  let createdProducerId: number;
+  let createdProducer: any;
+  let randomRut: string;
+  let randomName: string;
+  let usedRuts: string[] = [];
   let usedNames: string[] = [];
-  let updatedRiceType: any;
+  let updatedProducer: any;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -43,58 +43,73 @@ describe('RiceType CRUD + Auditoría (e2e)', () => {
     expect(res.body).toHaveProperty('userId');
     adminToken = res.body.access_token || '';
     
-    // Ahora obtener los códigos y nombres ya usados
-    const riceTypesRes = await request(httpServer)
-      .get('/rice-types')
+    // Ahora obtener los RUTs y nombres ya usados
+    const producersRes = await request(httpServer)
+      .get('/producers')
       .set('Authorization', `Bearer ${adminToken}`);
-    usedCodes = (riceTypesRes.body || []).map((rt: any) => rt.code);
-    usedNames = (riceTypesRes.body || []).map((rt: any) => rt.name);
+    usedRuts = (producersRes.body || []).map((p: any) => p.rut);
+    usedNames = (producersRes.body || []).map((p: any) => p.name);
 
-    // Generar código y nombre únicos
+    // Generar RUT y nombre únicos
     do {
-      randomRiceCode = Math.floor(Math.random() * 1000000) + 1000;
-      randomRiceName = 'TestArroz_' + Math.floor(Math.random() * 1000000);
-    } while (usedCodes.includes(randomRiceCode) || usedNames.includes(randomRiceName));
+      const randomNum = Math.floor(Math.random() * 10000000) + 10000000; // 8 dígitos
+      const dv = Math.floor(Math.random() * 10); // Dígito verificador
+      randomRut = `${randomNum}-${dv}`;
+      randomName = 'TestProductor_' + Math.floor(Math.random() * 1000000);
+    } while (usedRuts.includes(randomRut) || usedNames.includes(randomName));
   });
 
-  it('Debe crear un tipo de arroz', async () => {
-    const riceTypeDto = { code: randomRiceCode, name: randomRiceName, description: 'Arroz test', price: 123.45, enable: true };
+  // ===== CREATE TESTS =====
+  it('Debe crear un productor', async () => {
+    const producerDto = {
+      name: randomName,
+      businessName: `${randomName} SpA`,
+      rut: randomRut,
+      address: 'Calle Test 123',
+      phone: '+56912345678'
+    };
+    
     const res = await request(httpServer)
-      .post('/rice-types')
+      .post('/producers')
       .set('Authorization', `Bearer ${adminToken}`)
-      .send(riceTypeDto);
+      .send(producerDto);
+    
     if (res.status !== 201) {
-      console.error('Error al crear tipo de arroz:', res.body);
+      console.error('Error al crear productor:', res.body);
     }
     expect(res.status).toBe(201);
     expect(res.body).toHaveProperty('id');
-    createdRiceTypeId = res.body.id;
-    createdRiceType = res.body;
+    expect(res.body.name).toBe(randomName);
+    expect(res.body.rut).toBe(randomRut);
+    
+    createdProducerId = res.body.id;
+    createdProducer = res.body;
   });
 
-  it('Debe verificar que el tipo de arroz fue creado', async () => {
+  it('Debe verificar que el productor fue creado', async () => {
     const res = await request(httpServer)
-      .get(`/rice-types/${createdRiceTypeId}`)
+      .get(`/producers/${createdProducerId}`)
       .set('Authorization', `Bearer ${adminToken}`);
-    if (res.status !== 200) {
-      console.error('Error al consultar tipo de arroz:', res.body);
-    }
     expect(res.status).toBe(200);
-    expect(res.body.name).toBe(randomRiceName);
+    expect(res.body.name).toBe(randomName);
+    expect(res.body.rut).toBe(randomRut);
   });
 
   it('Debe verificar que existe un log de auditoría para la creación', async () => {
     const res = await request(httpServer)
-      .get('/audit?entityType=RICE_TYPE&action=CREATE')
+      .get('/audit?entityType=PRODUCER&action=CREATE')
       .set('Authorization', `Bearer ${adminToken}`);
     const logs = res.body.data || res.body;
+    
     // Buscar el log más reciente que coincida con el entityId y acción
     const found = logs
-      .filter((log) => log.entityId === createdRiceTypeId && log.action === 'CREATE')
+      .filter((log) => log.entityId === createdProducerId && log.action === 'CREATE')
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+    
     if (!found) {
-      console.error('No se encontró log de auditoría para el tipo de arroz creado. Logs recibidos:', logs);
+      console.error('No se encontró log de auditoría para el productor creado. Logs recibidos:', logs);
     }
+    
     console.log('Log de auditoría encontrado:', {
       entityId: found?.entityId,
       userId: found?.userId,
@@ -102,91 +117,92 @@ describe('RiceType CRUD + Auditoría (e2e)', () => {
       entityType: found?.entityType,
       createdAt: found?.createdAt
     });
+    
     expect(found).toBeDefined();
     expect(found.userId).toBeDefined();
     expect(found.userId).not.toBeNull();
-    // Comparar los datos relevantes del arroz creado con los del log
-    expect(found.entityId).toBe(createdRiceTypeId);
-    expect(found.entityType).toBe('RICE_TYPE');
+    expect(found.entityId).toBe(createdProducerId);
+    expect(found.entityType).toBe('PRODUCER');
     expect(found.action).toBe('CREATE');
+    
     // Comparar campos clave (usar newValues, no data)
     const logNewValues = typeof found.newValues === 'string' ? JSON.parse(found.newValues) : found.newValues;
-    expect(logNewValues.code).toBe(createdRiceType.code);
-    expect(logNewValues.name).toBe(createdRiceType.name);
-    expect(logNewValues.description).toBe(createdRiceType.description);
-    expect(logNewValues.price).toBe(createdRiceType.price);
-    expect(logNewValues.enable).toBe(createdRiceType.enable);
+    expect(logNewValues.name).toBe(createdProducer.name);
+    expect(logNewValues.rut).toBe(createdProducer.rut);
+    expect(logNewValues.businessName).toBe(createdProducer.businessName);
+    expect(logNewValues.address).toBe(createdProducer.address);
+    expect(logNewValues.phone).toBe(createdProducer.phone);
   });
 
   // ===== READ TESTS =====
-  it('Debe obtener el tipo de arroz por ID (READ)', async () => {
+  it('Debe obtener el productor por ID (READ)', async () => {
     const res = await request(httpServer)
-      .get(`/rice-types/${createdRiceTypeId}`)
+      .get(`/producers/${createdProducerId}`)
       .set('Authorization', `Bearer ${adminToken}`);
     expect(res.status).toBe(200);
-    expect(res.body.id).toBe(createdRiceTypeId);
-    expect(res.body.code).toBe(randomRiceCode);
-    expect(res.body.name).toBe(randomRiceName);
-    expect(res.body.enable).toBe(true);
+    expect(res.body.id).toBe(createdProducerId);
+    expect(res.body.name).toBe(randomName);
+    expect(res.body.rut).toBe(randomRut);
   });
 
-  it('Debe obtener todos los tipos de arroz (READ ALL)', async () => {
+  it('Debe obtener todos los productores (READ ALL)', async () => {
     const res = await request(httpServer)
-      .get('/rice-types')
+      .get('/producers')
       .set('Authorization', `Bearer ${adminToken}`);
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
-    const foundRiceType = res.body.find((rt: any) => rt.id === createdRiceTypeId);
-    expect(foundRiceType).toBeDefined();
+    const foundProducer = res.body.find((p: any) => p.id === createdProducerId);
+    expect(foundProducer).toBeDefined();
   });
 
   // ===== UPDATE TESTS =====
-  it('Debe actualizar el tipo de arroz (UPDATE)', async () => {
+  it('Debe actualizar el productor (UPDATE)', async () => {
     const updateDto = {
-      code: randomRiceCode, // Mantenemos el código
-      name: `${randomRiceName}_UPDATED`,
-      description: 'Arroz test actualizado',
-      price: 456.78,
-      enable: false
+      name: `${randomName}_UPDATED`,
+      businessName: `${randomName}_UPDATED SpA`,
+      rut: randomRut, // Mantenemos el RUT
+      address: 'Calle Actualizada 456',
+      phone: '+56987654321'
     };
     
     const res = await request(httpServer)
-      .put(`/rice-types/${createdRiceTypeId}`)
+      .put(`/producers/${createdProducerId}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .send(updateDto);
     
     if (res.status !== 200) {
-      console.error('Error al actualizar tipo de arroz:', res.body);
+      console.error('Error al actualizar productor:', res.body);
     }
     expect(res.status).toBe(200);
-    expect(res.body.id).toBe(createdRiceTypeId);
+    expect(res.body.id).toBe(createdProducerId);
     expect(res.body.name).toBe(updateDto.name);
-    expect(res.body.price).toBe(updateDto.price);
-    expect(res.body.enable).toBe(false);
+    expect(res.body.businessName).toBe(updateDto.businessName);
+    expect(res.body.address).toBe(updateDto.address);
+    expect(res.body.phone).toBe(updateDto.phone);
     
-    updatedRiceType = res.body;
+    updatedProducer = res.body;
   });
 
-  it('Debe verificar que el tipo de arroz fue actualizado', async () => {
+  it('Debe verificar que el productor fue actualizado', async () => {
     const res = await request(httpServer)
-      .get(`/rice-types/${createdRiceTypeId}`)
+      .get(`/producers/${createdProducerId}`)
       .set('Authorization', `Bearer ${adminToken}`);
     expect(res.status).toBe(200);
-    expect(res.body.name).toBe(`${randomRiceName}_UPDATED`);
-    // Usar toBeCloseTo para comparaciones numéricas con tolerancia
-    expect(parseFloat(res.body.price)).toBeCloseTo(456.78, 0); // 0 decimales de precisión
-    expect(res.body.enable).toBe(false);
+    expect(res.body.name).toBe(`${randomName}_UPDATED`);
+    expect(res.body.businessName).toBe(`${randomName}_UPDATED SpA`);
+    expect(res.body.address).toBe('Calle Actualizada 456');
+    expect(res.body.phone).toBe('+56987654321');
   });
 
   it('Debe verificar que existe un log de auditoría para la actualización', async () => {
     const res = await request(httpServer)
-      .get('/audit?entityType=RICE_TYPE&action=UPDATE')
+      .get('/audit?entityType=PRODUCER&action=UPDATE')
       .set('Authorization', `Bearer ${adminToken}`);
     const logs = res.body.data || res.body;
     
     // Buscar el log más reciente que coincida con el entityId y acción UPDATE
     const found = logs
-      .filter((log) => log.entityId === createdRiceTypeId && log.action === 'UPDATE')
+      .filter((log) => log.entityId === createdProducerId && log.action === 'UPDATE')
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
     
     if (!found) {
@@ -204,45 +220,46 @@ describe('RiceType CRUD + Auditoría (e2e)', () => {
     expect(found).toBeDefined();
     expect(found.userId).toBeDefined();
     expect(found.userId).not.toBeNull();
-    expect(found.entityId).toBe(createdRiceTypeId);
-    expect(found.entityType).toBe('RICE_TYPE');
+    expect(found.entityId).toBe(createdProducerId);
+    expect(found.entityType).toBe('PRODUCER');
     expect(found.action).toBe('UPDATE');
     
     // Verificar que los newValues contienen los datos actualizados
     const logNewValues = typeof found.newValues === 'string' ? JSON.parse(found.newValues) : found.newValues;
-    expect(logNewValues.name).toBe(`${randomRiceName}_UPDATED`);
-    expect(parseFloat(logNewValues.price)).toBeCloseTo(456.78, 0); // Usar tolerancia
-    expect(logNewValues.enable).toBe(false);
+    expect(logNewValues.name).toBe(`${randomName}_UPDATED`);
+    expect(logNewValues.businessName).toBe(`${randomName}_UPDATED SpA`);
+    expect(logNewValues.address).toBe('Calle Actualizada 456');
+    expect(logNewValues.phone).toBe('+56987654321');
   });
 
   // ===== DELETE TESTS =====
-  it('Debe eliminar el tipo de arroz (DELETE)', async () => {
+  it('Debe eliminar el productor (DELETE)', async () => {
     const res = await request(httpServer)
-      .delete(`/rice-types/${createdRiceTypeId}`)
+      .delete(`/producers/${createdProducerId}`)
       .set('Authorization', `Bearer ${adminToken}`);
     
     if (res.status !== 200) {
-      console.error('Error al eliminar tipo de arroz:', res.body);
+      console.error('Error al eliminar productor:', res.body);
     }
     expect(res.status).toBe(200);
   });
 
-  it('Debe verificar que el tipo de arroz fue eliminado', async () => {
+  it('Debe verificar que el productor fue eliminado', async () => {
     const res = await request(httpServer)
-      .get(`/rice-types/${createdRiceTypeId}`)
+      .get(`/producers/${createdProducerId}`)
       .set('Authorization', `Bearer ${adminToken}`);
-    expect(res.status).toBe(404); // Not found
+    expect(res.status).toBe(404); // Not found debido al soft delete
   });
 
   it('Debe verificar que existe un log de auditoría para la eliminación', async () => {
     const res = await request(httpServer)
-      .get('/audit?entityType=RICE_TYPE&action=DELETE')
+      .get('/audit?entityType=PRODUCER&action=DELETE')
       .set('Authorization', `Bearer ${adminToken}`);
     const logs = res.body.data || res.body;
     
     // Buscar el log más reciente que coincida con el entityId y acción DELETE
     const found = logs
-      .filter((log) => log.entityId === createdRiceTypeId && log.action === 'DELETE')
+      .filter((log) => log.entityId === createdProducerId && log.action === 'DELETE')
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
     
     if (!found) {
@@ -260,8 +277,8 @@ describe('RiceType CRUD + Auditoría (e2e)', () => {
     expect(found).toBeDefined();
     expect(found.userId).toBeDefined();
     expect(found.userId).not.toBeNull();
-    expect(found.entityId).toBe(createdRiceTypeId);
-    expect(found.entityType).toBe('RICE_TYPE');
+    expect(found.entityId).toBe(createdProducerId);
+    expect(found.entityType).toBe('PRODUCER');
     expect(found.action).toBe('DELETE');
   });
 });

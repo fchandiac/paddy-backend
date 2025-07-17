@@ -4,18 +4,16 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { AppModule } from '../../../src/app.module';
 import { DataSource } from 'typeorm';
 
-describe('RiceType CRUD + Auditoría (e2e)', () => {
+describe('DiscountPercent CRUD + Auditoría (e2e)', () => {
   let app: INestApplication;
   let httpServer: any;
   let dataSource: DataSource;
   let adminToken: string;
-  let createdRiceTypeId: number;
-  let createdRiceType: any;
-  let randomRiceCode: number;
-  let randomRiceName: string;
-  let usedCodes: number[] = [];
-  let usedNames: string[] = [];
-  let updatedRiceType: any;
+  let createdDiscountId: number;
+  let createdDiscount: any;
+  let randomDiscountCode: number;
+  let usedDiscountCodes: number[] = [];
+  let updatedDiscount: any;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -43,58 +41,72 @@ describe('RiceType CRUD + Auditoría (e2e)', () => {
     expect(res.body).toHaveProperty('userId');
     adminToken = res.body.access_token || '';
     
-    // Ahora obtener los códigos y nombres ya usados
-    const riceTypesRes = await request(httpServer)
-      .get('/rice-types')
+    // Ahora obtener los códigos de descuento ya usados
+    const discountsRes = await request(httpServer)
+      .get('/discounts-percent')
       .set('Authorization', `Bearer ${adminToken}`);
-    usedCodes = (riceTypesRes.body || []).map((rt: any) => rt.code);
-    usedNames = (riceTypesRes.body || []).map((rt: any) => rt.name);
+    usedDiscountCodes = (discountsRes.body || []).map((d: any) => d.discountCode);
 
-    // Generar código y nombre únicos
+    // Generar código de descuento único
     do {
-      randomRiceCode = Math.floor(Math.random() * 1000000) + 1000;
-      randomRiceName = 'TestArroz_' + Math.floor(Math.random() * 1000000);
-    } while (usedCodes.includes(randomRiceCode) || usedNames.includes(randomRiceName));
+      randomDiscountCode = Math.floor(Math.random() * 1000) + 1;
+    } while (usedDiscountCodes.includes(randomDiscountCode));
   });
 
-  it('Debe crear un tipo de arroz', async () => {
-    const riceTypeDto = { code: randomRiceCode, name: randomRiceName, description: 'Arroz test', price: 123.45, enable: true };
+  // ===== CREATE TESTS =====
+  it('Debe crear un porcentaje de descuento', async () => {
+    const discountDto = {
+      discountCode: randomDiscountCode,
+      start: 0,
+      end: 10,
+      percent: 5.5
+    };
+    
     const res = await request(httpServer)
-      .post('/rice-types')
+      .post('/discounts-percent')
       .set('Authorization', `Bearer ${adminToken}`)
-      .send(riceTypeDto);
+      .send(discountDto);
+    
     if (res.status !== 201) {
-      console.error('Error al crear tipo de arroz:', res.body);
+      console.error('Error al crear porcentaje de descuento:', res.body);
     }
     expect(res.status).toBe(201);
     expect(res.body).toHaveProperty('id');
-    createdRiceTypeId = res.body.id;
-    createdRiceType = res.body;
+    expect(res.body.discountCode).toBe(randomDiscountCode);
+    expect(parseFloat(res.body.start)).toBe(0);
+    expect(parseFloat(res.body.end)).toBe(10);
+    expect(parseFloat(res.body.percent)).toBe(5.5);
+    
+    createdDiscountId = res.body.id;
+    createdDiscount = res.body;
   });
 
-  it('Debe verificar que el tipo de arroz fue creado', async () => {
+  it('Debe verificar que el porcentaje de descuento fue creado', async () => {
     const res = await request(httpServer)
-      .get(`/rice-types/${createdRiceTypeId}`)
+      .get(`/discounts-percent/${createdDiscountId}`)
       .set('Authorization', `Bearer ${adminToken}`);
-    if (res.status !== 200) {
-      console.error('Error al consultar tipo de arroz:', res.body);
-    }
     expect(res.status).toBe(200);
-    expect(res.body.name).toBe(randomRiceName);
+    expect(res.body.discountCode).toBe(randomDiscountCode);
+    expect(parseFloat(res.body.start)).toBe(0);
+    expect(parseFloat(res.body.end)).toBe(10);
+    expect(parseFloat(res.body.percent)).toBe(5.5);
   });
 
   it('Debe verificar que existe un log de auditoría para la creación', async () => {
     const res = await request(httpServer)
-      .get('/audit?entityType=RICE_TYPE&action=CREATE')
+      .get('/audit?entityType=DISCOUNT_PERCENT&action=CREATE')
       .set('Authorization', `Bearer ${adminToken}`);
     const logs = res.body.data || res.body;
+    
     // Buscar el log más reciente que coincida con el entityId y acción
     const found = logs
-      .filter((log) => log.entityId === createdRiceTypeId && log.action === 'CREATE')
+      .filter((log) => log.entityId === createdDiscountId && log.action === 'CREATE')
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+    
     if (!found) {
-      console.error('No se encontró log de auditoría para el tipo de arroz creado. Logs recibidos:', logs);
+      console.error('No se encontró log de auditoría para el descuento creado. Logs recibidos:', logs);
     }
+    
     console.log('Log de auditoría encontrado:', {
       entityId: found?.entityId,
       userId: found?.userId,
@@ -102,91 +114,100 @@ describe('RiceType CRUD + Auditoría (e2e)', () => {
       entityType: found?.entityType,
       createdAt: found?.createdAt
     });
+    
     expect(found).toBeDefined();
     expect(found.userId).toBeDefined();
     expect(found.userId).not.toBeNull();
-    // Comparar los datos relevantes del arroz creado con los del log
-    expect(found.entityId).toBe(createdRiceTypeId);
-    expect(found.entityType).toBe('RICE_TYPE');
+    expect(found.entityId).toBe(createdDiscountId);
+    expect(found.entityType).toBe('DISCOUNT_PERCENT');
     expect(found.action).toBe('CREATE');
+    
     // Comparar campos clave (usar newValues, no data)
     const logNewValues = typeof found.newValues === 'string' ? JSON.parse(found.newValues) : found.newValues;
-    expect(logNewValues.code).toBe(createdRiceType.code);
-    expect(logNewValues.name).toBe(createdRiceType.name);
-    expect(logNewValues.description).toBe(createdRiceType.description);
-    expect(logNewValues.price).toBe(createdRiceType.price);
-    expect(logNewValues.enable).toBe(createdRiceType.enable);
+    expect(logNewValues.discountCode).toBe(createdDiscount.discountCode);
+    expect(parseFloat(logNewValues.start)).toBe(0);
+    expect(parseFloat(logNewValues.end)).toBe(10);
+    expect(parseFloat(logNewValues.percent)).toBe(5.5);
   });
 
   // ===== READ TESTS =====
-  it('Debe obtener el tipo de arroz por ID (READ)', async () => {
+  it('Debe obtener el porcentaje de descuento por ID (READ)', async () => {
     const res = await request(httpServer)
-      .get(`/rice-types/${createdRiceTypeId}`)
+      .get(`/discounts-percent/${createdDiscountId}`)
       .set('Authorization', `Bearer ${adminToken}`);
     expect(res.status).toBe(200);
-    expect(res.body.id).toBe(createdRiceTypeId);
-    expect(res.body.code).toBe(randomRiceCode);
-    expect(res.body.name).toBe(randomRiceName);
-    expect(res.body.enable).toBe(true);
+    expect(res.body.id).toBe(createdDiscountId);
+    expect(res.body.discountCode).toBe(randomDiscountCode);
+    expect(parseFloat(res.body.percent)).toBe(5.5);
   });
 
-  it('Debe obtener todos los tipos de arroz (READ ALL)', async () => {
+  it('Debe obtener todos los porcentajes de descuento (READ ALL)', async () => {
     const res = await request(httpServer)
-      .get('/rice-types')
+      .get('/discounts-percent')
       .set('Authorization', `Bearer ${adminToken}`);
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
-    const foundRiceType = res.body.find((rt: any) => rt.id === createdRiceTypeId);
-    expect(foundRiceType).toBeDefined();
+    const foundDiscount = res.body.find((d: any) => d.id === createdDiscountId);
+    expect(foundDiscount).toBeDefined();
+  });
+
+  it('Debe obtener porcentajes de descuento por código (READ BY CODE)', async () => {
+    const res = await request(httpServer)
+      .get(`/discounts-percent/code/${randomDiscountCode}`)
+      .set('Authorization', `Bearer ${adminToken}`);
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body.length).toBeGreaterThan(0);
+    const foundDiscount = res.body.find((d: any) => d.id === createdDiscountId);
+    expect(foundDiscount).toBeDefined();
   });
 
   // ===== UPDATE TESTS =====
-  it('Debe actualizar el tipo de arroz (UPDATE)', async () => {
+  it('Debe actualizar el porcentaje de descuento (UPDATE)', async () => {
     const updateDto = {
-      code: randomRiceCode, // Mantenemos el código
-      name: `${randomRiceName}_UPDATED`,
-      description: 'Arroz test actualizado',
-      price: 456.78,
-      enable: false
+      discountCode: randomDiscountCode, // Mantenemos el código
+      start: 5,
+      end: 15,
+      percent: 8.75
     };
     
     const res = await request(httpServer)
-      .put(`/rice-types/${createdRiceTypeId}`)
+      .put(`/discounts-percent/${createdDiscountId}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .send(updateDto);
     
     if (res.status !== 200) {
-      console.error('Error al actualizar tipo de arroz:', res.body);
+      console.error('Error al actualizar porcentaje de descuento:', res.body);
     }
     expect(res.status).toBe(200);
-    expect(res.body.id).toBe(createdRiceTypeId);
-    expect(res.body.name).toBe(updateDto.name);
-    expect(res.body.price).toBe(updateDto.price);
-    expect(res.body.enable).toBe(false);
+    expect(res.body.id).toBe(createdDiscountId);
+    expect(res.body.discountCode).toBe(randomDiscountCode);
+    expect(parseFloat(res.body.start)).toBe(5);
+    expect(parseFloat(res.body.end)).toBe(15);
+    expect(parseFloat(res.body.percent)).toBe(8.75);
     
-    updatedRiceType = res.body;
+    updatedDiscount = res.body;
   });
 
-  it('Debe verificar que el tipo de arroz fue actualizado', async () => {
+  it('Debe verificar que el porcentaje de descuento fue actualizado', async () => {
     const res = await request(httpServer)
-      .get(`/rice-types/${createdRiceTypeId}`)
+      .get(`/discounts-percent/${createdDiscountId}`)
       .set('Authorization', `Bearer ${adminToken}`);
     expect(res.status).toBe(200);
-    expect(res.body.name).toBe(`${randomRiceName}_UPDATED`);
-    // Usar toBeCloseTo para comparaciones numéricas con tolerancia
-    expect(parseFloat(res.body.price)).toBeCloseTo(456.78, 0); // 0 decimales de precisión
-    expect(res.body.enable).toBe(false);
+    expect(parseFloat(res.body.start)).toBe(5);
+    expect(parseFloat(res.body.end)).toBe(15);
+    expect(parseFloat(res.body.percent)).toBe(8.75);
   });
 
   it('Debe verificar que existe un log de auditoría para la actualización', async () => {
     const res = await request(httpServer)
-      .get('/audit?entityType=RICE_TYPE&action=UPDATE')
+      .get('/audit?entityType=DISCOUNT_PERCENT&action=UPDATE')
       .set('Authorization', `Bearer ${adminToken}`);
     const logs = res.body.data || res.body;
     
     // Buscar el log más reciente que coincida con el entityId y acción UPDATE
     const found = logs
-      .filter((log) => log.entityId === createdRiceTypeId && log.action === 'UPDATE')
+      .filter((log) => log.entityId === createdDiscountId && log.action === 'UPDATE')
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
     
     if (!found) {
@@ -204,45 +225,45 @@ describe('RiceType CRUD + Auditoría (e2e)', () => {
     expect(found).toBeDefined();
     expect(found.userId).toBeDefined();
     expect(found.userId).not.toBeNull();
-    expect(found.entityId).toBe(createdRiceTypeId);
-    expect(found.entityType).toBe('RICE_TYPE');
+    expect(found.entityId).toBe(createdDiscountId);
+    expect(found.entityType).toBe('DISCOUNT_PERCENT');
     expect(found.action).toBe('UPDATE');
     
     // Verificar que los newValues contienen los datos actualizados
     const logNewValues = typeof found.newValues === 'string' ? JSON.parse(found.newValues) : found.newValues;
-    expect(logNewValues.name).toBe(`${randomRiceName}_UPDATED`);
-    expect(parseFloat(logNewValues.price)).toBeCloseTo(456.78, 0); // Usar tolerancia
-    expect(logNewValues.enable).toBe(false);
+    expect(parseFloat(logNewValues.start)).toBe(5);
+    expect(parseFloat(logNewValues.end)).toBe(15);
+    expect(parseFloat(logNewValues.percent)).toBe(8.75);
   });
 
   // ===== DELETE TESTS =====
-  it('Debe eliminar el tipo de arroz (DELETE)', async () => {
+  it('Debe eliminar el porcentaje de descuento (DELETE)', async () => {
     const res = await request(httpServer)
-      .delete(`/rice-types/${createdRiceTypeId}`)
+      .delete(`/discounts-percent/${createdDiscountId}`)
       .set('Authorization', `Bearer ${adminToken}`);
     
     if (res.status !== 200) {
-      console.error('Error al eliminar tipo de arroz:', res.body);
+      console.error('Error al eliminar porcentaje de descuento:', res.body);
     }
     expect(res.status).toBe(200);
   });
 
-  it('Debe verificar que el tipo de arroz fue eliminado', async () => {
+  it('Debe verificar que el porcentaje de descuento fue eliminado', async () => {
     const res = await request(httpServer)
-      .get(`/rice-types/${createdRiceTypeId}`)
+      .get(`/discounts-percent/${createdDiscountId}`)
       .set('Authorization', `Bearer ${adminToken}`);
-    expect(res.status).toBe(404); // Not found
+    expect(res.status).toBe(404); // Not found debido al soft delete
   });
 
   it('Debe verificar que existe un log de auditoría para la eliminación', async () => {
     const res = await request(httpServer)
-      .get('/audit?entityType=RICE_TYPE&action=DELETE')
+      .get('/audit?entityType=DISCOUNT_PERCENT&action=DELETE')
       .set('Authorization', `Bearer ${adminToken}`);
     const logs = res.body.data || res.body;
     
     // Buscar el log más reciente que coincida con el entityId y acción DELETE
     const found = logs
-      .filter((log) => log.entityId === createdRiceTypeId && log.action === 'DELETE')
+      .filter((log) => log.entityId === createdDiscountId && log.action === 'DELETE')
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
     
     if (!found) {
@@ -260,8 +281,8 @@ describe('RiceType CRUD + Auditoría (e2e)', () => {
     expect(found).toBeDefined();
     expect(found.userId).toBeDefined();
     expect(found.userId).not.toBeNull();
-    expect(found.entityId).toBe(createdRiceTypeId);
-    expect(found.entityType).toBe('RICE_TYPE');
+    expect(found.entityId).toBe(createdDiscountId);
+    expect(found.entityType).toBe('DISCOUNT_PERCENT');
     expect(found.action).toBe('DELETE');
   });
 });

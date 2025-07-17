@@ -40,16 +40,22 @@ export class UserService {
 
     const createdUser = await this.userRepo.save(user);
 
-    return createdUser;
-
-  
+    // Sanitizar la contraseña antes de devolver
+    const { pass, ...userWithoutPassword } = createdUser;
+    return userWithoutPassword as User;
   }
 
   // ✅ Listar todos los usuarios
   async findAll(): Promise<User[]> {
-    return this.userRepo.find({
+    const users = await this.userRepo.find({
       where: { deletedAt: null }, // ✅ solo los no eliminados
       order: { createdAt: 'DESC' },
+    });
+    
+    // Sanitizar contraseñas
+    return users.map(user => {
+      const { pass, ...userWithoutPassword } = user;
+      return userWithoutPassword as User;
     });
   }
 
@@ -59,7 +65,10 @@ export class UserService {
     if (!user) {
       throw new NotFoundException(`No se encontró el usuario con ID ${id}`);
     }
-    return user;
+    
+    // Sanitizar la contraseña antes de devolver
+    const { pass, ...userWithoutPassword } = user;
+    return userWithoutPassword as User;
   }
 
   // ✅ Buscar usuario por email
@@ -68,7 +77,10 @@ export class UserService {
     if (!user) {
       throw new NotFoundException(`No se encontró un usuario con el correo ${email}`);
     }
-    return user;
+    
+    // Sanitizar la contraseña antes de devolver
+    const { pass, ...userWithoutPassword } = user;
+    return userWithoutPassword as User;
   }
 
   // ✅ Buscar usuarios por nombre (like case-insensitive)
@@ -81,8 +93,11 @@ export class UserService {
       throw new NotFoundException(`No se encontraron usuarios con nombre parecido a "${name}"`);
     }
 
-    return users
-
+    // Sanitizar contraseñas
+    return users.map(user => {
+      const { pass, ...userWithoutPassword } = user;
+      return userWithoutPassword as User;
+    });
   }
 
 
@@ -90,26 +105,41 @@ export class UserService {
     const user = await this.userRepo.findOne({ where: { id: dto.id } });
   
     if (!user) {
-      throw new NotFoundException(`Usuario con email ${dto.email} no encontrado`);
+      throw new NotFoundException(`Usuario con ID ${dto.id} no encontrado`);
     }
   
     // Solo se permite actualizar name y role
     user.name = dto.name;
     user.role = dto.role;
   
-    return this.userRepo.save(user);
+    const updatedUser = await this.userRepo.save(user);
+    
+    // Sanitizar la contraseña antes de devolver
+    const { pass, ...userWithoutPassword } = updatedUser;
+    return userWithoutPassword as User;
   }
 
   // ✅ Actualizar contraseña (el usuario debe existir)
-  async updatePassword(dto: UpdatePasswordDto): Promise<User> {
-    const user = await this.findById(dto.userId); // lanza excepción si no existe
+  async updatePassword(dto: UpdatePasswordDto): Promise<{ message: string }> {
+    const user = await this.userRepo.findOne({ where: { id: dto.userId } });
+    if (!user) {
+      throw new NotFoundException(`Usuario con ID ${dto.userId} no encontrado`);
+    }
+    
     (user as any).pass = dto.newPassword;
-    return this.userRepo.save(user);
+    await this.userRepo.save(user);
+    
+    return { message: 'Contraseña actualizada correctamente' };
   }
 
   // ✅ Soft delete
-  async deleteUser(id: number): Promise<void> {
-    const user = await this.findById(id); // lanza excepción si no existe
+  async deleteUser(id: number): Promise<{ message: string }> {
+    const user = await this.userRepo.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
+    }
+    
     await this.userRepo.softDelete(user.id);
+    return { message: 'Usuario eliminado correctamente' };
   }
 }

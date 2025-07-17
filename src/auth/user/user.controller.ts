@@ -7,8 +7,10 @@ import {
   Param,
   Body,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { AuditInterceptor, Audit } from '../../common/interceptors/audit.interceptor';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UserService } from './user.service';
 import {
   CreateUserDto,
@@ -19,6 +21,7 @@ import {
 
 @Controller('users')
 @UseInterceptors(AuditInterceptor)
+@UseGuards(JwtAuthGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 

@@ -11,8 +11,10 @@ import {
   ValidationPipe,
   Patch,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { AuditInterceptor, Audit } from '../../common/interceptors/audit.interceptor';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ProducerService } from './producer.service';
 import {
   AddBankAccountDto,
@@ -24,6 +26,7 @@ import { Producer } from '../../../libs/entities/producer.entity';
 
 @Controller('producers')
 @UseInterceptors(AuditInterceptor)
+@UseGuards(JwtAuthGuard)
 export class ProducerController {
   constructor(private readonly producerService: ProducerService) {}
 
