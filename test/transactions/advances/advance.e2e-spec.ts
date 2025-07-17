@@ -40,7 +40,7 @@ describe('Anticipo + Pago + Auditoría (e2e)', () => {
       .send({ email: 'admin@ayg.cl', pass: 'admin' });
     expect(res.status).toBe(201);
     expect(res.body).toHaveProperty('userId');
-    adminToken = res.body.token || '';
+    adminToken = res.body.access_token || '';
     userId = res.body.userId;
   });
 
@@ -116,7 +116,7 @@ describe('Anticipo + Pago + Auditoría (e2e)', () => {
       .set('Authorization', `Bearer ${adminToken}`);
     expect(res.status).toBe(200);
     const logs = res.body.data || res.body;
-    console.log('Logs recibidos:', logs.map(l => ({ entityId: l.entityId, description: l.description, typeCode: l.newValues?.typeCode })));
+    console.log('Logs recibidos:', logs.map(l => ({ entityId: l.entityId, description: l.description, typeCode: l.newValues?.typeCode, userId: l.userId })));
     const found = logs.find((log: any) =>
       log.action === 'CREATE' &&
       log.entityType === 'TRANSACTION' &&

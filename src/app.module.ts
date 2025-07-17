@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as fs from 'fs';
+import { JwtModule } from '@nestjs/jwt';
 
 import { AuthModule } from './auth/auth/auth.module';
 import { UserModule } from './auth/user/user.module';
@@ -55,6 +56,10 @@ import { envs } from 'libs/config';
       ],
     }),
 
+    JwtModule.register({
+      secret: process.env.JWT_SECRET || 'supersecret',
+      signOptions: { expiresIn: '1d' },
+    }),
     // 🧩 Módulos agrupados por dominio
     AuthModule,
     UserModule,
@@ -71,6 +76,11 @@ import { envs } from 'libs/config';
 
     // Audit module
     AuditModule,
+
+    JwtModule.register({
+      secret: process.env.JWT_SECRET || 'supersecret',
+      signOptions: { expiresIn: '1d' },
+    }),
   ],
 })
 export class AppModule {}

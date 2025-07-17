@@ -53,7 +53,7 @@ describe('RiceType + Auditoría (e2e)', () => {
       .send({ email: 'admin@ayg.cl', pass: 'admin' });
     expect(res.status).toBe(201);
     expect(res.body).toHaveProperty('userId');
-    adminToken = res.body.token || '';
+    adminToken = res.body.access_token || '';
   });
 
   it('Debe crear un tipo de arroz', async () => {

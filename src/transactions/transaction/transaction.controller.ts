@@ -11,7 +11,9 @@ import {
   ValidationPipe,
   BadRequestException,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
+import { JwtAuthGuard } from '../../auth/auth/jwt-auth.guard';
 import { AuditInterceptor, Audit } from '../../common/interceptors/audit.interceptor';
 import { TransactionService } from './transaction.service';
 import { CreateTransactionDto, FilterTransactionDto } from 'libs/dto/transaction.dto';
@@ -21,6 +23,7 @@ import { GenerateInterestDto } from 'libs/dto/interest.dto';
 
 @Controller('transactions')
 @UseInterceptors(AuditInterceptor)
+@UseGuards(JwtAuthGuard)
 export class TransactionController {
   constructor(private readonly transactionService: TransactionService) {}
 
