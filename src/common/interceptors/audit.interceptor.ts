@@ -101,6 +101,9 @@ export class AuditInterceptor implements NestInterceptor {
         entityId = body.id;
       } else if (body?.userId && typeof body.userId === 'number') {
         entityId = body.userId;
+      } else if (auditData.action === 'LOGIN' && response?.user?.id) {
+        // Para login exitoso, usar el ID del usuario autenticado
+        entityId = response.user.id;
       }
 
       // Preparar valores anteriores y nuevos según la acción
@@ -111,16 +114,27 @@ export class AuditInterceptor implements NestInterceptor {
       } else if (auditData.action === 'UPDATE') {
         newValues = this.sanitizeData(body);
         // Los valores anteriores deberían obtenerse del servicio antes del update
+      } else if (auditData.action === 'LOGIN') {
+        // Para login, incluir información detallada del intento
+        newValues = {
+          email: body?.email || null,
+          loginSuccessful: success,
+          userAgent: userAgent || null,
+          timestamp: new Date().toISOString(),
+          ipAddress: ip,
+          loginResult: success ? 'SUCCESS' : 'FAILED',
+          failureReason: success ? null : (errorMessage || 'Login failed'),
+        };
       }
 
       const auditLog = this.auditRepo.create({
-        userId: user?.id || null,
+        userId: this.getUserIdForAudit(auditData, user, response, success),
         ipAddress: ip && ip !== 'N/A' && ip.trim() !== '' ? ip : null,
         userAgent: userAgent && userAgent !== 'N/A' && userAgent.trim() !== '' ? userAgent : null,
         action: auditData.action,
         entityType: auditData.entityType,
         entityId,
-        description: auditData.description || this.generateDescription(auditData, method, url),
+        description: this.generateLoginDescription(auditData, method, url, success, body, errorMessage),
         metadata: {
           method,
           url,
@@ -139,6 +153,24 @@ export class AuditInterceptor implements NestInterceptor {
     }
   }
 
+  private getUserIdForAudit(auditData: any, user: any, response: any, success: boolean): number | null {
+    // Para login exitoso, usar el usuario de la respuesta
+    if (auditData.action === 'LOGIN' && success && response?.user?.id) {
+      return response.user.id;
+    }
+    
+    // Para login fallido, tratar de obtener el usuario del email si existe
+    if (auditData.action === 'LOGIN' && !success) {
+      // Para logins fallidos por contraseña incorrecta, podríamos identificar el usuario
+      // pero por seguridad, es mejor no exponer si el usuario existe o no
+      // Solo loguear userId si el login fue exitoso
+      return null;
+    }
+    
+    // Para otras operaciones, usar el usuario del request
+    return user?.id || null;
+  }
+
   private sanitizeData(data: any): any {
     if (!data) return null;
     
@@ -153,6 +185,22 @@ export class AuditInterceptor implements NestInterceptor {
     });
     
     return sanitized;
+  }
+
+  private generateLoginDescription(auditData: any, method: string, url: string, success: boolean, body: any, errorMessage?: string): string {
+    const email = body?.email || 'unknown';
+    
+    if (auditData.action === 'LOGIN') {
+      if (success) {
+        return `Login exitoso para ${email}`;
+      } else {
+        const reason = errorMessage || 'Login fallido';
+        return `Login fallido para ${email}: ${reason}`;
+      }
+    }
+    
+    // Para otras acciones, usar la descripción original
+    return auditData.description || this.generateDescription(auditData, method, url);
   }
 
   private generateDescription(auditData: any, method: string, url: string): string {

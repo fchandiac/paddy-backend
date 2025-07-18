@@ -13,7 +13,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async signIn(email: string, pass: string): Promise<{ access_token: string; userId: number; email: string; role: string }> {
+  async signIn(email: string, pass: string): Promise<{ access_token: string; userId: number; email: string; role: string; user: { id: number; email: string; role: string } }> {
     const user = await this.userRepo.findOne({ where: { email } });
     if (!user) throw new UnauthorizedException('Usuario no encontrado');
 
@@ -26,6 +26,7 @@ export class AuthService {
       userId: user.id,
       email: user.email,
       role: user.role,
+      user: { id: user.id, email: user.email, role: user.role }, // Para el interceptor de auditoría
     };
   }
 
