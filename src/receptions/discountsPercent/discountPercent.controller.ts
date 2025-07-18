@@ -37,6 +37,13 @@ export class DiscountPercentController {
   }
 
   @Get()
+  // --- AUDITORÍA DE CONSULTAS ---
+  // Si quieres auditar solo las consultas hechas manualmente por el usuario (y no las automáticas de la UI),
+  // usa el decorador @AuditUserQuery en vez de @Audit. Ejemplo:
+  // @AuditUserQuery('VIEW', 'DISCOUNT_PERCENT', 'Consulta de descuentos por usuario')
+  // El frontend debe enviar el header X-Request-Source: 'USER' para consultas manuales,
+  // o 'UI_AUTO' para consultas automáticas (grillas, autocompletados, etc).
+  // Si usas @Audit, todas las consultas serán auditadas sin distinción.
   @Audit('VIEW', 'DISCOUNT_PERCENT', 'Listar todos los descuentos')
   async findAll(): Promise<DiscountPercent[]> {
     return this.discountPercentService.findAll();

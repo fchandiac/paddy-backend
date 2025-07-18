@@ -30,6 +30,13 @@ export class RiceTypeController {
   }
 
   @Get()
+  // --- AUDITORÍA DE CONSULTAS ---
+  // Si quieres auditar solo las consultas hechas manualmente por el usuario (y no las automáticas de la UI),
+  // usa el decorador @AuditUserQuery en vez de @Audit. Ejemplo:
+  // @AuditUserQuery('VIEW', 'RICE_TYPE', 'Consulta de tipos de arroz por usuario')
+  // El frontend debe enviar el header X-Request-Source: 'USER' para consultas manuales,
+  // o 'UI_AUTO' para consultas automáticas (grillas, autocompletados, etc).
+  // Si usas @Audit, todas las consultas serán auditadas sin distinción.
   async findAll(): Promise<RiceType[]> {
     return this.riceTypeService.findAll();
   }
