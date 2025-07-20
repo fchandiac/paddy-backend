@@ -15,7 +15,7 @@ import {
 import { RiceTypeService } from './riceType.service';
 import { CreateRiceTypeDto, UpdateRiceTypeDto } from '../../../libs/dto/rice-type.dto';
 import { RiceType } from '../../../libs/entities/rice-type.entity';
-import { AuditInterceptor, Audit } from '../../common/interceptors/audit.interceptor';
+import { AuditInterceptor, Audit, AuditUserQuery } from '../../common/interceptors/audit.interceptor';
 import { JwtAuthGuard } from '../../auth/auth/jwt-auth.guard';
 
 @Controller('rice-types')
@@ -30,13 +30,7 @@ export class RiceTypeController {
   }
 
   @Get()
-  // --- AUDITORÍA DE CONSULTAS ---
-  // Si quieres auditar solo las consultas hechas manualmente por el usuario (y no las automáticas de la UI),
-  // usa el decorador @AuditUserQuery en vez de @Audit. Ejemplo:
-  // @AuditUserQuery('VIEW', 'RICE_TYPE', 'Consulta de tipos de arroz por usuario')
-  // El frontend debe enviar el header X-Request-Source: 'USER' para consultas manuales,
-  // o 'UI_AUTO' para consultas automáticas (grillas, autocompletados, etc).
-  // Si usas @Audit, todas las consultas serán auditadas sin distinción.
+  @AuditUserQuery('VIEW', 'RICE_TYPE', 'Consulta de tipos de arroz por usuario')
   async findAll(): Promise<RiceType[]> {
     return this.riceTypeService.findAll();
   }

@@ -13,7 +13,7 @@ import {
   UseInterceptors,
   UseGuards,
 } from '@nestjs/common';
-import { AuditInterceptor, Audit } from '../../common/interceptors/audit.interceptor';
+import { AuditInterceptor, Audit, AuditUserQuery } from '../../common/interceptors/audit.interceptor';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ProducerService } from './producer.service';
 import {
@@ -37,14 +37,7 @@ export class ProducerController {
   }
 
   @Get()
-  // --- AUDITORÍA DE CONSULTAS ---
-  // Si quieres auditar solo las consultas hechas manualmente por el usuario (y no las automáticas de la UI),
-  // usa el decorador @AuditUserQuery en vez de @Audit. Ejemplo:
-  // @AuditUserQuery('VIEW', 'PRODUCER', 'Consulta de productores por usuario')
-  // El frontend debe enviar el header X-Request-Source: 'USER' para consultas manuales,
-  // o 'UI_AUTO' para consultas automáticas (grillas, autocompletados, etc).
-  // Si usas @Audit, todas las consultas serán auditadas sin distinción.
-  @Audit('VIEW', 'PRODUCER', 'Listar todos los productores')
+  @AuditUserQuery('VIEW', 'PRODUCER', 'Consulta de productores por usuario')
   async findAll(): Promise<Producer[]> {
     return this.producerService.findAll();
   }
