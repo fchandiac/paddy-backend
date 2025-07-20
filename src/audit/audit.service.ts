@@ -96,7 +96,7 @@ export class AuditService {
     const options: FindManyOptions<AuditLog> = {
       where,
       relations: ['user'],
-      order: { createdAt: 'DESC' },
+      order: { createdAt: 'DESC' }, // Más nuevos primero
       skip: (page - 1) * limit,
       take: limit,
     };

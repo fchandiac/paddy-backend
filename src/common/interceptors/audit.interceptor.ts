@@ -17,6 +17,10 @@ export const AUDIT_METADATA_KEY = 'audit_metadata';
 export const Audit = (action: AuditAction, entityType: AuditEntityType, description?: string) =>
   SetMetadata(AUDIT_METADATA_KEY, { action, entityType, description });
 
+// Decorator para marcar endpoints que deben ser auditados solo si son consultas de usuario
+export const AuditUserQuery = (action: AuditAction, entityType: AuditEntityType, description?: string) =>
+  SetMetadata(AUDIT_METADATA_KEY, { action, entityType, description, userQueryOnly: true });
+
 @Injectable()
 export class AuditInterceptor implements NestInterceptor {
   constructor(
@@ -30,14 +34,23 @@ export class AuditInterceptor implements NestInterceptor {
     if (!auditData) {
       return next.handle(); // No audit needed
     }
+
     const request = context.switchToHttp().getRequest();
-    const { user, ip, headers, method, url, body, params } = request;
+    const { user, ip, headers, method, url, body, params, query } = request;
+
+    // Verificar si es una consulta que solo debe auditarse cuando es de usuario
+    if (auditData.userQueryOnly) {
+      const requestSource = AuditInterceptor.getRequestSource(headers, query);
+      // Si es una consulta automática de la UI, no auditar
+      if (requestSource === 'UI_AUTO' || requestSource === 'SYSTEM') {
+        return next.handle();
+      }
+    }
+
     const startTime = Date.now();
-    // ...existing code...
+
     return next.handle().pipe(
       tap(async (response) => {
-        // Operación exitosa
-        // ...existing code...
         await this.createAuditLog({
           auditData,
           user,
@@ -47,14 +60,13 @@ export class AuditInterceptor implements NestInterceptor {
           url,
           body,
           params,
+          query,
           response,
           success: true,
           duration: Date.now() - startTime,
         });
       }),
       catchError(async (error) => {
-        // Operación fallida
-        // ...existing code...
         await this.createAuditLog({
           auditData,
           user,
@@ -64,6 +76,7 @@ export class AuditInterceptor implements NestInterceptor {
           url,
           body,
           params,
+          query,
           success: false,
           errorMessage: error.message,
           duration: Date.now() - startTime,
@@ -71,6 +84,39 @@ export class AuditInterceptor implements NestInterceptor {
         throw error;
       }),
     );
+  }
+
+  // Método utilitario para determinar el origen de la consulta
+  static getRequestSource(headers: any, query: any): string {
+    // Verificar header personalizado
+    const headerSource = headers['x-request-source'];
+    if (headerSource) {
+      return String(headerSource).toUpperCase();
+    }
+    // Verificar query parameter
+    const querySource = query?.source;
+    if (querySource) {
+      return String(querySource).toUpperCase();
+    }
+    // Por defecto, asumir que es una consulta de usuario
+    return 'USER';
+  }
+
+  private getRequestSource(headers: any, query: any): string {
+    // Verificar header personalizado
+    const headerSource = headers['x-request-source'];
+    if (headerSource) {
+      return headerSource.toUpperCase();
+    }
+    
+    // Verificar query parameter
+    const querySource = query?.source;
+    if (querySource) {
+      return querySource.toUpperCase();
+    }
+    
+    // Por defecto, asumir que es una consulta de usuario
+    return 'USER';
   }
 
   private async createAuditLog(data: any) {
