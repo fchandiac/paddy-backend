@@ -11,7 +11,7 @@ import {
   Headers,
   UseInterceptors,
 } from '@nestjs/common';
-import { AuditInterceptor, Audit } from '../../common/interceptors/audit.interceptor';
+import { AuditInterceptor, Audit, AuditUserQuery } from '../../common/interceptors/audit.interceptor';
 import { ReceptionService } from './receptions.service';
 import { CreateReceptionDto, UpdateReceptionDto, UpdateReasonDto } from '../../../libs/dto/reception.dto';
 
@@ -48,7 +48,7 @@ export class ReceptionController {
 
   // 📄 Listar todas las recepciones
   @Get()
-  @Audit('VIEW', 'RECEPTION', 'Listar todas las recepciones')
+  @AuditUserQuery('VIEW', 'RECEPTION', 'Consulta de recepciones por usuario')
   findAll() {
     return this.receptionService.findAll();
   }
