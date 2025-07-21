@@ -14,10 +14,11 @@ export class AuthService {
   ) {}
 
   async signIn(email: string, pass: string): Promise<{ access_token: string; userId: number; email: string; role: string; name: string; user: { id: number; email: string; role: string; name: string } }> {
+    const { translate } = require('../../../libs/utils/i18n');
     const user = await this.userRepo.findOne({ where: { email } });
-    if (!user) throw new UnauthorizedException('Usuario no encontrado');
+    if (!user) throw new UnauthorizedException(translate('Usuario no encontrado', 'es') + ' (User not found)');
 
-    if ((user as any).pass !== pass) throw new UnauthorizedException('Contraseña incorrecta');
+    if ((user as any).pass !== pass) throw new UnauthorizedException(translate('Contraseña incorrecta', 'es') + ' (Wrong password)');
 
     const payload = { sub: user.id, email: user.email, role: user.role };
     

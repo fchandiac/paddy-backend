@@ -29,14 +29,16 @@ export class RiceTypeService {
   }
 
   async findById(id: number): Promise<RiceType> {
+    const { translate } = require('../../../libs/utils/i18n');
     const riceType = await this.riceTypeRepo.findOne({ where: { id } });
     if (!riceType) {
-      throw new NotFoundException(`Tipo de arroz con ID ${id} no encontrado.`);
+      throw new NotFoundException(translate('Tipo de arroz con ID no encontrado', 'es') + ` (Rice type with ID ${id} not found)`);
     }
     return riceType;
   }
 
   async create(dto: CreateRiceTypeDto): Promise<RiceType> {
+    const { translate } = require('../../../libs/utils/i18n');
     // Validar nombre único
     const existingByName = await this.riceTypeRepo.findOne({
       where: { name: dto.name },
@@ -44,7 +46,7 @@ export class RiceTypeService {
 
     if (existingByName) {
       throw new ConflictException(
-        `Ya existe un tipo de arroz con el nombre "${dto.name}".`,
+        translate('Ya existe un tipo de arroz con el nombre', 'es') + ` "${dto.name}" (Rice type with name already exists)`,
       );
     }
 
@@ -55,7 +57,7 @@ export class RiceTypeService {
 
     if (existingByCode) {
       throw new ConflictException(
-        `Ya existe un tipo de arroz con el código "${dto.code}".`,
+        translate('Ya existe un tipo de arroz con el código', 'es') + ` "${dto.code}" (Rice type with code already exists)`,
       );
     }
 
@@ -66,6 +68,7 @@ export class RiceTypeService {
   async update(id: number, dto: UpdateRiceTypeDto): Promise<RiceType> {
     const riceType = await this.findById(id);
 
+    const { translate } = require('../../../libs/utils/i18n');
     // Si se está actualizando el nombre, validar que no exista otro con ese nombre
     if (dto.name && dto.name !== riceType.name) {
       const existingByName = await this.riceTypeRepo.findOne({
@@ -74,7 +77,7 @@ export class RiceTypeService {
 
       if (existingByName) {
         throw new ConflictException(
-          `Ya existe un tipo de arroz con el nombre "${dto.name}".`,
+          translate('Ya existe un tipo de arroz con el nombre', 'es') + ` "${dto.name}" (Rice type with name already exists)`,
         );
       }
     }
@@ -87,7 +90,7 @@ export class RiceTypeService {
 
       if (existingByCode) {
         throw new ConflictException(
-          `Ya existe un tipo de arroz con el código "${dto.code}".`,
+          translate('Ya existe un tipo de arroz con el código', 'es') + ` "${dto.code}" (Rice type with code already exists)`,
         );
       }
     }

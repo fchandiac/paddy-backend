@@ -29,9 +29,10 @@ export class DiscountPercentService {
   }
 
   async findById(id: number): Promise<DiscountPercent> {
+    const { translate } = require('../../../libs/utils/i18n');
     const discount = await this.discountRepo.findOne({ where: { id } });
     if (!discount) {
-      throw new NotFoundException(`Descuento con ID ${id} no encontrado.`);
+      throw new NotFoundException(translate('Descuento con ID no encontrado', 'es') + ` (Discount with ID ${id} not found)`);
     }
     return discount;
   }
@@ -59,10 +60,11 @@ export class DiscountPercentService {
       qb.andWhere('dp.id != :excludeId', { excludeId });
     }
 
+    const { translate } = require('../../../libs/utils/i18n');
     const overlapping = await qb.getOne();
     if (overlapping) {
       throw new ConflictException(
-        `El rango ${start}–${end} se solapa con otro existente (${overlapping.start}–${overlapping.end}).`,
+        translate('El rango se solapa con otro existente', 'es') + ` (${start}–${end} overlaps with ${overlapping.start}–${overlapping.end})`,
       );
     }
   }
@@ -72,6 +74,7 @@ export class DiscountPercentService {
     // Verifica si el rango se solapa con otro existente
     await this.ensureNoOverlap(dto.discountCode, dto.start, dto.end);
     
+    const { translate } = require('../../../libs/utils/i18n');
     const duplicate = await this.discountRepo.findOne({
       where: {
         discountCode: dto.discountCode,
@@ -82,7 +85,7 @@ export class DiscountPercentService {
 
     if (duplicate) {
       throw new ConflictException(
-        `Ya existe un tramo de descuento con ese código y rango.`,
+        translate('Ya existe un tramo de descuento con ese código y rango', 'es') + ' (Discount range already exists)',
       );
     }
 
@@ -119,8 +122,9 @@ export class DiscountPercentService {
   
     // 3) Compruebo solapamientos excluyendo este ID
     await this.ensureNoOverlap(code, start, end, id);
-  
+
     // 4) (Opcional) Evitar duplicados exactos si cambió el triplete
+    const { translate } = require('../../../libs/utils/i18n');
     if (
       code  !== discount.discountCode ||
       start !== discount.start        ||
@@ -131,7 +135,7 @@ export class DiscountPercentService {
       });
       if (duplicate) {
         throw new ConflictException(
-          `Ya existe un tramo de descuento con ese código y rango.`
+          translate('Ya existe un tramo de descuento con ese código y rango', 'es') + ' (Discount range already exists)'
         );
       }
     }
