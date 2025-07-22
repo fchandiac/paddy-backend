@@ -7,10 +7,11 @@ import { Producer } from '../../../libs/entities/producer.entity';
 import { RiceType } from '../../../libs/entities/rice-type.entity'; // ✅ corrige la ruta si estás dentro de src/receptions/reception/
 import { Template } from '../../../libs/entities/template.entity'; // ✅ corrige la ruta si estás dentro de src/receptions/reception/
 import { User } from '../../../libs/entities/user.entity';
+import { Season } from '../../../libs/entities/season.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Reception, Producer, RiceType, Template, User]), // ✅ agregamos User
+    TypeOrmModule.forFeature([Reception, Producer, RiceType, Template, User, Season]),
   ],
   controllers: [ReceptionController],
   providers: [ReceptionService],
