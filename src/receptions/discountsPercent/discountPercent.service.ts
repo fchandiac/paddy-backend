@@ -81,6 +81,11 @@ export class DiscountPercentService {
     if (dto.start > dto.end) {
       throw new BadRequestException('El inicio del rango no puede ser mayor que el final');
     }
+    // Validación lógica: percent <= 100
+    if (dto.percent > 100) {
+      const { translate } = require('../../../libs/utils/i18n');
+      throw new BadRequestException(translate('El porcentaje no puede ser mayor que 100', 'es'));
+    }
     // Primero: validar duplicado exacto
     const { translate } = require('../../../libs/utils/i18n');
     const duplicate = await this.discountRepo.findOne({
@@ -135,6 +140,11 @@ export class DiscountPercentService {
     // Validación lógica: start <= end
     if (start > end) {
       throw new BadRequestException('El inicio del rango no puede ser mayor que el final');
+    }
+    // Validación lógica: percent <= 100
+    if ((dto.percent ?? discount.percent) > 100) {
+      const { translate } = require('../../../libs/utils/i18n');
+      throw new BadRequestException(translate('El porcentaje no puede ser mayor que 100', 'es'));
     }
     // 3) Compruebo solapamientos excluyendo este ID
     await this.ensureNoOverlap(code, start, end, id);
