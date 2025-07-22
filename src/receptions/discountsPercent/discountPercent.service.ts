@@ -70,7 +70,7 @@ export class DiscountPercentService {
     const overlapping = await qb.getOne();
     if (overlapping) {
       throw new ConflictException(
-        translate('El rango se solapa con otro existente', 'es') + ` (${start}–${end} overlaps with ${overlapping.start}–${overlapping.end})`,
+        translate('El rango se solapa con otro existente', 'es'),
       );
     }
   }
