@@ -81,8 +81,7 @@ export class DiscountPercentService {
     if (dto.start > dto.end) {
       throw new BadRequestException('El inicio del rango no puede ser mayor que el final');
     }
-    // Verifica si el rango se solapa con otro existente
-    await this.ensureNoOverlap(dto.discountCode, dto.start, dto.end);
+    // Primero: validar duplicado exacto
     const { translate } = require('../../../libs/utils/i18n');
     const duplicate = await this.discountRepo.findOne({
       where: {
@@ -93,9 +92,11 @@ export class DiscountPercentService {
     });
     if (duplicate) {
       throw new ConflictException(
-        translate('Ya existe un tramo de descuento con ese código y rango', 'es') + ' (Discount range already exists)',
+        translate('Ya existe un tramo de descuento con ese código y rango', 'es'),
       );
     }
+    // Luego: validar solapamiento con otros rangos
+    await this.ensureNoOverlap(dto.discountCode, dto.start, dto.end);
     try {
       const discount = this.discountRepo.create(dto);
       const savedDiscount = await this.discountRepo.save(discount);
@@ -149,7 +150,7 @@ export class DiscountPercentService {
       });
       if (duplicate) {
         throw new ConflictException(
-          translate('Ya existe un tramo de descuento con ese código y rango', 'es') + ' (Discount range already exists)'
+          translate('Ya existe un tramo de descuento con ese código y rango', 'es')
         );
       }
     }
