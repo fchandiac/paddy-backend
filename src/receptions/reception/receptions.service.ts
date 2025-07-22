@@ -13,6 +13,7 @@ import { Template } from '../../../libs/entities/template.entity';
 import { User } from '../../../libs/entities/user.entity';
 import { ReceptionHistoryEntry } from '../../../libs/interfaces/reception-history.interface';
 import { AuditService } from '../../audit/audit.service';
+import { Season } from '../../../libs/entities/season.entity';
 
 @Injectable()
 export class ReceptionService {
@@ -31,6 +32,9 @@ export class ReceptionService {
 
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
+
+    @InjectRepository(Season)
+    private readonly seasonRepo: Repository<Season>,
 
     private readonly auditService: AuditService,
   ) {}

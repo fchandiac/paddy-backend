@@ -10,6 +10,9 @@ import { ReceptionStatus } from '../entities/reception.entity';
 import { ReceptionHistory } from '../interfaces/reception-history.interface';
 
 export class CreateReceptionDto {
+  @IsOptional()
+  @IsNumber()
+  seasonId?: number;
   @IsNumber()
   producerId: number;
 
@@ -111,6 +114,9 @@ export class CreateReceptionDto {
 }
 
 export class UpdateReceptionDto {
+  @IsOptional()
+  @IsNumber()
+  seasonId?: number;
   @IsOptional()
   @IsNumber()
   producerId?: number;

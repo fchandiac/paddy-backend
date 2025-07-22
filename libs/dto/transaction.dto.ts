@@ -3,6 +3,9 @@ import { Type } from 'class-transformer';
 import { TransactionTypeCode } from 'libs/enums';
 
 export class CreateTransactionDto {
+  @IsOptional()
+  @IsNumber()
+  seasonId?: number;
   @IsNumber()
   @Type(() => Number)
   userId: number;
@@ -51,6 +54,9 @@ export class CreateTransactionDto {
 }
 
 export class FilterTransactionDto {
+  @IsOptional()
+  @IsNumber()
+  seasonId?: number;
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
