@@ -16,6 +16,7 @@ import { TemplateModule } from './receptions/template/template.module';
 
 import { TransactionModule } from './transactions/transaction/transaction.module';
 import { TransactionReferenceModule } from './transactions/transactionReference/transactionReference.module';
+import { SeasonModule } from './transactions/season/season.module';
 
 // Audit module
 import { AuditModule } from './audit/audit.module';
@@ -29,6 +30,7 @@ import { Transaction } from '../libs/entities/transaction.entity';
 import { TransactionReference } from '../libs/entities/transaction-reference.entity';
 import { Record } from '../libs/entities/record.entity';
 import { AuditLog } from '../libs/entities/audit-log.entity';
+import { Season } from '../libs/entities/season.entity';
 
 import { envs } from 'libs/config';
 
@@ -53,6 +55,7 @@ import { envs } from 'libs/config';
         Record,
         Template,
         AuditLog,
+        Season,
       ],
     }),
 
@@ -76,6 +79,7 @@ import { envs } from 'libs/config';
 
     // Audit module
     AuditModule,
+    SeasonModule,
 
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'supersecret',

@@ -9,7 +9,9 @@
  * 4       | CREDIT_NOTE   | Nota de crédito   | Documento que refleja un crédito a favor.
  * 5       | DEBIT_NOTE    | Nota de débito    | Documento que refleja un débito o cargo.
  * 6       | PAYMENT       | Pago              | Registro de un pago realizado o recibido.
+ * 7       | DISCOUNT      | Descuento         | Registro de un descuento aplicado a productos.
  */
+
 export enum TransactionTypeCode {
   ADVANCE = 1,
   SETTLEMENT = 2,
@@ -17,7 +19,9 @@ export enum TransactionTypeCode {
   CREDIT_NOTE = 4,
   DEBIT_NOTE = 5,
   PAYMENT = 6,
+  DISCOUNT = 7,
 }
+
 
 export enum TransactionType {
   ADVANCE = 'Anticipo',
@@ -26,6 +30,7 @@ export enum TransactionType {
   CREDIT_NOTE = 'Nota de crédito',
   DEBIT_NOTE = 'Nota de débito',
   PAYMENT = 'Pago',
+  DISCOUNT = 'Descuento',
 }
 
 

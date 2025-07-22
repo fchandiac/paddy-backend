@@ -1,3 +1,4 @@
+import { CreateDiscountTransactionDto } from 'libs/dto/discount-transaction.dto';
 
 import {
   Controller,

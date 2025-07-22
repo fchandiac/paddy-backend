@@ -1,5 +1,3 @@
-
-
 import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -7,6 +5,7 @@ import { Transaction } from 'libs/entities/transaction.entity';
 import { User } from 'libs/entities/user.entity';
 import { Producer } from 'libs/entities/producer.entity';
 import { CreateTransactionDto, FilterTransactionDto } from 'libs/dto/transaction.dto';
+import { CreateDiscountTransactionDto } from 'libs/dto/discount-transaction.dto';
 import { TransactionTypeCode } from 'libs/enums';
 
 /**
@@ -23,6 +22,42 @@ import { TransactionTypeCode } from 'libs/enums';
  */
 @Injectable()
 export class TransactionService {
+
+  async createDiscount(dto: CreateDiscountTransactionDto): Promise<Transaction> {
+    const user = await this.userRepo.findOne({ where: { id: dto.userId } });
+    if (!user) throw new NotFoundException(`Usuario con ID ${dto.userId} no encontrado.`);
+
+    const producer = await this.producerRepo.findOne({ where: { id: dto.producerId } });
+    if (!producer) throw new NotFoundException(`Productor con ID ${dto.producerId} no encontrado.`);
+
+    // Validar detalles mínimos para descuento
+    if (!dto.details || typeof dto.details !== 'object') {
+      throw new BadRequestException('El campo details es obligatorio y debe ser un objeto.');
+    }
+    if (typeof dto.details.productId !== 'number') {
+      throw new BadRequestException('El campo details.productId es obligatorio y debe ser numérico.');
+    }
+    if (typeof dto.details.discountPercent !== 'number') {
+      throw new BadRequestException('El campo details.discountPercent es obligatorio y debe ser numérico.');
+    }
+    if (typeof dto.details.discountAmount !== 'number') {
+      throw new BadRequestException('El campo details.discountAmount es obligatorio y debe ser numérico.');
+    }
+
+    const trx = this.transactionRepo.create({
+      user,
+      producer,
+      typeCode: TransactionTypeCode.DISCOUNT,
+      debit: dto.debit,
+      credit: dto.credit,
+      description: dto.description,
+      previousBalance: dto.previousBalance,
+      balance: dto.balance,
+      isDraft: dto.isDraft || false,
+      details: dto.details,
+    });
+    return this.transactionRepo.save(trx);
+  }
   constructor(
     @InjectRepository(Transaction)
     private readonly transactionRepo: Repository<Transaction>,

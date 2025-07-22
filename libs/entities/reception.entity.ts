@@ -1,3 +1,4 @@
+import { Season } from './season.entity';
 import {
   Entity,
   Column,
@@ -22,6 +23,9 @@ export class Reception {
   @PrimaryGeneratedColumn()
   @Expose()
   id: number;
+
+  @ManyToOne(() => Season, { nullable: true })
+  season: Season;
 
   @ManyToOne(() => Producer)
   @JoinColumn({ name: 'producerId' })

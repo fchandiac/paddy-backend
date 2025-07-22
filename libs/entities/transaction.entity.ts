@@ -1,3 +1,4 @@
+import { Season } from './season.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -23,7 +24,25 @@ import { TransactionTypeCode } from 'libs/enums';
  * 4       | INTEREST      | Interés           | Cargo aplicado sobre el capital prestado o saldo pendiente.
  * 5       | CREDIT_NOTE   | Nota de crédito   | Documento que refleja un crédito a favor.
  * 6       | DEBIT_NOTE    | Nota de débito    | Documento que refleja un débito o cargo.
- */
+ * 7       | DISCOUNT      | Descuento         | Registro de un descuento aplicado a productos.
+  /**
+   * Para transacciones de tipo DISCOUNT:
+   * - productId: ID del producto al que se aplica el descuento
+   * - discountPercent: Porcentaje de descuento aplicado
+   * - discountAmount: Monto descontado
+   * - reason: Motivo del descuento
+   * - reference: Referencia a documento o recepción
+   * - observations: Observaciones adicionales
+   * Ejemplo:
+   *   {
+   *     productId: 123,
+   *     discountPercent: 5,
+   *     discountAmount: 1000,
+   *     reason: 'Promoción',
+   *     reference: 'REC-2025-001',
+   *     observations: 'Descuento por campaña de invierno'
+   *   }
+   */
 @Entity()
 export class Transaction {
   @PrimaryGeneratedColumn()
@@ -31,6 +50,9 @@ export class Transaction {
 
   @ManyToOne(() => User, { eager: false })
   user: User;
+
+  @ManyToOne(() => Season, { nullable: true })
+  season: Season;
 
   @ManyToOne(() => Producer, { eager: false })
   producer: Producer;
