@@ -112,15 +112,14 @@ describe('Anticipo + Pago + Auditoría (e2e)', () => {
 
   it('Debe verificar que existe un log de auditoría para la creación del anticipo', async () => {
     const res = await request(httpServer)
-      .get('/audit?entityType=TRANSACTION&action=CREATE')
+      .get(`/audit?entityType=TRANSACTION&action=CREATE&entityId=${advanceId}`)
       .set('Authorization', `Bearer ${adminToken}`);
     expect(res.status).toBe(200);
     const logs = res.body.data || res.body;
-    console.log('Logs recibidos:', logs.map(l => ({ entityId: l.entityId, description: l.description, typeCode: l.newValues?.typeCode, userId: l.userId })));
     const found = logs.find((log: any) =>
+      log.entityId === advanceId &&
       log.action === 'CREATE' &&
       log.entityType === 'TRANSACTION' &&
-      log.description === 'Crear anticipo' &&
       log.newValues?.typeCode === 1 &&
       log.newValues?.debit === 100000
     );
@@ -129,7 +128,6 @@ describe('Anticipo + Pago + Auditoría (e2e)', () => {
     expect(found.action).toBe('CREATE');
     expect(found.newValues.debit).toBe(100000);
     expect(found.newValues.details.advanceRate).toBe(0.7);
-    console.log('Detalles del log encontrado:', found.newValues.details);
     expect(found.newValues.details.paymentId).toBe(paymentId);
   });
 });

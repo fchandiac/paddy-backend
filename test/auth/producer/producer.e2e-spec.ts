@@ -110,14 +110,6 @@ describe('Producer CRUD + Auditoría (e2e)', () => {
       console.error('No se encontró log de auditoría para el productor creado. Logs recibidos:', logs);
     }
     
-    console.log('Log de auditoría encontrado:', {
-      entityId: found?.entityId,
-      userId: found?.userId,
-      action: found?.action,
-      entityType: found?.entityType,
-      createdAt: found?.createdAt
-    });
-    
     expect(found).toBeDefined();
     expect(found.userId).toBeDefined();
     expect(found.userId).not.toBeNull();
@@ -209,14 +201,6 @@ describe('Producer CRUD + Auditoría (e2e)', () => {
       console.error('No se encontró log de auditoría UPDATE. Logs recibidos:', logs);
     }
     
-    console.log('Log de auditoría UPDATE encontrado:', {
-      entityId: found?.entityId,
-      userId: found?.userId,
-      action: found?.action,
-      entityType: found?.entityType,
-      createdAt: found?.createdAt
-    });
-    
     expect(found).toBeDefined();
     expect(found.userId).toBeDefined();
     expect(found.userId).not.toBeNull();
@@ -265,14 +249,6 @@ describe('Producer CRUD + Auditoría (e2e)', () => {
     if (!found) {
       console.error('No se encontró log de auditoría DELETE. Logs recibidos:', logs);
     }
-    
-    console.log('Log de auditoría DELETE encontrado:', {
-      entityId: found?.entityId,
-      userId: found?.userId,
-      action: found?.action,
-      entityType: found?.entityType,
-      createdAt: found?.createdAt
-    });
     
     expect(found).toBeDefined();
     expect(found.userId).toBeDefined();

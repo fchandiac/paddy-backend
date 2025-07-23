@@ -112,14 +112,6 @@ describe('User CRUD + Auditoría (e2e)', () => {
       console.error('No se encontró log de auditoría para el usuario creado. Logs recibidos:', logs);
     }
     
-    console.log('Log de auditoría encontrado:', {
-      entityId: found?.entityId,
-      userId: found?.userId,
-      action: found?.action,
-      entityType: found?.entityType,
-      createdAt: found?.createdAt
-    });
-    
     expect(found).toBeDefined();
     expect(found.userId).toBeDefined();
     expect(found.userId).not.toBeNull();
@@ -227,14 +219,6 @@ describe('User CRUD + Auditoría (e2e)', () => {
       console.error('No se encontró log de auditoría UPDATE. Logs recibidos:', logs);
     }
     
-    console.log('Log de auditoría UPDATE encontrado:', {
-      entityId: found?.entityId,
-      userId: found?.userId,
-      action: found?.action,
-      entityType: found?.entityType,
-      createdAt: found?.createdAt
-    });
-    
     expect(found).toBeDefined();
     expect(found.userId).toBeDefined();
     expect(found.userId).not.toBeNull();
@@ -284,7 +268,7 @@ describe('User CRUD + Auditoría (e2e)', () => {
     // Debe haber al menos 1 log UPDATE para este usuario
     expect(userUpdateLogs.length).toBeGreaterThanOrEqual(1);
     
-    console.log('Total logs UPDATE para usuario:', userUpdateLogs.length);
+    // ...existing code...
     
     // El más reciente debería ser el cambio de contraseña
     const passwordUpdateLog = userUpdateLogs[0];
@@ -324,14 +308,6 @@ describe('User CRUD + Auditoría (e2e)', () => {
     if (!found) {
       console.error('No se encontró log de auditoría DELETE. Logs recibidos:', logs);
     }
-    
-    console.log('Log de auditoría DELETE encontrado:', {
-      entityId: found?.entityId,
-      userId: found?.userId,
-      action: found?.action,
-      entityType: found?.entityType,
-      createdAt: found?.createdAt
-    });
     
     expect(found).toBeDefined();
     expect(found.userId).toBeDefined();

@@ -109,18 +109,6 @@ describe('Auth + Auditoría (e2e)', () => {
     expect(found.newValues.loginResult).toBe('SUCCESS');
     expect(found.newValues.failureReason).toBeNull();
     expect(found.description).toContain('Login exitoso para admin@ayg.cl');
-    
-    console.log('Log de auditoría LOGIN exitoso:', {
-      entityId: found.entityId,
-      userId: found.userId,
-      action: found.action,
-      entityType: found.entityType,
-      success: found.success,
-      email: found.newValues.email,
-      loginResult: found.newValues.loginResult,
-      description: found.description,
-      createdAt: found.createdAt
-    });
   });
 
   // ===== LOGIN FALLIDO TEST =====
@@ -173,19 +161,6 @@ describe('Auth + Auditoría (e2e)', () => {
     expect(found.description).toContain('Login fallido para admin@ayg.cl');
     expect(found.errorMessage).toContain('Contraseña incorrecta');
     
-    console.log('Log de auditoría LOGIN fallido:', {
-      entityId: found.entityId,
-      userId: found.userId,
-      action: found.action,
-      entityType: found.entityType,
-      success: found.success,
-      email: found.newValues.email,
-      loginResult: found.newValues.loginResult,
-      failureReason: found.newValues.failureReason,
-      description: found.description,
-      errorMessage: found.errorMessage,
-      createdAt: found.createdAt
-    });
   });
 
   // ===== LOGIN CON USUARIO INEXISTENTE TEST =====
@@ -238,18 +213,5 @@ describe('Auth + Auditoría (e2e)', () => {
     expect(found.description).toContain('Login fallido para usuario_inexistente@test.com');
     expect(found.errorMessage).toContain('Usuario no encontrado');
     
-    console.log('Log de auditoría LOGIN usuario inexistente:', {
-      entityId: found.entityId,
-      userId: found.userId,
-      action: found.action,
-      entityType: found.entityType,
-      success: found.success,
-      email: found.newValues.email,
-      loginResult: found.newValues.loginResult,
-      failureReason: found.newValues.failureReason,
-      description: found.description,
-      errorMessage: found.errorMessage,
-      createdAt: found.createdAt
-    });
   });
 });

@@ -1,0 +1,117 @@
+
+# REPORTE DETALLADO DE TESTS E2E (22/07/2025)
+
+A continuación se detalla cada suite de tests e2e y cada test (`it`) aplicado dentro de la suite, con su lógica principal.
+
+---
+
+## test/auth/auth/auth.e2e-spec.ts
+**Suite:** Auth + Auditoría (e2e)
+- Debe verificar salud del servicio de autenticación: Verifica que el endpoint /auth/health responde correctamente.
+- Debe verificar que existe un log de auditoría para health check: Realiza health check y luego consulta que se haya generado un log de auditoría correspondiente.
+- Debe hacer login exitoso y generar log de auditoría: Realiza login exitoso y verifica que se genera el log de auditoría correcto.
+- Debe generar log de auditoría para login fallido: Intenta login con contraseña incorrecta y verifica que se genera el log de auditoría de fallo.
+- Debe generar log de auditoría para usuario inexistente: Intenta login con usuario inexistente y verifica que se genera el log de auditoría de fallo.
+
+---
+
+## test/auth/user/user.e2e-spec.ts
+**Suite:** User CRUD + Auditoría (e2e)
+- Debe hacer login y obtener token: Login de admin y obtiene token, además genera datos únicos para usuario de prueba.
+- Debe crear un usuario: Crea un usuario nuevo y verifica respuesta.
+- Debe verificar que el usuario fue creado: Consulta el usuario creado por ID y verifica datos.
+- Debe verificar que existe un log de auditoría para la creación: Consulta logs y verifica que existe log de creación para el usuario.
+- Debe obtener el usuario por ID (READ): Consulta usuario por ID y verifica datos.
+- Debe obtener todos los usuarios (READ ALL): Consulta todos los usuarios y verifica que el usuario creado está presente.
+- Debe obtener usuario por email (READ BY EMAIL): Consulta usuario por email y verifica datos.
+- Debe obtener usuario por nombre (READ BY NAME): Consulta usuario por nombre y verifica datos.
+- Debe actualizar el usuario (UPDATE): Actualiza datos del usuario y verifica respuesta.
+- Debe verificar que el usuario fue actualizado: Consulta usuario actualizado y verifica cambios.
+- Debe verificar que existe un log de auditoría para la actualización: Consulta logs y verifica log de actualización.
+- Debe actualizar la contraseña del usuario: Cambia la contraseña del usuario y verifica respuesta.
+- Debe verificar que existe un log de auditoría para el cambio de contraseña: Consulta logs y verifica log de cambio de contraseña.
+- Debe eliminar el usuario (DELETE): Elimina el usuario y verifica respuesta.
+- Debe verificar que el usuario fue eliminado: Consulta usuario eliminado y espera 404.
+- Debe verificar que existe un log de auditoría para la eliminación: Consulta logs y verifica log de eliminación.
+
+---
+
+## test/auth/producer/producer.e2e-spec.ts
+**Suite:** Producer CRUD + Auditoría (e2e)
+- Debe hacer login y obtener token: Login de admin y obtiene token, además genera datos únicos para productor de prueba.
+- Debe crear un productor: Crea un productor nuevo y verifica respuesta.
+- Debe verificar que el productor fue creado: Consulta el productor creado por ID y verifica datos.
+- Debe verificar que existe un log de auditoría para la creación: Consulta logs y verifica que existe log de creación para el productor.
+- Debe obtener el productor por ID (READ): Consulta productor por ID y verifica datos.
+- Debe obtener todos los productores (READ ALL): Consulta todos los productores y verifica que el productor creado está presente.
+- Debe actualizar el productor (UPDATE): Actualiza datos del productor y verifica respuesta.
+- Debe verificar que el productor fue actualizado: Consulta productor actualizado y verifica cambios.
+- Debe verificar que existe un log de auditoría para la actualización: Consulta logs y verifica log de actualización.
+- Debe eliminar el productor (DELETE): Elimina el productor y verifica respuesta.
+- Debe verificar que el productor fue eliminado: Consulta productor eliminado y espera 404.
+- Debe verificar que existe un log de auditoría para la eliminación: Consulta logs y verifica log de eliminación.
+
+---
+
+## test/receptions/discountPercent/discountPercent.e2e-spec.ts
+**Suite:** DiscountPercent CRUD + Auditoría (e2e)
+- Debe hacer login y obtener token: Login de admin y obtiene token, además genera código único para descuento de prueba.
+- Debe crear un porcentaje de descuento: Crea un descuento y verifica respuesta.
+- Debe verificar que el porcentaje de descuento fue creado: Consulta el descuento creado por ID y verifica datos.
+- Debe verificar que existe un log de auditoría para la creación: Consulta logs y verifica log de creación.
+- Debe obtener el porcentaje de descuento por ID (READ): Consulta descuento por ID y verifica datos.
+- Debe obtener todos los porcentajes de descuento (READ ALL): Consulta todos los descuentos y verifica que el creado está presente.
+- Debe obtener porcentajes de descuento por código (READ BY CODE): Consulta descuentos por código y verifica datos.
+- Debe actualizar el porcentaje de descuento (UPDATE): Actualiza datos del descuento y verifica respuesta.
+- Debe verificar que el porcentaje de descuento fue actualizado: Consulta descuento actualizado y verifica cambios.
+- Debe verificar que existe un log de auditoría para la actualización: Consulta logs y verifica log de actualización.
+- Debe eliminar el porcentaje de descuento (DELETE): Elimina el descuento y verifica respuesta.
+- Debe verificar que el porcentaje de descuento fue eliminado: Consulta descuento eliminado y espera 404.
+- Debe verificar que existe un log de auditoría para la eliminación: Consulta logs y verifica log de eliminación.
+
+---
+
+## test/receptions/riceType/riceType.e2e-spec.ts
+**Suite:** RiceType CRUD + Auditoría (e2e)
+- Debe hacer login y obtener token: Login de admin y obtiene token, además genera código y nombre únicos para tipo de arroz de prueba.
+- Debe crear un tipo de arroz: Crea un tipo de arroz y verifica respuesta.
+- Debe verificar que el tipo de arroz fue creado: Consulta el tipo de arroz creado por ID y verifica datos.
+- Debe verificar que existe un log de auditoría para la creación: Consulta logs y verifica log de creación.
+- Debe obtener el tipo de arroz por ID (READ): Consulta tipo de arroz por ID y verifica datos.
+- Debe obtener todos los tipos de arroz (READ ALL): Consulta todos los tipos de arroz y verifica que el creado está presente.
+- Debe actualizar el tipo de arroz (UPDATE): Actualiza datos del tipo de arroz y verifica respuesta.
+- Debe verificar que el tipo de arroz fue actualizado: Consulta tipo de arroz actualizado y verifica cambios.
+- Debe verificar que existe un log de auditoría para la actualización: Consulta logs y verifica log de actualización.
+- Debe eliminar el tipo de arroz (DELETE): Elimina el tipo de arroz y verifica respuesta.
+- Debe verificar que el tipo de arroz fue eliminado: Consulta tipo de arroz eliminado y espera 404.
+- Debe verificar que existe un log de auditoría para la eliminación: Consulta logs y verifica log de eliminación.
+
+---
+
+## test/transactions/advance/advance.e2e-spec.ts
+**Suite:** Anticipo + Pago + Auditoría (e2e)
+- Debe hacer login y obtener token: Login de admin y obtiene token.
+- Debe obtener un productor válido: Consulta productores y crea uno si no existe.
+- Debe crear un pago asociado: Crea un pago y verifica respuesta.
+- Debe crear un anticipo asociado al pago: Crea un anticipo y verifica respuesta.
+- Debe verificar que existe un log de auditoría para la creación del anticipo: Consulta logs y verifica log de creación del anticipo.
+
+---
+
+## test/transactions/advances/advance.e2e-spec.ts
+**Suite:** Anticipo + Pago + Auditoría (e2e)
+- Debe hacer login y obtener token: Login de admin y obtiene token.
+- Debe obtener un productor válido: Consulta productores y obtiene uno existente.
+- Debe crear un pago asociado: Crea un pago y verifica respuesta.
+- Debe crear un anticipo asociado al pago: Crea un anticipo y verifica respuesta.
+- Debe verificar que existe un log de auditoría para la creación del anticipo: Consulta logs y verifica log de creación del anticipo.
+
+---
+
+## test/receptions/reception/reception.e2e-spec.ts
+**Suite:** ReceptionController (e2e)
+- /receptions (POST) crea una recepción: Crea productor y tipo de arroz, luego crea una recepción y verifica respuesta.
+
+---
+
+> Fin del reporte detallado de tests e2e.

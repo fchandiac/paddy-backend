@@ -138,9 +138,11 @@ export class AuditInterceptor implements NestInterceptor {
 
       // Extraer ID de la entidad de los parámetros, respuesta o body
       let entityId = null;
-      if (params?.id) {
-        const parsedId = parseInt(params.id);
-        entityId = !isNaN(parsedId) ? parsedId : null;
+      // Prioridad: params.id > response.id > body.id > body.userId > login
+      if (params?.id && typeof params.id === 'string' && !isNaN(Number(params.id))) {
+        entityId = Number(params.id);
+      } else if (params?.id && typeof params.id === 'number') {
+        entityId = params.id;
       } else if (response?.id && typeof response.id === 'number') {
         entityId = response.id;
       } else if (body?.id && typeof body.id === 'number') {
@@ -162,6 +164,20 @@ export class AuditInterceptor implements NestInterceptor {
         // Los valores anteriores deberían obtenerse del servicio antes del update
       } else if (auditData.action === 'LOGIN') {
         // Para login, incluir información detallada del intento
+        let razon = null;
+        if (!success) {
+          if (errorMessage && errorMessage.toLowerCase().includes('wrong password')) {
+            razon = 'Contraseña incorrecta';
+          } else if (errorMessage && errorMessage.toLowerCase().includes('user not found')) {
+            razon = 'Usuario no encontrado';
+          } else if (errorMessage && errorMessage.toLowerCase().includes('contraseña incorrecta')) {
+            razon = 'Contraseña incorrecta';
+          } else if (errorMessage && errorMessage.toLowerCase().includes('usuario no encontrado')) {
+            razon = 'Usuario no encontrado';
+          } else {
+            razon = errorMessage || 'Login fallido';
+          }
+        }
         newValues = {
           email: body?.email || null,
           loginSuccessful: success,
@@ -169,12 +185,13 @@ export class AuditInterceptor implements NestInterceptor {
           timestamp: new Date().toISOString(),
           ipAddress: ip,
           loginResult: success ? 'SUCCESS' : 'FAILED',
-          failureReason: success ? null : (errorMessage || 'Login failed'),
+          failureReason: success ? null : razon,
         };
       }
 
+
       const auditLog = this.auditRepo.create({
-        userId: this.getUserIdForAudit(auditData, user, response, success),
+        userId: (user && user.id) ? user.id : this.getUserIdForAudit(auditData, user, response, success),
         ipAddress: ip && ip !== 'N/A' && ip.trim() !== '' ? ip : null,
         userAgent: userAgent && userAgent !== 'N/A' && userAgent.trim() !== '' ? userAgent : null,
         action: auditData.action,
@@ -240,8 +257,19 @@ export class AuditInterceptor implements NestInterceptor {
       if (success) {
         return `Login exitoso para ${email}`;
       } else {
-        const reason = errorMessage || 'Login fallido';
-        return `Login fallido para ${email}: ${reason}`;
+        let razon = null;
+        if (errorMessage && errorMessage.toLowerCase().includes('wrong password')) {
+          razon = 'Contraseña incorrecta';
+        } else if (errorMessage && errorMessage.toLowerCase().includes('user not found')) {
+          razon = 'Usuario no encontrado';
+        } else if (errorMessage && errorMessage.toLowerCase().includes('contraseña incorrecta')) {
+          razon = 'Contraseña incorrecta';
+        } else if (errorMessage && errorMessage.toLowerCase().includes('usuario no encontrado')) {
+          razon = 'Usuario no encontrado';
+        } else {
+          razon = errorMessage || 'Login fallido';
+        }
+        return `Login fallido para ${email}: ${razon}`;
       }
     }
     

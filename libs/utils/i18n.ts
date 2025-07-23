@@ -6,10 +6,10 @@ const translations: Record<string, string> = {
   'Conflict': 'Conflicto',
   'Bad request': 'Solicitud incorrecta',
   'Not found': 'No encontrado',
-  'Usuario no encontrado': 'User not found',
-  'Contraseña incorrecta': 'Wrong password',
-  'El porcentaje no puede ser mayor que 100': 'El porcentaje no puede ser mayor que 100',
-  // Add more translations as needed
+  'User not found': 'Usuario no encontrado',
+  'Wrong password': 'Contraseña incorrecta',
+  'The percentage cannot be greater than 100': 'El porcentaje no puede ser mayor que 100',
+  // Agrega más traducciones según sea necesario
 };
 
 export function translate(message: string, lang: string = 'es'): string {

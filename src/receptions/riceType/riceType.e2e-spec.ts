@@ -29,12 +29,19 @@ describe('RiceType + Auditoría (e2e)', () => {
     httpServer = app.getHttpServer();
     dataSource = app.get(DataSource);
 
+    // Login admin antes de pedir rice-types
+    const loginRes = await request(httpServer)
+      .post('/auth/sign-in')
+      .send({ email: 'admin@ayg.cl', pass: 'admin' });
+    expect(loginRes.status).toBe(201);
+    adminToken = loginRes.body.access_token || loginRes.body.token || '';
+
     // Obtener los códigos y nombres ya usados
     const res = await request(httpServer)
       .get('/rice-types')
       .set('Authorization', `Bearer ${adminToken}`);
-    usedCodes = (res.body || []).map((rt: any) => rt.code);
-    usedNames = (res.body || []).map((rt: any) => rt.name);
+    usedCodes = Array.isArray(res.body) ? res.body.map((rt: any) => rt.code) : [];
+    usedNames = Array.isArray(res.body) ? res.body.map((rt: any) => rt.name) : [];
 
     // Generar código y nombre únicos
     do {
@@ -47,14 +54,8 @@ describe('RiceType + Auditoría (e2e)', () => {
     await app.close();
   });
 
-  it('Debe hacer login y obtener token', async () => {
-    const res = await request(httpServer)
-      .post('/auth/sign-in')
-      .send({ email: 'admin@ayg.cl', pass: 'admin' });
-    expect(res.status).toBe(201);
-    expect(res.body).toHaveProperty('userId');
-    adminToken = res.body.token || '';
-  });
+
+  // El login ya se hace en beforeAll
 
   it('Debe crear un tipo de arroz', async () => {
     const riceTypeDto = { code: randomRiceCode, name: randomRiceName, description: 'Arroz test', price: 123.45, enable: true };
