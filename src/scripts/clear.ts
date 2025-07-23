@@ -7,7 +7,6 @@ import { RiceType } from '../../libs/entities/rice-type.entity';
 import { DiscountPercent } from '../../libs/entities/discount-percent.entity';
 import { Template } from '../../libs/entities/template.entity';
 import { Reception } from '../../libs/entities/reception.entity';
-import { Record } from '../../libs/entities/record.entity';
 import { Transaction } from '../../libs/entities/transaction.entity';
 import { TransactionReference } from '../../libs/entities/transaction-reference.entity';
 // Import other entities as needed
@@ -22,7 +21,6 @@ async function bootstrap() {
   // Delete child entities first, then parent entities
   const entities = [
     // Start with entities that have fewer dependencies or are at the "end" of a dependency chain
-    Record,
     TransactionReference,
     Transaction,
     Reception,

@@ -11,14 +11,12 @@ import {
   UpdateUserDto,
   UpdatePasswordDto,
 } from 'libs/dto/user.dto';
-import { RecordService } from '../record/record.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
-    private readonly recordService: RecordService, // Inyectar el servicio de registros
   ) {}
 
   // ✅ Método de verificación de salud del servicio

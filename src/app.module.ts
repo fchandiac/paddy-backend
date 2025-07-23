@@ -6,7 +6,6 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from './auth/auth/auth.module';
 import { UserModule } from './auth/user/user.module';
 import { ProducerModule } from './auth/producer/producer.module';
-import { RecordModule } from './auth/record/record.module';
 
 import { ReceptionsModule } from './receptions/reception/receptions.module';
 import { DiscountPercentModule } from './receptions/discountsPercent/discountPercent.module';
@@ -28,7 +27,6 @@ import { DiscountPercent } from '../libs/entities/discount-percent.entity';
 import { Reception } from '../libs/entities/reception.entity';
 import { Transaction } from '../libs/entities/transaction.entity';
 import { TransactionReference } from '../libs/entities/transaction-reference.entity';
-import { Record } from '../libs/entities/record.entity';
 import { AuditLog } from '../libs/entities/audit-log.entity';
 import { Season } from '../libs/entities/season.entity';
 
@@ -52,7 +50,6 @@ import { envs } from 'libs/config';
         Reception,
         Transaction,
         TransactionReference,
-        Record,
         Template,
         AuditLog,
         Season,
@@ -67,7 +64,6 @@ import { envs } from 'libs/config';
     AuthModule,
     UserModule,
     ProducerModule,
-    RecordModule,
 
     ReceptionsModule,
     DiscountPercentModule,
