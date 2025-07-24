@@ -13,7 +13,7 @@ import {
   AddBankAccountDto,
 } from '../../../libs/dto/producer.dto';
 import { TransactionService } from '../../transactions/transaction/transaction.service';
-import { TransactionTypeCode, BankCode, BankName } from '../../../libs/enums';
+import { TransactionTypeCode, BankCode, BankName, AccountTypeCode, AccountTypeName } from '../../../libs/enums';
 import { CreateTransactionDto } from '../../../libs/dto/transaction.dto';
 
 @Injectable()
@@ -65,6 +65,32 @@ export class ProducerService {
   }
 
   /**
+   * Helper para obtener el nombre del tipo de cuenta desde el código
+   */
+  private getAccountTypeNameFromCode(accountTypeCode: number): string {
+    switch (accountTypeCode) {
+      case AccountTypeCode.CUENTA_CORRIENTE:
+        return AccountTypeName.CUENTA_CORRIENTE;
+      case AccountTypeCode.CUENTA_AHORRO:
+        return AccountTypeName.CUENTA_AHORRO;
+      case AccountTypeCode.CUENTA_VISTA:
+        return AccountTypeName.CUENTA_VISTA;
+      case AccountTypeCode.CUENTA_RUT:
+        return AccountTypeName.CUENTA_RUT;
+      case AccountTypeCode.CUENTA_CHEQUERA:
+        return AccountTypeName.CUENTA_CHEQUERA;
+      case AccountTypeCode.LINEA_CREDITO:
+        return AccountTypeName.LINEA_CREDITO;
+      case AccountTypeCode.DEPOSITO_PLAZO:
+        return AccountTypeName.DEPOSITO_PLAZO;
+      case AccountTypeCode.OTRO_TIPO:
+        return AccountTypeName.OTRO_TIPO;
+      default:
+        return AccountTypeName.OTRO_TIPO;
+    }
+  }
+
+  /**
    * Obtiene la lista de bancos disponibles
    */
   getBanksList(): Array<{ code: number; name: string }> {
@@ -84,6 +110,22 @@ export class ProducerService {
       { code: BankCode.BANCO_BICE, name: BankName.BANCO_BICE },
       { code: BankCode.BANCO_PARIS, name: BankName.BANCO_PARIS },
       { code: BankCode.OTRO, name: BankName.OTRO },
+    ];
+  }
+
+  /**
+   * Obtiene la lista de tipos de cuenta disponibles
+   */
+  getAccountTypesList(): Array<{ code: number; name: string }> {
+    return [
+      { code: AccountTypeCode.CUENTA_CORRIENTE, name: AccountTypeName.CUENTA_CORRIENTE },
+      { code: AccountTypeCode.CUENTA_AHORRO, name: AccountTypeName.CUENTA_AHORRO },
+      { code: AccountTypeCode.CUENTA_VISTA, name: AccountTypeName.CUENTA_VISTA },
+      { code: AccountTypeCode.CUENTA_RUT, name: AccountTypeName.CUENTA_RUT },
+      { code: AccountTypeCode.CUENTA_CHEQUERA, name: AccountTypeName.CUENTA_CHEQUERA },
+      { code: AccountTypeCode.LINEA_CREDITO, name: AccountTypeName.LINEA_CREDITO },
+      { code: AccountTypeCode.DEPOSITO_PLAZO, name: AccountTypeName.DEPOSITO_PLAZO },
+      { code: AccountTypeCode.OTRO_TIPO, name: AccountTypeName.OTRO_TIPO },
     ];
   }
 
@@ -123,13 +165,14 @@ export class ProducerService {
       throw new ConflictException(`Ya existe un productor con el RUT ${dto.rut}.`);
     }
   
-    const bankAccounts = dto.bankCode
+    const bankAccounts = dto.bankCode && dto.accountTypeCode
       ? [
           {
             bankCode: dto.bankCode,
             bankName: this.getBankNameFromCode(dto.bankCode),
             accountNumber: dto.accountNumber,
-            accountType: dto.accountType,
+            accountTypeCode: dto.accountTypeCode,
+            accountTypeName: this.getAccountTypeNameFromCode(dto.accountTypeCode),
             holderName: dto.holderName ?? dto.name, // por defecto usamos el nombre del productor
           },
         ]
@@ -160,7 +203,8 @@ export class ProducerService {
       bankCode: dto.bankCode,
       bankName: this.getBankNameFromCode(dto.bankCode),
       accountNumber: dto.accountNumber,
-      accountType: dto.accountType,
+      accountTypeCode: dto.accountTypeCode,
+      accountTypeName: this.getAccountTypeNameFromCode(dto.accountTypeCode),
       holderName: dto.holderName,
     };
   

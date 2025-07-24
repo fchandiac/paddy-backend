@@ -41,6 +41,11 @@ export class ProducerController {
     return this.producerService.getBanksList();
   }
 
+  @Get('account-types')
+  async getAccountTypesList(): Promise<Array<{ code: number; name: string }>> {
+    return this.producerService.getAccountTypesList();
+  }
+
   @Get()
   @AuditUserQuery('VIEW', 'PRODUCER', 'Consulta de productores por usuario')
   async findAll(): Promise<Producer[]> {

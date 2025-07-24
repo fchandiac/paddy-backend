@@ -34,11 +34,12 @@ export class Producer {
 
   @Column({ type: 'json', nullable: true })
   bankAccounts?: {
-    bankCode: number;       // Código del banco (100, 101, etc.)
-    bankName: string;       // Nombre del banco
-    accountNumber: string;  // Número de cuenta
-    accountType: string;    // Tipo de cuenta (corriente, ahorro, etc.)
-    holderName?: string;    // Nombre del titular (opcional)
+    bankCode: number;           // Código del banco (100, 101, etc.)
+    bankName: string;           // Nombre del banco
+    accountNumber: string;      // Número de cuenta
+    accountTypeCode: number;    // Código del tipo de cuenta (101, 102, etc.)
+    accountTypeName: string;    // Nombre del tipo de cuenta
+    holderName?: string;        // Nombre del titular (opcional)
   }[];
 
   @OneToMany(() => Transaction, (trx) => trx.producer)

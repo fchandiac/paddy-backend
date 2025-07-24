@@ -91,6 +91,43 @@ export enum BankName {
   OTRO = 'Otro',
 }
 
+/**
+ * Códigos y tipos de cuentas bancarias
+ * 
+ * Código  | Tipo                   | Descripción
+ * --------|------------------------|------------------------------------------
+ * 101     | CUENTA_CORRIENTE       | Cuenta Corriente
+ * 102     | CUENTA_AHORRO          | Cuenta de Ahorro
+ * 103     | CUENTA_VISTA           | Cuenta Vista
+ * 104     | CUENTA_RUT             | Cuenta RUT
+ * 105     | CUENTA_CHEQUERA        | Cuenta Chequera Electrónica
+ * 106     | LINEA_CREDITO          | Línea de Crédito
+ * 107     | DEPOSITO_PLAZO         | Depósito a Plazo
+ * 199     | OTRO_TIPO              | Otro tipo de cuenta
+ */
+
+export enum AccountTypeCode {
+  CUENTA_CORRIENTE = 101,
+  CUENTA_AHORRO = 102,
+  CUENTA_VISTA = 103,
+  CUENTA_RUT = 104,
+  CUENTA_CHEQUERA = 105,
+  LINEA_CREDITO = 106,
+  DEPOSITO_PLAZO = 107,
+  OTRO_TIPO = 199,
+}
+
+export enum AccountTypeName {
+  CUENTA_CORRIENTE = 'Cuenta Corriente',
+  CUENTA_AHORRO = 'Cuenta de Ahorro',
+  CUENTA_VISTA = 'Cuenta Vista',
+  CUENTA_RUT = 'Cuenta RUT',
+  CUENTA_CHEQUERA = 'Cuenta Chequera Electrónica',
+  LINEA_CREDITO = 'Línea de Crédito',
+  DEPOSITO_PLAZO = 'Depósito a Plazo',
+  OTRO_TIPO = 'Otro',
+}
+
 // Humedad
 // Granos verdes
 // Impurezas

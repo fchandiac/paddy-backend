@@ -6,7 +6,7 @@ import {
   IsEnum,
   IsNumber,
 } from 'class-validator';
-import { BankCode } from '../enums';
+import { BankCode, AccountTypeCode } from '../enums';
 
 export class CreateProducerDto {
   @IsString()
@@ -107,8 +107,10 @@ export class CreateProducerWithBankDto {
   accountNumber?: string;
 
   @IsOptional()
-  @IsString()
-  accountType?: string;
+  @IsEnum(AccountTypeCode, {
+    message: 'El código de tipo de cuenta debe ser uno de los valores válidos',
+  })
+  accountTypeCode?: number;
 
   @IsOptional()
   @IsString()
@@ -125,9 +127,10 @@ export class AddBankAccountDto {
   @IsNotEmpty()
   accountNumber: string;
 
-  @IsString()
-  @IsNotEmpty()
-  accountType: string;
+  @IsEnum(AccountTypeCode, {
+    message: 'El código de tipo de cuenta debe ser uno de los valores válidos',
+  })
+  accountTypeCode: number;
 
   @IsString()
   @IsNotEmpty()
