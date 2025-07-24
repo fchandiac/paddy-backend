@@ -10,9 +10,10 @@ import {
   CreateProducerDto,
   CreateProducerWithBankDto,
   UpdateProducerDto,
+  AddBankAccountDto,
 } from '../../../libs/dto/producer.dto';
 import { TransactionService } from '../../transactions/transaction/transaction.service';
-import { TransactionTypeCode } from '../../../libs/enums';
+import { TransactionTypeCode, BankCode, BankName } from '../../../libs/enums';
 import { CreateTransactionDto } from '../../../libs/dto/transaction.dto';
 
 @Injectable()
@@ -22,6 +23,69 @@ export class ProducerService {
     private readonly producerRepo: Repository<Producer>,
     private readonly transactionService: TransactionService,
   ) {}
+
+  /**
+   * Helper para obtener el nombre del banco desde el código
+   */
+  private getBankNameFromCode(bankCode: number): string {
+    switch (bankCode) {
+      case BankCode.BANCO_CHILE:
+        return BankName.BANCO_CHILE;
+      case BankCode.BANCO_ESTADO:
+        return BankName.BANCO_ESTADO;
+      case BankCode.BANCO_SANTANDER:
+        return BankName.BANCO_SANTANDER;
+      case BankCode.BANCO_BCI:
+        return BankName.BANCO_BCI;
+      case BankCode.BANCO_FALABELLA:
+        return BankName.BANCO_FALABELLA;
+      case BankCode.BANCO_SECURITY:
+        return BankName.BANCO_SECURITY;
+      case BankCode.BANCO_CREDICHILE:
+        return BankName.BANCO_CREDICHILE;
+      case BankCode.BANCO_ITAU:
+        return BankName.BANCO_ITAU;
+      case BankCode.BANCO_SCOTIABANK:
+        return BankName.BANCO_SCOTIABANK;
+      case BankCode.BANCO_CONSORCIO:
+        return BankName.BANCO_CONSORCIO;
+      case BankCode.BANCO_RIPLEY:
+        return BankName.BANCO_RIPLEY;
+      case BankCode.BANCO_INTERNACIONAL:
+        return BankName.BANCO_INTERNACIONAL;
+      case BankCode.BANCO_BICE:
+        return BankName.BANCO_BICE;
+      case BankCode.BANCO_PARIS:
+        return BankName.BANCO_PARIS;
+      case BankCode.OTRO:
+        return BankName.OTRO;
+      default:
+        return BankName.OTRO;
+    }
+  }
+
+  /**
+   * Obtiene la lista de bancos disponibles
+   */
+  getBanksList(): Array<{ code: number; name: string }> {
+    return [
+      { code: BankCode.BANCO_CHILE, name: BankName.BANCO_CHILE },
+      { code: BankCode.BANCO_ESTADO, name: BankName.BANCO_ESTADO },
+      { code: BankCode.BANCO_SANTANDER, name: BankName.BANCO_SANTANDER },
+      { code: BankCode.BANCO_BCI, name: BankName.BANCO_BCI },
+      { code: BankCode.BANCO_FALABELLA, name: BankName.BANCO_FALABELLA },
+      { code: BankCode.BANCO_SECURITY, name: BankName.BANCO_SECURITY },
+      { code: BankCode.BANCO_CREDICHILE, name: BankName.BANCO_CREDICHILE },
+      { code: BankCode.BANCO_ITAU, name: BankName.BANCO_ITAU },
+      { code: BankCode.BANCO_SCOTIABANK, name: BankName.BANCO_SCOTIABANK },
+      { code: BankCode.BANCO_CONSORCIO, name: BankName.BANCO_CONSORCIO },
+      { code: BankCode.BANCO_RIPLEY, name: BankName.BANCO_RIPLEY },
+      { code: BankCode.BANCO_INTERNACIONAL, name: BankName.BANCO_INTERNACIONAL },
+      { code: BankCode.BANCO_BICE, name: BankName.BANCO_BICE },
+      { code: BankCode.BANCO_PARIS, name: BankName.BANCO_PARIS },
+      { code: BankCode.OTRO, name: BankName.OTRO },
+    ];
+  }
 
   async health(): Promise<string> {
     return 'ProducerService is healthy ✅';
@@ -59,10 +123,11 @@ export class ProducerService {
       throw new ConflictException(`Ya existe un productor con el RUT ${dto.rut}.`);
     }
   
-    const bankAccounts = dto.bank
+    const bankAccounts = dto.bankCode
       ? [
           {
-            bank: dto.bank,
+            bankCode: dto.bankCode,
+            bankName: this.getBankNameFromCode(dto.bankCode),
             accountNumber: dto.accountNumber,
             accountType: dto.accountType,
             holderName: dto.holderName ?? dto.name, // por defecto usamos el nombre del productor
@@ -81,12 +146,7 @@ export class ProducerService {
 
   async addBankAccount(
     producerId: number,
-    account: {
-      bank: string;
-      accountNumber: string;
-      accountType: string;
-      holderName?: string;
-    }
+    dto: AddBankAccountDto
   ): Promise<Producer> {
     const producer = await this.producerRepo.findOne({ where: { id: producerId } });
   
@@ -96,7 +156,15 @@ export class ProducerService {
   
     const existingAccounts = producer.bankAccounts || [];
   
-    const updatedAccounts = [...existingAccounts, account];
+    const newAccount = {
+      bankCode: dto.bankCode,
+      bankName: this.getBankNameFromCode(dto.bankCode),
+      accountNumber: dto.accountNumber,
+      accountType: dto.accountType,
+      holderName: dto.holderName,
+    };
+  
+    const updatedAccounts = [...existingAccounts, newAccount];
   
     producer.bankAccounts = updatedAccounts;
   

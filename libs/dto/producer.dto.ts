@@ -3,7 +3,10 @@ import {
   IsNotEmpty,
   IsOptional,
   Matches,
+  IsEnum,
+  IsNumber,
 } from 'class-validator';
+import { BankCode } from '../enums';
 
 export class CreateProducerDto {
   @IsString()
@@ -94,8 +97,10 @@ export class CreateProducerWithBankDto {
   phone?: string;
 
   @IsOptional()
-  @IsString()
-  bank?: string;
+  @IsEnum(BankCode, {
+    message: 'El código de banco debe ser uno de los valores válidos',
+  })
+  bankCode?: number;
 
   @IsOptional()
   @IsString()
@@ -111,9 +116,10 @@ export class CreateProducerWithBankDto {
 }
 
 export class AddBankAccountDto {
-  @IsString()
-  @IsNotEmpty()
-  bank: string;
+  @IsEnum(BankCode, {
+    message: 'El código de banco debe ser uno de los valores válidos',
+  })
+  bankCode: number;
 
   @IsString()
   @IsNotEmpty()
