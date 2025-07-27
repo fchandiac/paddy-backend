@@ -10,6 +10,7 @@ describe('Producer CRUD + Auditoría (e2e)', () => {
   let dataSource: DataSource;
   let adminToken: string;
   let createdProducerId: number;
+  let createdProducerWithBankId: number;
   let createdProducer: any;
   let randomRut: string;
   let randomName: string;
@@ -216,6 +217,111 @@ describe('Producer CRUD + Auditoría (e2e)', () => {
     expect(logNewValues.phone).toBe('+56987654321');
   });
 
+  // ===== BANK ACCOUNT TESTS =====
+  it('Debe obtener la lista de bancos disponibles', async () => {
+    const res = await request(httpServer)
+      .get('/producers/banks')
+      .set('Authorization', `Bearer ${adminToken}`);
+    
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body.length).toBeGreaterThan(0);
+    
+    // Verificar estructura de cada banco
+    const bank = res.body[0];
+    expect(bank).toHaveProperty('code');
+    expect(bank).toHaveProperty('name');
+    expect(typeof bank.code).toBe('number');
+    expect(typeof bank.name).toBe('string');
+  });
+
+  it('Debe obtener la lista de tipos de cuenta disponibles', async () => {
+    const res = await request(httpServer)
+      .get('/producers/account-types')
+      .set('Authorization', `Bearer ${adminToken}`);
+    
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body.length).toBeGreaterThan(0);
+    
+    // Verificar estructura de cada tipo de cuenta
+    const accountType = res.body[0];
+    expect(accountType).toHaveProperty('code');
+    expect(accountType).toHaveProperty('name');
+    expect(typeof accountType.code).toBe('number');
+    expect(typeof accountType.name).toBe('string');
+  });
+
+  it('Debe crear un productor con cuenta bancaria', async () => {
+    const createProducerWithBankDto = {
+      name: `${randomName}_WITH_BANK`,
+      businessName: `${randomName}_WITH_BANK SpA`,
+      rut: `${randomRut.slice(0, -1)}0`, // Cambiar último dígito para evitar duplicados
+      address: 'Dirección con Banco 123',
+      phone: '+56900000000',
+      bankCode: 100, // Banco de Chile
+      accountNumber: '123456789',
+      accountTypeCode: 101, // Cuenta Corriente
+      holderName: `${randomName}_WITH_BANK`
+    };
+
+    const res = await request(httpServer)
+      .post('/producers/with-bank')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send(createProducerWithBankDto);
+
+    if (res.status !== 201) {
+      console.error('Error al crear productor con banco:', res.body);
+    }
+    expect(res.status).toBe(201);
+    expect(res.body.id).toBeDefined();
+    expect(res.body.name).toBe(createProducerWithBankDto.name);
+    expect(res.body.bankAccounts).toBeDefined();
+    expect(Array.isArray(res.body.bankAccounts)).toBe(true);
+    expect(res.body.bankAccounts.length).toBe(1);
+    
+    const bankAccount = res.body.bankAccounts[0];
+    expect(bankAccount.bankCode).toBe(100);
+    expect(bankAccount.bankName).toBe('Banco de Chile');
+    expect(bankAccount.accountTypeCode).toBe(101);
+    expect(bankAccount.accountTypeName).toBe('Cuenta Corriente');
+    expect(bankAccount.accountNumber).toBe('123456789');
+    expect(bankAccount.holderName).toBe(createProducerWithBankDto.holderName);
+
+    // Guardar ID para uso posterior
+    createdProducerWithBankId = res.body.id;
+  });
+
+  it('Debe agregar una cuenta bancaria adicional al productor', async () => {
+    const addBankAccountDto = {
+      bankCode: 102, // Banco Santander
+      accountNumber: '987654321',
+      accountTypeCode: 102, // Cuenta de Ahorro
+      holderName: 'Titular Adicional'
+    };
+
+    const res = await request(httpServer)
+      .patch(`/producers/${createdProducerId}/add-bank-account`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send(addBankAccountDto);
+
+    if (res.status !== 200) {
+      console.error('Error al agregar cuenta bancaria:', res.body);
+    }
+    expect(res.status).toBe(200);
+    expect(res.body.bankAccounts).toBeDefined();
+    expect(Array.isArray(res.body.bankAccounts)).toBe(true);
+    expect(res.body.bankAccounts.length).toBe(1);
+    
+    const bankAccount = res.body.bankAccounts[0];
+    expect(bankAccount.bankCode).toBe(102);
+    expect(bankAccount.bankName).toBe('Banco Santander Chile');
+    expect(bankAccount.accountTypeCode).toBe(102);
+    expect(bankAccount.accountTypeName).toBe('Cuenta de Ahorro');
+    expect(bankAccount.accountNumber).toBe('987654321');
+    expect(bankAccount.holderName).toBe('Titular Adicional');
+  });
+
   // ===== DELETE TESTS =====
   it('Debe eliminar el productor (DELETE)', async () => {
     const res = await request(httpServer)
@@ -224,6 +330,17 @@ describe('Producer CRUD + Auditoría (e2e)', () => {
     
     if (res.status !== 200) {
       console.error('Error al eliminar productor:', res.body);
+    }
+    expect(res.status).toBe(200);
+  });
+
+  it('Debe eliminar el productor con banco (DELETE)', async () => {
+    const res = await request(httpServer)
+      .delete(`/producers/${createdProducerWithBankId}`)
+      .set('Authorization', `Bearer ${adminToken}`);
+    
+    if (res.status !== 200) {
+      console.error('Error al eliminar productor con banco:', res.body);
     }
     expect(res.status).toBe(200);
   });
