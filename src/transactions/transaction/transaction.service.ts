@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Transaction } from 'libs/entities/transaction.entity';
 import { User } from 'libs/entities/user.entity';
 import { Producer } from 'libs/entities/producer.entity';
+import { Season } from 'libs/entities/season.entity';
 import { CreateTransactionDto, FilterTransactionDto } from 'libs/dto/transaction.dto';
 import { CreateDiscountTransactionDto } from 'libs/dto/discount-transaction.dto';
 import { TransactionTypeCode } from 'libs/enums';
@@ -45,16 +46,14 @@ export class TransactionService {
     }
 
     const trx = this.transactionRepo.create({
-      user,
-      producer,
       typeCode: TransactionTypeCode.DISCOUNT,
-      debit: dto.debit,
-      credit: dto.credit,
-      description: dto.description,
-      previousBalance: dto.previousBalance,
-      balance: dto.balance,
-      isDraft: dto.isDraft || false,
-      details: dto.details,
+      producer,
+      producerId: dto.producerId,
+      user,
+      userId: dto.userId,
+      amount: dto.details.discountAmount,
+      notes: dto.notes,
+      metadata: dto.details,
     });
     return this.transactionRepo.save(trx);
   }
@@ -67,6 +66,8 @@ export class TransactionService {
 
     @InjectRepository(Producer)
     private readonly producerRepo: Repository<Producer>,
+    @InjectRepository(Season)
+    private readonly seasonRepo: Repository<Season>,
   ) {}
 
   async health() {
@@ -79,8 +80,7 @@ export class TransactionService {
     if (filter?.userId) query.andWhere('transaction.userId = :userId', { userId: filter.userId });
     if (filter?.producerId) query.andWhere('transaction.producerId = :producerId', { producerId: filter.producerId });
     if (filter?.typeCode) query.andWhere('transaction.typeCode = :typeCode', { typeCode: filter.typeCode });
-    if (filter?.description) query.andWhere('transaction.description ILIKE :description', { description: `%${filter.description}%` });
-
+    if (filter?.notes) query.andWhere('transaction.notes LIKE :notes', { notes: `%${filter.notes}%` });
     return query.orderBy('transaction.createdAt', 'DESC').getMany();
   }
 
@@ -97,31 +97,21 @@ export class TransactionService {
     const producer = await this.producerRepo.findOne({ where: { id: dto.producerId } });
     if (!producer) throw new NotFoundException(`Productor con ID ${dto.producerId} no encontrado.`);
 
-    let lastTransaction: Transaction | null = null;
-    if (dto.lastTransaction) {
-      lastTransaction = await this.transactionRepo.findOne({ where: { id: dto.lastTransaction } });
-      if (!lastTransaction) throw new NotFoundException(`Transacción anterior con ID ${dto.lastTransaction} no encontrada.`);
-    }
-
-    // Validar que la estructura de details sea coherente con el tipo de transacción
-    if (dto.details) {
-      this.validateTransactionDetails(dto.typeCode, dto.details);
-    }
+    const season = dto.seasonId ? await this.seasonRepo?.findOne({ where: { id: dto.seasonId } }) : null;
 
     const trx = this.transactionRepo.create({
-      user,
-      producer,
       typeCode: dto.typeCode,
-      debit: dto.debit,
-      credit: dto.credit,
-      description: dto.description,
-      previousBalance: dto.previousBalance,
-      balance: dto.balance,
-      lastTransaction: lastTransaction || null,
-      isDraft: dto.isDraft || false,
-      details: dto.details || {},
+      producer,
+      producerId: dto.producerId,
+      user,
+      userId: dto.userId,
+      season: season || null,
+      seasonId: dto.seasonId,
+      amount: dto.amount,
+      date: dto.date,
+      notes: dto.notes,
+      metadata: dto.metadata,
     });
-
     return this.transactionRepo.save(trx);
   }
 

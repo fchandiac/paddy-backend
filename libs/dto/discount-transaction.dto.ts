@@ -8,23 +8,9 @@ export class CreateDiscountTransactionDto {
   @IsNumber()
   producerId: number;
 
-  @IsNumber()
-  debit: number;
-
-  @IsNumber()
-  credit: number;
-
-  @IsString()
-  description: string;
-
-  @IsNumber()
-  previousBalance: number;
-
-  @IsNumber()
-  balance: number;
-
   @IsOptional()
-  isDraft?: boolean;
+  @IsString()
+  notes?: string;
 
   @IsObject()
   details: {
