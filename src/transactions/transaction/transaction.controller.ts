@@ -71,12 +71,5 @@ export class TransactionController {
     return this.transactionService.findAllByProducer(producerId);
   }
 
-  // Crear un anticipo (ADVANCE) con auditoría específica
-  @Post('advance')
-  @Audit('CREATE', 'TRANSACTION', 'Crear anticipo')
-  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
-  async createAdvance(@Body() dto: CreateTransactionDto): Promise<Transaction> {
-    dto.typeCode = TransactionTypeCode.ADVANCE;
-    return this.transactionService.create(dto);
-  }
+  // El endpoint de anticipo se puede eliminar, ya que la lógica se unifica en el endpoint general
 }

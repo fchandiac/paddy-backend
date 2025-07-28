@@ -45,78 +45,43 @@ import { TransactionTypeCode } from 'libs/enums';
    */
 @Entity()
 export class Transaction {
+
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, { eager: false })
-  user: User;
 
-  @ManyToOne(() => Season, { nullable: true })
-  season: Season;
+  @Column()
+  typeCode: number;
 
   @ManyToOne(() => Producer, { eager: false })
   producer: Producer;
-
-  @Column({
-    type: 'enum',
-    enum: TransactionTypeCode,
-  })
-  typeCode: TransactionTypeCode;
-
-  @Column('decimal')
-  debit: number;
-
-  @Column('decimal')
-  credit: number;
-
   @Column()
-  description: string;
+  producerId: number;
+
+  @ManyToOne(() => Season, { nullable: true })
+  season: Season;
+  @Column({ nullable: true })
+  seasonId: number;
+
+  @ManyToOne(() => User, { eager: false })
+  user: User;
+  @Column()
+  userId: number;
 
   @Column('decimal')
-  previousBalance: number;
+  amount: number;
 
-  @Column('decimal')
-  balance: number;
-
-  @ManyToOne(() => Transaction, { nullable: true })
-  lastTransaction: Transaction;
-
-  @Column({ default: false })
-  isDraft: boolean;
+  @Column({ type: 'date' })
+  date: string;
 
   @Column({ type: 'varchar', nullable: true })
-  bank?: string;
+  notes?: string;
 
-  @Column({ type: 'varchar', nullable: true })
-  accountNumber?: string;
-
-  @Column({ type: 'varchar', nullable: true })
-  accountType?: string;
-
-  @Column({ type: 'varchar', nullable: true })
-  document?: string;
-
-  @Column({ type: 'date', nullable: true })
-  documentDate?: Date;
-
-  @Column({ type: 'varchar', nullable: true })
-  paymentType?: string;
-
-  /**
-   * Campo para almacenar detalles específicos según el tipo de transacción (ADVANCE, SETTLEMENT, DRYING, INTEREST, etc.)
-   * Este campo permite tener flexibilidad para guardar información particular de cada tipo sin crear múltiples tablas.
-   * 
-   * Ejemplos de contenido:
-   * - Para ADVANCE (Anticipo): { receptions: [1, 2, 3], advanceRate: 0.7, ... }
-   * - Para DRYING (Secado): { weight: 1000, moisturePercentage: 15.3, dryingRate: 0.05, ... }
-   * - Para INTEREST (Interés): { rate: 0.12, days: 30, baseAmount: 1000000, ... }
-   */
   @Column({ type: 'json', nullable: true })
-  details?: any;
+  metadata?: any;
 
   @CreateDateColumn()
   createdAt: Date;
-
 
   @UpdateDateColumn()
   updatedAt: Date;

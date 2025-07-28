@@ -3,77 +3,53 @@ import { Type } from 'class-transformer';
 import { TransactionTypeCode } from 'libs/enums';
 
 export class CreateTransactionDto {
-  @IsOptional()
   @IsNumber()
-  seasonId?: number;
+  typeCode: number;
+
   @IsNumber()
-  @Type(() => Number)
+  producerId: number;
+
+  @IsNumber()
+  seasonId: number;
+
+  @IsNumber()
   userId: number;
 
   @IsNumber()
-  @Type(() => Number)
-  producerId: number;
-
-  @IsEnum(TransactionTypeCode)
-  typeCode: TransactionTypeCode;
-
-  @IsNumber()
-  @Type(() => Number)
-  debit: number;
-
-  @IsNumber()
-  @Type(() => Number)
-  credit: number;
+  amount: number;
 
   @IsString()
-  description: string;
+  date: string;
 
   @IsOptional()
-  @IsNumber()
-  @Type(() => Number)
-  lastTransaction?: number;
+  @IsString()
+  notes?: string;
 
-  @IsNumber()
-  @Type(() => Number)
-  previousBalance: number;
-
-  @IsNumber()
-  @Type(() => Number)
-  balance: number;
-
-  @IsOptional()
-  isDraft?: boolean;
-  
-  /**
-   * Detalles específicos según el tipo de transacción
-   * El contenido variará dependiendo del valor de typeCode
-   */
   @IsOptional()
   @IsObject()
-  details?: any;
+  metadata?: any;
 }
 
 export class FilterTransactionDto {
   @IsOptional()
   @IsNumber()
   seasonId?: number;
+
   @IsOptional()
   @IsNumber()
-  @Type(() => Number)
   userId?: number;
 
   @IsOptional()
   @IsNumber()
-  @Type(() => Number)
   producerId?: number;
 
   @IsOptional()
-  @IsEnum(TransactionTypeCode)
-  typeCode?: TransactionTypeCode;
+  @IsNumber()
+  typeCode?: number;
 
   @IsOptional()
   @IsString()
-  description?: string;
+  notes?: string;
 }
 
 export class TransactionIdDto {
