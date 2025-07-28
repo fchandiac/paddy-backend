@@ -1,3 +1,12 @@
+export enum ConceptPayment {
+  RECEPTION = 1, // Payment for reception
+  ADVANCE = 2,   // Payment for advance
+}
+export enum PaymentType {
+  EFECTIVO = 'EFECTIVO',
+  TRANSFERENCIA = 'TRANSFERENCIA',
+  CHEQUE = 'CHEQUE',
+}
 /**
  * Códigos y tipos de transacciones del sistema
  * 
