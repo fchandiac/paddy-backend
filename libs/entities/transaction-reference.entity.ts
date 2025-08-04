@@ -27,9 +27,6 @@ export class TransactionReference {
   transactionCode: string; // Ej: "liquidación", "nota de crédito", "nota de débito"
 
   // Relación: referencia al productor involucrado
-  @ManyToOne(() => Producer, { eager: true })
-  @Type(() => Producer)
-  producer: Producer;
 
   @Column()
   parentId: number; // ID de la transacción principal

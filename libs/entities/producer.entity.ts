@@ -45,7 +45,7 @@ export class Producer {
   @OneToMany(() => Transaction, (trx) => trx.producer)
   transactions: Transaction[];
 
-  @OneToMany(() => TransactionReference, (ref) => ref.producer)
+  @OneToMany(() => TransactionReference, (ref) => undefined)
   transactionReferences: TransactionReference[];
 
   @OneToMany(() => Template, (template) => template.producer)
