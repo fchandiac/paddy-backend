@@ -68,7 +68,7 @@ export class Transaction {
   @Column()
   userId: number;
 
-  @Column('decimal')
+  @Column('int')
   amount: number;
 
   @Column({ type: 'date' })

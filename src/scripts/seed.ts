@@ -403,9 +403,11 @@ async function bootstrap() {
         phone: producerData.phone,
         bankAccounts: [
           {
-            bank: producerData.bank,
-            accountNumber: (Math.floor(Math.random() * 9000000000) + 1000000000).toString(), // Random 10-digit account as string
-            accountType: Math.random() > 0.5 ? 'Cuenta Corriente' : 'Cuenta Vista',
+            bankCode: 103, // ejemplo: BCI
+            bankName: producerData.bank,
+            accountNumber: (Math.floor(Math.random() * 9000000000) + 1000000000).toString(),
+            accountTypeCode: 101, // ejemplo: Cuenta Corriente
+            accountTypeName: Math.random() > 0.5 ? 'Cuenta Corriente' : 'Cuenta Vista',
             holderName: producerData.businessName,
           },
         ],

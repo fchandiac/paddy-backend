@@ -1,3 +1,4 @@
+import { Season } from '../../../libs/entities/season.entity';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm'; // ✅ agregar esto
 import { Transaction } from '../../../libs/entities/transaction.entity'; // ✅ corrige la ruta si estás dentro de src/transactions/transaction/
@@ -12,7 +13,7 @@ import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Transaction, User, Producer]), // ✅ este es el fix real
+    TypeOrmModule.forFeature([Transaction, User, Producer, Season]),
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'supersecret',
       signOptions: { expiresIn: '1d' },

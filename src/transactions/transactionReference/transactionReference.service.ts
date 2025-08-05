@@ -58,7 +58,6 @@ export class TransactionReferenceService {
     // Crear y guardar la referencia
     const reference = this.refRepo.create({
       transactionCode,
-      producer,
       parentId,
       childId,
       parentType,
@@ -93,8 +92,16 @@ export class TransactionReferenceService {
    * @returns Lista de referencias
    */
   async findByProducer(producerId: number): Promise<TransactionReference[]> {
+    // Buscar todas las transacciones del productor
+    const transactions = await this.transactionRepo.find({ where: { producerId } });
+    const transactionIds = transactions.map(t => t.id);
+    // Buscar referencias donde el parentId o childId esté en los IDs de transacciones del productor
+    const { In } = require('typeorm');
     return this.refRepo.find({
-      where: { producer: { id: producerId } },
+      where: [
+        { parentId: In(transactionIds) },
+        { childId: In(transactionIds) }
+      ],
       order: { createdAt: 'DESC' },
     });
   }

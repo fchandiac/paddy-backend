@@ -1,109 +1,141 @@
-id
 
-typeCode: Tipo de transacción según el enum numérico.
+---
+Enums del sistema
 
-producerId, seasonId, userId: Referencias por identificador.
+ConceptPayment:
+  RECEPTION = 1 // Payment for reception
+  ADVANCE = 2   // Payment for advance
 
-amount: Monto de la transacción.
+PaymentType:
+  EFECTIVO = 'EFECTIVO'
+  TRANSFERENCIA = 'TRANSFERENCIA'
+  CHEQUE = 'CHEQUE'
 
-date: Fecha en formato YYYY-MM-DD.
+TransactionTypeCode:
+  ADVANCE = 1
+  PAYMENT = 2
+  DISCOUNT = 3
+  SETTLEMENT = 4
 
-notes: Notas o descripción opcional.
+TransactionType:
+  ADVANCE = 'Anticipo'
+  PAYMENT = 'Pago'
+  DISCOUNT = 'Descuento'
+  SETTLEMENT = 'Liquidación'
 
-createdAt, updatedAt, deletedAt,
+BankCode:
+  BANCO_CHILE = 100
+  BANCO_ESTADO = 101
+  BANCO_SANTANDER = 102
+  BANCO_BCI = 103
+  BANCO_FALABELLA = 104
+  BANCO_SECURITY = 105
+  BANCO_CREDICHILE = 106
+  BANCO_ITAU = 107
+  BANCO_SCOTIABANK = 108
+  BANCO_CONSORCIO = 109
+  BANCO_RIPLEY = 110
+  BANCO_INTERNACIONAL = 111
+  BANCO_BICE = 112
+  BANCO_PARIS = 113
+  OTRO = 999
 
-metadata: Payload JSON específico.
+BankName:
+  BANCO_CHILE = 'Banco de Chile'
+  BANCO_ESTADO = 'Banco del Estado de Chile'
+  BANCO_SANTANDER = 'Banco Santander Chile'
+  BANCO_BCI = 'Banco de Crédito e Inversiones'
+  BANCO_FALABELLA = 'Banco Falabella'
+  BANCO_SECURITY = 'Banco Security'
+  BANCO_CREDICHILE = 'Banco CrediChile'
+  BANCO_ITAU = 'Banco Itaú Corpbanca'
+  BANCO_SCOTIABANK = 'Scotiabank Chile'
+  BANCO_CONSORCIO = 'Banco Consorcio'
+  BANCO_RIPLEY = 'Banco Ripley'
+  BANCO_INTERNACIONAL = 'Banco Internacional'
+  BANCO_BICE = 'Banco BICE'
+  BANCO_PARIS = 'Banco Paris'
+  OTRO = 'Otro'
 
-versionHistory: Historial de versiones previas.
+AccountTypeCode:
+  CUENTA_CORRIENTE = 101
+  CUENTA_AHORRO = 102
+  CUENTA_VISTA = 103
+  CUENTA_RUT = 104
+  CUENTA_CHEQUERA = 105
+  LINEA_CREDITO = 106
+  DEPOSITO_PLAZO = 107
+  OTRO_TIPO = 199
 
-1. Transacción: ADV-001 (ADVANCE)
+AccountTypeName:
+  CUENTA_CORRIENTE = 'Cuenta Corriente'
+  CUENTA_AHORRO = 'Cuenta de Ahorro'
+  CUENTA_VISTA = 'Cuenta Vista'
+  CUENTA_RUT = 'Cuenta RUT'
+  CUENTA_CHEQUERA = 'Cuenta Chequera Electrónica'
+  LINEA_CREDITO = 'Línea de Crédito'
+  DEPOSITO_PLAZO = 'Depósito a Plazo'
+  OTRO_TIPO = 'Otro'
+---
 
+---
+Estructura Transaction
 {
-  "id": "ADV-001",
-  "type": "ADVANCE",
-  "producer_id": "prod-001",
-  "season_id": "season-2025",
+  "id": 1,
+  "typeCode": 1,
+  "producerId": 123,
+  "seasonId": 2025,
+  "userId": 10,
   "amount": 5000,
-  "date": "2025-06-01",
-  "notes": "Anticipo otorgado con interés",
-  "created_at": "2025-06-01T10:00:00Z",
-  "updated_at": "2025-07-20T08:00:00Z",
-  "user_id": "admin",
-   metadata: JsonObject;  {
-    "hasInterest": true,
-    "interest": {
-      "rate": 0.12,
-      "days": 60,
-      "baseAmount": 5000,
-      "interestAmount": 100,
-      "discounted": true
-    }
-   versionHistory: JsonObject[];
+  "date": "2025-08-04",
+  "notes": "Anticipo otorgado",
+  "metadata": { /* ver Advance abajo */ },
+  "createdAt": "2025-08-04T10:00:00Z",
+  "updatedAt": "2025-08-04T12:00:00Z",
+  "deletedAt": null
+}
 
-  }
-}
-💸 2. Transacción: PAY-001 (PAYMENT)
-json
-Copiar
-Editar
+Estructura TransactionReference
 {
-  "id": "PAY-001",
-  "type": "PAYMENT",
-  "producer_id": "prod-001",
-  "season_id": "season-2025",
-  "amount": 5000,
-  "date": "2025-06-01",
-  "notes": "Pago por anticipo ADV-001",
-  "created_at": "2025-06-01T11:00:00Z",
-  "updated_at": "2025-07-20T08:00:00Z",
-  "user_id": "admin"
-}
-🔻 3. Transacción: DISC-001 (DISCOUNT por interés)
-json
-Copiar
-Editar
-{
-  "id": "DISC-001",
-  "type": "DISCOUNT",
-  "producer_id": "prod-001",
-  "season_id": "season-2025",
-  "amount": 100,
-  "date": "2025-07-20",
-  "notes": "Interés aplicado al anticipo ADV-001",
-  "created_at": "2025-07-20T12:00:00Z",
-  "updated_at": "2025-07-20T12:10:00Z",
-  "user_id": "admin"
-}
-🔗 TransactionReference: relaciones
-🔗 1. ADVANCE → PAYMENT
-json
-Copiar
-Editar
-{
-  "id": "REF-001",
+  "id": 1,
   "transactionCode": "pago anticipo",
-  "producer": "prod-001",
-  "parentId": "ADV-001",
-  "childId": "PAY-001",
+  "parentId": 1,
+  "childId": 2,
   "parentType": "ADVANCE",
   "childType": "PAYMENT",
-  "createdAt": "2025-06-01T11:01:00Z",
+  "createdAt": "2025-08-04T11:00:00Z",
   "updatedAt": null,
   "deletedAt": null
 }
-🔗 2. ADVANCE → DISCOUNT (por interés)
-json
-Copiar
-Editar
+
+Estructura AdvanceTransactionMetadataDto
 {
-  "id": "REF-002",
-  "transactionCode": "interes aplicado",
-  "producer": "prod-001",
-  "parentId": "ADV-001",
-  "childId": "DISC-001",
-  "parentType": "ADVANCE",
-  "childType": "DISCOUNT",
-  "createdAt": "2025-07-20T12:01:00Z",
-  "updatedAt": null,
-  "deletedAt": null
+  "rate": 0.12,
+  "days": 60,
+  "baseAmount": 5000,
+  "interestAmount": 100,
+  "discounted": true
 }
+---
+
+
++-------------+--------------------+-----------------------+--------+
+| Categoría   | Subcategoría       | Descripción           | Monto  |
++-------------+--------------------+-----------------------+--------+
+| RECEPCIONES | TOTAL_RECEPCIONES  | Recepciones a pagar   | 10000  |
+| DESCUENTOS  | ANTICIPO_PRINCIPAL | Anticipo              |  -2000 |
+| DESCUENTOS  | INTERESES_ANTICIPO | Intereses de anticipo |  -500  |
+| DESCUENTOS  | SERVICIO_SECADO    | Secado                |  -500  |
++-------------+--------------------+-----------------------+--------+
+|             | SALDO_NETO         | Saldo Neto a Pagar    |  7000  |
++-------------+--------------------+-----------------------+--------+
+
+
++------+----------------------------------------+
+| Paso | Etapa del proceso                      |
++------+----------------------------------------+
+| 1    | Selección de recepciones               |
+| 2    | Cierre de intereses                    |
+| 3    | Selección de anticipos                 |
+| 4    | Registro de pagos asociados            |
++------+----------------------------------------+
