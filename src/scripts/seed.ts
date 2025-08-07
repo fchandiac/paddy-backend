@@ -186,19 +186,17 @@ async function bootstrap() {
       ],
     },
     // Note: "Vano" (id: 9) is skipped as no range data was provided.
-    // Note: "secado" data is skipped as its discountCode is unclear.
-    // If "secado" needs to be seeded, please provide its discountCode.
-    // Example for "secado" if it had discountCode: 8
-    // {
-    //   discountCode: 8, // Assuming a code for Secado
-    //   name: "Secado",
-    //   ranges: [
-    //     { start: 15.01, end: 17.0, percent: 1.5 },
-    //     { start: 17.01, end: 20.0, percent: 2.5 },
-    //     { start: 20.01, end: 22.5, percent: 3.5 },
-    //     { start: 22.51, end: 100.0, percent: 4.5 },
-    //   ],
-    // },
+    // Se agrega "Secado" con discountCode 8
+    {
+      discountCode: 8, // Secado
+      name: "Secado",
+      ranges: [
+        { start: 15.01, end: 17.0, percent: 1.5 },
+        { start: 17.01, end: 20.0, percent: 2.5 },
+        { start: 20.01, end: 22.5, percent: 3.5 },
+        { start: 22.51, end: 100.0, percent: 4.5 },
+      ],
+    },
   ];
 
   for (const config of discountConfigurations) {

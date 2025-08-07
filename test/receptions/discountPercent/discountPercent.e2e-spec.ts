@@ -107,8 +107,6 @@ describe('DiscountPercent CRUD + Auditoría (e2e)', () => {
       console.error('No se encontró log de auditoría para el descuento creado. Logs recibidos:', logs);
     }
     
-    // ...existing code...
-    
     expect(found).toBeDefined();
     expect(found.userId).toBeDefined();
     expect(found.userId).not.toBeNull();
@@ -208,8 +206,6 @@ describe('DiscountPercent CRUD + Auditoría (e2e)', () => {
       console.error('No se encontró log de auditoría UPDATE. Logs recibidos:', logs);
     }
     
-    // ...existing code...
-    
     expect(found).toBeDefined();
     expect(found.userId).toBeDefined();
     expect(found.userId).not.toBeNull();
@@ -258,8 +254,6 @@ describe('DiscountPercent CRUD + Auditoría (e2e)', () => {
       console.error('No se encontró log de auditoría DELETE. Logs recibidos:', logs);
     }
     
-    // ...existing code...
-    
     expect(found).toBeDefined();
     expect(found.userId).toBeDefined();
     expect(found.userId).not.toBeNull();
@@ -267,4 +261,41 @@ describe('DiscountPercent CRUD + Auditoría (e2e)', () => {
     expect(found.entityType).toBe('DISCOUNT_PERCENT');
     expect(found.action).toBe('DELETE');
   });
+
+  // ===== TEST PARA SECADO (discountCode=8) =====
+  it('Debe validar rangos de Secado (discountCode 8)', async () => {
+    const code = 8;
+    const expectedRanges = [
+      { start: 15.01, end: 17.0, percent: 1.5 },
+      { start: 17.01, end: 20.0, percent: 2.5 },
+      { start: 20.01, end: 22.5, percent: 3.5 },
+      { start: 22.51, end: 100.0, percent: 4.5 },
+    ];
+    // Primero crear todos los rangos de Secado
+    for (const range of expectedRanges) {
+      const createRes = await request(httpServer)
+        .post('/discounts-percent')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ discountCode: code, start: range.start, end: range.end, percent: range.percent });
+      if (createRes.status !== 201) {
+        console.error('Error al crear rango Secado:', createRes.body);
+      }
+      expect(createRes.status).toBe(201);
+    }
+    // Luego obtenerlos por código
+    const res = await request(httpServer)
+      .get(`/discounts-percent/code/${code}`)
+      .set('Authorization', `Bearer ${adminToken}`);
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body.length).toBe(expectedRanges.length);
+    // Verificar cada rango en orden
+    expectedRanges.forEach((range, index) => {
+      const item = res.body[index];
+      expect(parseFloat(item.start)).toBeCloseTo(range.start, 2);
+      expect(parseFloat(item.end)).toBeCloseTo(range.end, 2);
+      expect(parseFloat(item.percent)).toBeCloseTo(range.percent, 2);
+    });
+  });
+  // Cierra el bloque describe
 });

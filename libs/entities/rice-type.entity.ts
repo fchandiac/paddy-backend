@@ -22,7 +22,7 @@ export class RiceType {
   @Column({ nullable: true })
   description: string;
 
-  @Column('decimal')
+  @Column('int')
   price: number;
 
   @Column()

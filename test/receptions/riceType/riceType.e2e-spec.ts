@@ -58,7 +58,7 @@ describe('RiceType CRUD + Auditoría (e2e)', () => {
   });
 
   it('Debe crear un tipo de arroz', async () => {
-    const riceTypeDto = { code: randomRiceCode, name: randomRiceName, description: 'Arroz test', price: 123.45, enable: true };
+    const riceTypeDto = { code: randomRiceCode, name: randomRiceName, description: 'Arroz test', price: 123, enable: true };
     const res = await request(httpServer)
       .post('/rice-types')
       .set('Authorization', `Bearer ${adminToken}`)
@@ -140,7 +140,7 @@ describe('RiceType CRUD + Auditoría (e2e)', () => {
       code: randomRiceCode, // Mantenemos el código
       name: `${randomRiceName}_UPDATED`,
       description: 'Arroz test actualizado',
-      price: 456.78,
+      price: 456, // Entero ahora
       enable: false
     };
     
@@ -168,7 +168,7 @@ describe('RiceType CRUD + Auditoría (e2e)', () => {
     expect(res.status).toBe(200);
     expect(res.body.name).toBe(`${randomRiceName}_UPDATED`);
     // Usar toBeCloseTo para comparaciones numéricas con tolerancia
-    expect(parseFloat(res.body.price)).toBeCloseTo(456.78, 0); // 0 decimales de precisión
+    expect(res.body.price).toBe(456);
     expect(res.body.enable).toBe(false);
   });
 
@@ -199,7 +199,7 @@ describe('RiceType CRUD + Auditoría (e2e)', () => {
     // Verificar que los newValues contienen los datos actualizados
     const logNewValues = typeof found.newValues === 'string' ? JSON.parse(found.newValues) : found.newValues;
     expect(logNewValues.name).toBe(`${randomRiceName}_UPDATED`);
-    expect(parseFloat(logNewValues.price)).toBeCloseTo(456.78, 0); // Usar tolerancia
+    expect(logNewValues.price).toBe(456);
     expect(logNewValues.enable).toBe(false);
   });
 

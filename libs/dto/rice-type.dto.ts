@@ -22,7 +22,7 @@ export class CreateRiceTypeDto {
   description?: string;
 
   @Type(() => Number)
-  @IsNumber()
+  @IsInt()
   @IsPositive()
   price: number;
 
@@ -47,7 +47,7 @@ export class UpdateRiceTypeDto {
 
   @IsOptional()
   @Type(() => Number)
-  @IsNumber()
+  @IsInt()
   @IsPositive()
   price?: number;
 

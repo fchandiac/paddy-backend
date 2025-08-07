@@ -165,18 +165,32 @@ export class ProducerService {
       throw new ConflictException(`Ya existe un productor con el RUT ${dto.rut}.`);
     }
   
-    const bankAccounts = dto.bankCode && dto.accountTypeCode
-      ? [
-          {
-            bankCode: dto.bankCode,
-            bankName: this.getBankNameFromCode(dto.bankCode),
-            accountNumber: dto.accountNumber,
-            accountTypeCode: dto.accountTypeCode,
-            accountTypeName: this.getAccountTypeNameFromCode(dto.accountTypeCode),
-            holderName: dto.holderName ?? dto.name, // por defecto usamos el nombre del productor
-          },
-        ]
-      : [];
+    // Validar que si se proporciona información bancaria, todos los campos requeridos estén presentes
+    let bankAccounts = [];
+    
+    if (dto.bankCode || dto.accountTypeCode || dto.accountNumber) {
+      // Si se proporciona algún campo bancario, validar que todos los requeridos estén presentes
+      if (!dto.bankCode) {
+        throw new ConflictException('bankCode es requerido cuando se proporciona información bancaria');
+      }
+      if (!dto.accountTypeCode) {
+        throw new ConflictException('accountTypeCode es requerido cuando se proporciona información bancaria');
+      }
+      if (!dto.accountNumber) {
+        throw new ConflictException('accountNumber es requerido cuando se proporciona información bancaria');
+      }
+
+      bankAccounts = [
+        {
+          bankCode: dto.bankCode,
+          bankName: this.getBankNameFromCode(dto.bankCode),
+          accountNumber: dto.accountNumber,
+          accountTypeCode: dto.accountTypeCode,
+          accountTypeName: this.getAccountTypeNameFromCode(dto.accountTypeCode),
+          holderName: dto.holderName ?? dto.name, // por defecto usamos el nombre del productor
+        },
+      ];
+    }
   
     const producer = this.producerRepo.create({
       ...dto,
@@ -198,6 +212,15 @@ export class ProducerService {
     }
   
     const existingAccounts = producer.bankAccounts || [];
+    
+    // Validar que no exista ya una cuenta con el mismo número de cuenta
+    const duplicateAccount = existingAccounts.find(
+      account => account.accountNumber === dto.accountNumber
+    );
+    
+    if (duplicateAccount) {
+      throw new ConflictException(`Ya existe una cuenta bancaria con el número ${dto.accountNumber}`);
+    }
   
     const newAccount = {
       bankCode: dto.bankCode,

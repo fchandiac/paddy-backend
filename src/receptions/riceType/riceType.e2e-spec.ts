@@ -58,7 +58,7 @@ describe('RiceType + Auditoría (e2e)', () => {
   // El login ya se hace en beforeAll
 
   it('Debe crear un tipo de arroz', async () => {
-    const riceTypeDto = { code: randomRiceCode, name: randomRiceName, description: 'Arroz test', price: 123.45, enable: true };
+    const riceTypeDto = { code: randomRiceCode, name: randomRiceName, description: 'Arroz test', price: 123, enable: true };
     const res = await request(httpServer)
       .post('/rice-types')
       .set('Authorization', `Bearer ${adminToken}`)
