@@ -59,7 +59,7 @@ export class ProducerController {
   }
 
   @Post()
-  @Audit('CREATE', 'PRODUCER', 'Crear productor')
+  @Audit('CREATE', 'PRODUCER_NO_BANK_ACCOUNT', 'Crear productor sin cuenta bancaria')
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   async create(@Body() dto: CreateProducerDto): Promise<Producer> {
     return this.producerService.create(dto);

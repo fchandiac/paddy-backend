@@ -4,7 +4,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { AppModule } from '../../../src/app.module';
 import { DataSource } from 'typeorm';
 
-describe('DiscountPercent CRUD + Auditoría (e2e)', () => {
+describe('AnalysisParam CRUD + Auditoría (e2e)', () => {
   let app: INestApplication;
   let httpServer: any;
   let dataSource: DataSource;
@@ -43,7 +43,7 @@ describe('DiscountPercent CRUD + Auditoría (e2e)', () => {
     
     // Ahora obtener los códigos de descuento ya usados
     const discountsRes = await request(httpServer)
-      .get('/discounts-percent')
+      .get('/analysis-param')
       .set('Authorization', `Bearer ${adminToken}`);
     usedDiscountCodes = (discountsRes.body || []).map((d: any) => d.discountCode);
 
@@ -63,7 +63,7 @@ describe('DiscountPercent CRUD + Auditoría (e2e)', () => {
     };
     
     const res = await request(httpServer)
-      .post('/discounts-percent')
+      .post('/analysis-param')
       .set('Authorization', `Bearer ${adminToken}`)
       .send(discountDto);
     
@@ -83,7 +83,7 @@ describe('DiscountPercent CRUD + Auditoría (e2e)', () => {
 
   it('Debe verificar que el porcentaje de descuento fue creado', async () => {
     const res = await request(httpServer)
-      .get(`/discounts-percent/${createdDiscountId}`)
+      .get(`/analysis-param/${createdDiscountId}`)
       .set('Authorization', `Bearer ${adminToken}`);
     expect(res.status).toBe(200);
     expect(res.body.discountCode).toBe(randomDiscountCode);
@@ -94,7 +94,7 @@ describe('DiscountPercent CRUD + Auditoría (e2e)', () => {
 
   it('Debe verificar que existe un log de auditoría para la creación', async () => {
     const res = await request(httpServer)
-      .get('/audit?entityType=DISCOUNT_PERCENT&action=CREATE')
+      .get('/audit?entityType=ANALYSIS_PARAM&action=CREATE')
       .set('Authorization', `Bearer ${adminToken}`);
     const logs = res.body.data || res.body;
     
@@ -111,7 +111,7 @@ describe('DiscountPercent CRUD + Auditoría (e2e)', () => {
     expect(found.userId).toBeDefined();
     expect(found.userId).not.toBeNull();
     expect(found.entityId).toBe(createdDiscountId);
-    expect(found.entityType).toBe('DISCOUNT_PERCENT');
+    expect(found.entityType).toBe('ANALYSIS_PARAM');
     expect(found.action).toBe('CREATE');
     
     // Comparar campos clave (usar newValues, no data)
@@ -125,7 +125,7 @@ describe('DiscountPercent CRUD + Auditoría (e2e)', () => {
   // ===== READ TESTS =====
   it('Debe obtener el porcentaje de descuento por ID (READ)', async () => {
     const res = await request(httpServer)
-      .get(`/discounts-percent/${createdDiscountId}`)
+      .get(`/analysis-param/${createdDiscountId}`)
       .set('Authorization', `Bearer ${adminToken}`);
     expect(res.status).toBe(200);
     expect(res.body.id).toBe(createdDiscountId);
@@ -135,7 +135,7 @@ describe('DiscountPercent CRUD + Auditoría (e2e)', () => {
 
   it('Debe obtener todos los porcentajes de descuento (READ ALL)', async () => {
     const res = await request(httpServer)
-      .get('/discounts-percent')
+      .get('/analysis-param')
       .set('Authorization', `Bearer ${adminToken}`);
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
@@ -145,7 +145,7 @@ describe('DiscountPercent CRUD + Auditoría (e2e)', () => {
 
   it('Debe obtener porcentajes de descuento por código (READ BY CODE)', async () => {
     const res = await request(httpServer)
-      .get(`/discounts-percent/code/${randomDiscountCode}`)
+      .get(`/analysis-param/code/${randomDiscountCode}`)
       .set('Authorization', `Bearer ${adminToken}`);
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
@@ -164,7 +164,7 @@ describe('DiscountPercent CRUD + Auditoría (e2e)', () => {
     };
     
     const res = await request(httpServer)
-      .put(`/discounts-percent/${createdDiscountId}`)
+      .put(`/analysis-param/${createdDiscountId}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .send(updateDto);
     
@@ -183,7 +183,7 @@ describe('DiscountPercent CRUD + Auditoría (e2e)', () => {
 
   it('Debe verificar que el porcentaje de descuento fue actualizado', async () => {
     const res = await request(httpServer)
-      .get(`/discounts-percent/${createdDiscountId}`)
+      .get(`/analysis-param/${createdDiscountId}`)
       .set('Authorization', `Bearer ${adminToken}`);
     expect(res.status).toBe(200);
     expect(parseFloat(res.body.start)).toBe(5);
@@ -193,7 +193,7 @@ describe('DiscountPercent CRUD + Auditoría (e2e)', () => {
 
   it('Debe verificar que existe un log de auditoría para la actualización', async () => {
     const res = await request(httpServer)
-      .get('/audit?entityType=DISCOUNT_PERCENT&action=UPDATE')
+      .get('/audit?entityType=ANALYSIS_PARAM&action=UPDATE')
       .set('Authorization', `Bearer ${adminToken}`);
     const logs = res.body.data || res.body;
     
@@ -210,7 +210,7 @@ describe('DiscountPercent CRUD + Auditoría (e2e)', () => {
     expect(found.userId).toBeDefined();
     expect(found.userId).not.toBeNull();
     expect(found.entityId).toBe(createdDiscountId);
-    expect(found.entityType).toBe('DISCOUNT_PERCENT');
+    expect(found.entityType).toBe('ANALYSIS_PARAM');
     expect(found.action).toBe('UPDATE');
     
     // Verificar que los newValues contienen los datos actualizados
@@ -223,7 +223,7 @@ describe('DiscountPercent CRUD + Auditoría (e2e)', () => {
   // ===== DELETE TESTS =====
   it('Debe eliminar el porcentaje de descuento (DELETE)', async () => {
     const res = await request(httpServer)
-      .delete(`/discounts-percent/${createdDiscountId}`)
+      .delete(`/analysis-param/${createdDiscountId}`)
       .set('Authorization', `Bearer ${adminToken}`);
     
     if (res.status !== 200) {
@@ -234,14 +234,14 @@ describe('DiscountPercent CRUD + Auditoría (e2e)', () => {
 
   it('Debe verificar que el porcentaje de descuento fue eliminado', async () => {
     const res = await request(httpServer)
-      .get(`/discounts-percent/${createdDiscountId}`)
+      .get(`/analysis-param/${createdDiscountId}`)
       .set('Authorization', `Bearer ${adminToken}`);
     expect(res.status).toBe(404); // Not found debido al soft delete
   });
 
   it('Debe verificar que existe un log de auditoría para la eliminación', async () => {
     const res = await request(httpServer)
-      .get('/audit?entityType=DISCOUNT_PERCENT&action=DELETE')
+      .get('/audit?entityType=ANALYSIS_PARAM&action=DELETE')
       .set('Authorization', `Bearer ${adminToken}`);
     const logs = res.body.data || res.body;
     
@@ -258,7 +258,7 @@ describe('DiscountPercent CRUD + Auditoría (e2e)', () => {
     expect(found.userId).toBeDefined();
     expect(found.userId).not.toBeNull();
     expect(found.entityId).toBe(createdDiscountId);
-    expect(found.entityType).toBe('DISCOUNT_PERCENT');
+    expect(found.entityType).toBe('ANALYSIS_PARAM');
     expect(found.action).toBe('DELETE');
   });
 
@@ -273,7 +273,7 @@ describe('DiscountPercent CRUD + Auditoría (e2e)', () => {
       ];
     // Obtener rangos existentes para evitar conflictos
     const existingRes = await request(httpServer)
-      .get(`/discounts-percent/code/${code}`)
+      .get(`/analysis-param/code/${code}`)
       .set('Authorization', `Bearer ${adminToken}`);
     expect(existingRes.status).toBe(200);
     const existingRanges = existingRes.body as Array<any>;
@@ -287,14 +287,14 @@ describe('DiscountPercent CRUD + Auditoría (e2e)', () => {
     // Crear rangos faltantes
     for (const range of toCreate) {
       const createRes = await request(httpServer)
-        .post('/discounts-percent')
+        .post('/analysis-param')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ discountCode: code, start: range.start, end: range.end, percent: range.percent });
       expect(createRes.status).toBe(201);
     }
     // Obtener todos los rangos y verificar
     const getRes = await request(httpServer)
-      .get(`/discounts-percent/code/${code}`)
+      .get(`/analysis-param/code/${code}`)
       .set('Authorization', `Bearer ${adminToken}`);
     expect(getRes.status).toBe(200);
     expect(Array.isArray(getRes.body)).toBe(true);

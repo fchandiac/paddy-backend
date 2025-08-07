@@ -98,7 +98,7 @@ describe('Producer CRUD + Auditoría (e2e)', () => {
 
   it('Debe verificar que existe un log de auditoría para la creación', async () => {
     const res = await request(httpServer)
-      .get('/audit?entityType=PRODUCER&action=CREATE')
+      .get('/audit?entityType=PRODUCER_NO_BANK_ACCOUNT&action=CREATE')
       .set('Authorization', `Bearer ${adminToken}`);
     const logs = res.body.data || res.body;
     
@@ -115,7 +115,7 @@ describe('Producer CRUD + Auditoría (e2e)', () => {
     expect(found.userId).toBeDefined();
     expect(found.userId).not.toBeNull();
     expect(found.entityId).toBe(createdProducerId);
-    expect(found.entityType).toBe('PRODUCER');
+    expect(found.entityType).toBe('PRODUCER_NO_BANK_ACCOUNT');
     expect(found.action).toBe('CREATE');
     
     // Comparar campos clave (usar newValues, no data)

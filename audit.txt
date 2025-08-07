@@ -1,0 +1,47 @@
++------------------------+------------------------------------------------------+------------------+-----------------------------------------------+
+| Domain                 | Test File                                             | EntityType       | Audit Actions                                 |
++------------------------+------------------------------------------------------+------------------+-----------------------------------------------+
+| Auth Service           | test/auth/auth/auth.e2e-spec.ts                       | SYSTEM, USER     | VIEW, LOGIN                                   |
+| User CRUD              | test/auth/user/user.e2e-spec.ts                       | USER             | CREATE, UPDATE, CHANGE_PASSWORD, DELETE       |
+| Producer CRUD          | test/auth/producer/producer.e2e-spec.ts               | PRODUCER         | CREATE, UPDATE, DELETE                        |
+| RiceType CRUD          | test/receptions/riceType/riceType.e2e-spec.ts         | RICE_TYPE        | CREATE, UPDATE, DELETE                        |
+| AnalysisParam CRUD     | test/receptions/analysisParam/analysis-param.e2e-spec.ts | ANALYSIS_PARAM | CREATE, UPDATE, DELETE                        |
+| Advance E2E            | test/transactions/advances/advance.e2e-spec.ts        | TRANSACTION      | CREATE                                        |
++------------------------+------------------------------------------------------+------------------+-----------------------------------------------+
+
+
+private getBankNameFromCode(bankCode: number): string
+Obtiene el nombre del banco según su código.
+
+private getAccountTypeNameFromCode(accountTypeCode: number): string
+Devuelve el nombre del tipo de cuenta bancario a partir de su código.
+
+getBanksList(): Array<{ code: number; name: string }>
+Retorna la lista de códigos y nombres de todos los bancos disponibles.
+
+getAccountTypesList(): Array<{ code: number; name: string }>
+Retorna la lista de códigos y nombres de todos los tipos de cuenta.
+
+async health(): Promise<string>
+Verifica que el servicio esté activo y funcionando.
+
+async findAll(): Promise<Producer[]>
+Recupera todos los productores, ordenados por fecha de creación.
+
+async findById(id: number): Promise<Producer>
+Busca un productor por su ID; lanza NotFoundException si no existe.
+
+async create(dto: CreateProducerDto): Promise<Producer>
+Crea un nuevo productor sin datos bancarios; evita duplicados por RUT.
+
+async createWithBankAccount(dto: CreateProducerWithBankDto): Promise<Producer>
+Crea un productor y, si se provee, su primera cuenta bancaria validando campos requeridos.
+
+async addBankAccount(producerId: number, dto: AddBankAccountDto): Promise<Producer>
+Añade una cuenta bancaria a un productor existente, evitando duplicados de número de cuenta.
+
+async update(id: number, dto: UpdateProducerDto): Promise<Producer>
+Actualiza los datos de un productor existente por ID.
+
+async remove(id: number): Promise<void>
+Realiza un borrado suave (soft remove) de un productor por ID.

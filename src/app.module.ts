@@ -8,7 +8,7 @@ import { UserModule } from './auth/user/user.module';
 import { ProducerModule } from './auth/producer/producer.module';
 
 import { ReceptionsModule } from './receptions/reception/receptions.module';
-import { DiscountPercentModule } from './receptions/discountsPercent/discountPercent.module';
+import { AnalysisParamModule } from './receptions/analysisParam/analysis-param.module';
 import { RiceTypeModule } from './receptions/riceType/riceType.module';
 import { Template } from 'libs/entities/template.entity';
 import { TemplateModule } from './receptions/template/template.module';
@@ -23,7 +23,7 @@ import { AuditModule } from './audit/audit.module';
 import { User } from '../libs/entities/user.entity';
 import { Producer } from '../libs/entities/producer.entity';
 import { RiceType } from '../libs/entities/rice-type.entity';
-import { DiscountPercent } from '../libs/entities/discount-percent.entity';
+import { AnalysisParam } from '../libs/entities/analysis-param.entity';
 import { Reception } from '../libs/entities/reception.entity';
 import { Transaction } from '../libs/entities/transaction.entity';
 import { TransactionReference } from '../libs/entities/transaction-reference.entity';
@@ -46,7 +46,7 @@ import { envs } from 'libs/config';
         User,
         Producer,
         RiceType,
-        DiscountPercent,
+        AnalysisParam,
         Reception,
         Transaction,
         TransactionReference,
@@ -66,7 +66,7 @@ import { envs } from 'libs/config';
     ProducerModule,
 
     ReceptionsModule,
-    DiscountPercentModule,
+    AnalysisParamModule,
     RiceTypeModule,
     TemplateModule,
 

@@ -20,13 +20,16 @@ export type AuditAction =
   | 'IMPORT';
 
 export type AuditEntityType = 
-  | 'USER' 
-  | 'PRODUCER' 
-  | 'RECEPTION' 
+  | 'USER'
+  | 'PRODUCER'
+  | 'PRODUCER_NO_BANK_ACCOUNT'
+  | 'PRODUCER_WITH_BANK_ACCOUNT'
+  | 'RECEPTION'
   | 'RICE_TYPE' 
   | 'TEMPLATE' 
   | 'TRANSACTION' 
   | 'DISCOUNT_PERCENT'
+  | 'ANALYSIS_PARAM'
   | 'SYSTEM';
 
 @Entity('audit_log')
@@ -85,7 +88,19 @@ export class AuditLog {
 
   @Column({
     type: 'enum',
-    enum: ['USER', 'PRODUCER', 'RECEPTION', 'RICE_TYPE', 'TEMPLATE', 'TRANSACTION', 'DISCOUNT_PERCENT', 'SYSTEM'],
+    enum: [
+      'USER',
+      'PRODUCER',
+      'PRODUCER_NO_BANK_ACCOUNT',
+      'PRODUCER_WITH_BANK_ACCOUNT',
+      'RECEPTION',
+      'RICE_TYPE',
+      'TEMPLATE',
+      'TRANSACTION',
+      'DISCOUNT_PERCENT',
+      'ANALYSIS_PARAM',
+      'SYSTEM',
+    ],
   })
   entityType: AuditEntityType;
 

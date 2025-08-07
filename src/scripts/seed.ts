@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from '../app.module';
 import { DataSource } from 'typeorm';
 import { User } from '../../libs/entities/user.entity';
-import { DiscountPercent } from '../../libs/entities/discount-percent.entity';
+import { AnalysisParam } from '../../libs/entities/analysis-param.entity';
 import { RiceType } from '../../libs/entities/rice-type.entity'; // Added import
 import { Producer } from '../../libs/entities/producer.entity'; // Added import
 import { Template } from '../../libs/entities/template.entity'; // Added Template import
@@ -12,7 +12,7 @@ async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule);
   const dataSource = app.get(DataSource);
   const userRepository = dataSource.getRepository(User);
-  const discountPercentRepository = dataSource.getRepository(DiscountPercent);
+  const analysisParamRepository = dataSource.getRepository(AnalysisParam);
   const riceTypeRepository = dataSource.getRepository(RiceType);
   const producerRepository = dataSource.getRepository(Producer); // Added repository
   const templateRepository = dataSource.getRepository(Template); // Added Template repository
@@ -41,7 +41,7 @@ async function bootstrap() {
   }
 
   // 2. Seed DiscountPercent data
-  console.log('Seeding DiscountPercent data...');
+  console.log('Seeding AnalysisParam data...');
 
   const discountConfigurations = [
     {
@@ -202,16 +202,16 @@ async function bootstrap() {
   for (const config of discountConfigurations) {
     console.log(`Processing discount code: ${config.discountCode} (${config.name})`);
     // Clear existing entries for this discountCode to prevent duplicates
-    await discountPercentRepository.delete({ discountCode: config.discountCode });
+    await analysisParamRepository.delete({ discountCode: config.discountCode });
 
     for (const range of config.ranges) {
-      const discountPercentEntry = discountPercentRepository.create({
+      const analysisEntry = analysisParamRepository.create({
         discountCode: config.discountCode,
         start: range.start,
         end: range.end,
         percent: Math.abs(range.percent), // Ensure percent is positive
       });
-      await discountPercentRepository.save(discountPercentEntry);
+      await analysisParamRepository.save(analysisEntry);
     }
     console.log(`Finished seeding for discount code: ${config.discountCode}`);
   }
