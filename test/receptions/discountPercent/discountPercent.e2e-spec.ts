@@ -264,38 +264,46 @@ describe('DiscountPercent CRUD + Auditoría (e2e)', () => {
 
   // ===== TEST PARA SECADO (discountCode=8) =====
   it('Debe validar rangos de Secado (discountCode 8)', async () => {
-    const code = 8;
-    const expectedRanges = [
-      { start: 15.01, end: 17.0, percent: 1.5 },
-      { start: 17.01, end: 20.0, percent: 2.5 },
-      { start: 20.01, end: 22.5, percent: 3.5 },
-      { start: 22.51, end: 100.0, percent: 4.5 },
-    ];
-    // Primero crear todos los rangos de Secado
-    for (const range of expectedRanges) {
+      const code = 8;
+      const expectedRanges = [
+        { start: 15.01, end: 17.0, percent: 1.5 },
+        { start: 17.01, end: 20.0, percent: 2.5 },
+        { start: 20.01, end: 22.5, percent: 3.5 },
+        { start: 22.51, end: 100.0, percent: 4.5 },
+      ];
+    // Obtener rangos existentes para evitar conflictos
+    const existingRes = await request(httpServer)
+      .get(`/discounts-percent/code/${code}`)
+      .set('Authorization', `Bearer ${adminToken}`);
+    expect(existingRes.status).toBe(200);
+    const existingRanges = existingRes.body as Array<any>;
+    const toCreate = expectedRanges.filter(er =>
+      !existingRanges.some(ex =>
+        parseFloat(ex.start) === er.start &&
+        parseFloat(ex.end) === er.end &&
+        parseFloat(ex.percent) === er.percent
+      )
+    );
+    // Crear rangos faltantes
+    for (const range of toCreate) {
       const createRes = await request(httpServer)
         .post('/discounts-percent')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ discountCode: code, start: range.start, end: range.end, percent: range.percent });
-      if (createRes.status !== 201) {
-        console.error('Error al crear rango Secado:', createRes.body);
-      }
       expect(createRes.status).toBe(201);
     }
-    // Luego obtenerlos por código
-    const res = await request(httpServer)
+    // Obtener todos los rangos y verificar
+    const getRes = await request(httpServer)
       .get(`/discounts-percent/code/${code}`)
       .set('Authorization', `Bearer ${adminToken}`);
-    expect(res.status).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-    expect(res.body.length).toBe(expectedRanges.length);
-    // Verificar cada rango en orden
+    expect(getRes.status).toBe(200);
+    expect(Array.isArray(getRes.body)).toBe(true);
+    expect(getRes.body.length).toBe(expectedRanges.length);
     expectedRanges.forEach((range, index) => {
-      const item = res.body[index];
+      const item = getRes.body[index];
       expect(parseFloat(item.start)).toBeCloseTo(range.start, 2);
       expect(parseFloat(item.end)).toBeCloseTo(range.end, 2);
       expect(parseFloat(item.percent)).toBeCloseTo(range.percent, 2);
     });
   });
-  // Cierra el bloque describe
 });
