@@ -4,7 +4,7 @@ import { DataSource } from 'typeorm';
 import { User } from '../../libs/entities/user.entity';
 import { Producer } from '../../libs/entities/producer.entity';
 import { RiceType } from '../../libs/entities/rice-type.entity';
-import { DiscountPercent } from '../../libs/entities/discount-percent.entity';
+import { AnalysisParam } from '../../libs/entities/analysis-param.entity';
 import { Template } from '../../libs/entities/template.entity';
 import { Reception } from '../../libs/entities/reception.entity';
 import { Transaction } from '../../libs/entities/transaction.entity';
@@ -24,7 +24,7 @@ async function bootstrap() {
     TransactionReference,
     Transaction,
     Reception,
-    DiscountPercent,
+    AnalysisParam,
     Template,
     // Entities that might be depended upon by others
     User,
