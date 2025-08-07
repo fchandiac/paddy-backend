@@ -253,10 +253,18 @@ describe('Producer CRUD + Auditoría (e2e)', () => {
   });
 
   it('Debe crear un productor con cuenta bancaria', async () => {
+    // Generar un RUT único diferente para este test
+    let uniqueRut: string;
+    do {
+      const randomNum = Math.floor(Math.random() * 10000000) + 10000000; // 8 dígitos
+      const dv = Math.floor(Math.random() * 10); // Dígito verificador
+      uniqueRut = `${randomNum}-${dv}`;
+    } while (usedRuts.includes(uniqueRut));
+
     const createProducerWithBankDto = {
       name: `${randomName}_WITH_BANK`,
       businessName: `${randomName}_WITH_BANK SpA`,
-      rut: `${randomRut.slice(0, -1)}0`, // Cambiar último dígito para evitar duplicados
+      rut: uniqueRut, // Usar el RUT único generado
       address: 'Dirección con Banco 123',
       phone: '+56900000000',
       bankCode: 100, // Banco de Chile
@@ -324,23 +332,35 @@ describe('Producer CRUD + Auditoría (e2e)', () => {
 
   // ===== DELETE TESTS =====
   it('Debe eliminar el productor (DELETE)', async () => {
+    // Verificar que el ID esté definido
+    expect(createdProducerId).toBeDefined();
+    expect(typeof createdProducerId).toBe('number');
+    expect(createdProducerId).toBeGreaterThan(0);
+
     const res = await request(httpServer)
       .delete(`/producers/${createdProducerId}`)
       .set('Authorization', `Bearer ${adminToken}`);
     
     if (res.status !== 200) {
       console.error('Error al eliminar productor:', res.body);
+      console.error('ID utilizado:', createdProducerId);
     }
     expect(res.status).toBe(200);
   });
 
   it('Debe eliminar el productor con banco (DELETE)', async () => {
+    // Verificar que el ID esté definido
+    expect(createdProducerWithBankId).toBeDefined();
+    expect(typeof createdProducerWithBankId).toBe('number');
+    expect(createdProducerWithBankId).toBeGreaterThan(0);
+
     const res = await request(httpServer)
       .delete(`/producers/${createdProducerWithBankId}`)
       .set('Authorization', `Bearer ${adminToken}`);
     
     if (res.status !== 200) {
       console.error('Error al eliminar productor con banco:', res.body);
+      console.error('ID utilizado:', createdProducerWithBankId);
     }
     expect(res.status).toBe(200);
   });
