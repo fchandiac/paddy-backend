@@ -1153,3 +1153,6 @@ Los métodos principales del servicio son:
 - `createReference`: Crea una nueva referencia entre dos transacciones.
 - `findReferencesForTransaction`: Busca referencias para una transacción específica (como padre o como hijo).
 - `findByProducer`: Busca todas las referencias asociadas a un productor.
+
+
+

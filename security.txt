@@ -1,0 +1,14 @@
+
+Para reforzar la seguridad en tu API basada en JWT te recomiendo:
+
+• Siempre usar HTTPS para proteger en tránsito la cabecera Authorization.
+• Firmar los tokens con una clave robusta (HMAC SHA-256 o RSA) y guardarla fuera de tu repositorio (p. ej. en variables de entorno o vault).
+• Ponerles caducidades cortas (exp: 5–15 min), y usar un mecanismo de refresh tokens con más vida útil.
+• No incluir datos sensibles en el payload (solo un ID y claims mínimos).
+• Almacenar el JWT en cookies seguras (HttpOnly, Secure, SameSite) o en almacenamiento web con protección contra XSS.
+• Validar siempre la firma y el issuer/audience.
+• Implementar roles y scopes en los claims si necesitas autorización fina.
+• Llevar un blacklist o lista de revocación de tokens si quieres invalidarlos antes de que expiren.
+• Considerar cifrado de payload (JWE) si necesitas confidencialidad real, no solo integridad.
+• Monitorear y limitar intentos de login para mitigar ataques de fuerza bruta.
+• Mantener tus dependencias actualizadas y hacer auditorías de seguridad periódicas.

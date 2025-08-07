@@ -11,6 +11,8 @@ let randomProducerName: string;
 let randomProducerRut: string;
 let randomRiceCode: number;
 let randomRiceName: string;
+let adminToken: string;
+let adminUserId: number;
 
 describe('ReceptionController (e2e)', () => {
   let app: INestApplication;
@@ -33,6 +35,8 @@ describe('ReceptionController (e2e)', () => {
       .send({ email: 'admin@ayg.cl', pass: 'admin' });
     expect(loginRes.status).toBe(201);
     adminToken = loginRes.body.access_token || loginRes.body.token;
+    // Capturar userId del admin para validar asociación en recepción
+    adminUserId = loginRes.body.userId;
 
     // Crear productor
     randomProducerName = 'TestProductor_' + Math.floor(Math.random() * 1000000);
@@ -109,6 +113,7 @@ describe('ReceptionController (e2e)', () => {
     expect(res.body).toHaveProperty('id');
     expect(res.body.producerId).toBe(receptionDto.producerId);
     expect(res.body.riceTypeId).toBe(receptionDto.riceTypeId);
-    // Aquí podrías agregar verificación de auditoría si tienes endpoint para logs
+    // Validar que userId se asignó según el token JWT
+    expect(res.body.userId).toBe(adminUserId);
   });
 });

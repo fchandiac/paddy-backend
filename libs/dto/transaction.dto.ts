@@ -12,8 +12,6 @@ export class CreateTransactionDto {
   @IsNumber()
   seasonId: number;
 
-  @IsNumber()
-  userId: number;
 
   @IsNumber()
   amount: number;

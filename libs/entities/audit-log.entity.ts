@@ -25,9 +25,10 @@ export type AuditEntityType =
   | 'PRODUCER_NO_BANK_ACCOUNT'
   | 'PRODUCER_WITH_BANK_ACCOUNT'
   | 'RECEPTION'
-  | 'RICE_TYPE' 
-  | 'TEMPLATE' 
-  | 'TRANSACTION' 
+  | 'RICE_TYPE'
+  | 'TEMPLATE'
+  | 'SEASON'
+  | 'TRANSACTION'
   | 'DISCOUNT_PERCENT'
   | 'ANALYSIS_PARAM'
   | 'SYSTEM';
@@ -96,6 +97,7 @@ export class AuditLog {
       'RECEPTION',
       'RICE_TYPE',
       'TEMPLATE',
+      'SEASON',
       'TRANSACTION',
       'DISCOUNT_PERCENT',
       'ANALYSIS_PARAM',

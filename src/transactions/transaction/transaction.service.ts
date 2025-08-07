@@ -90,9 +90,9 @@ export class TransactionService {
     return trx;
   }
 
-  async create(dto: CreateTransactionDto): Promise<Transaction> {
-    const user = await this.userRepo.findOne({ where: { id: dto.userId } });
-    if (!user) throw new NotFoundException(`Usuario con ID ${dto.userId} no encontrado.`);
+  async create(dto: CreateTransactionDto, userId: number): Promise<Transaction> {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException(`Usuario con ID ${userId} no encontrado.`);
 
     const producer = await this.producerRepo.findOne({ where: { id: dto.producerId } });
     if (!producer) throw new NotFoundException(`Productor con ID ${dto.producerId} no encontrado.`);
@@ -104,7 +104,7 @@ export class TransactionService {
       producer,
       producerId: dto.producerId,
       user,
-      userId: dto.userId,
+      userId,
       season: season || null,
       seasonId: dto.seasonId,
       amount: dto.amount,
@@ -207,22 +207,22 @@ export class TransactionService {
 
     /**
    * Crea un anticipo y lo vincula a un pago mediante TransactionReference
-  /**
-   * Crea un anticipo y lo vincula a un pago mediante TransactionReference
    * @param advanceDto DTO para la transacción de anticipo
    * @param paymentDto DTO para la transacción de pago
    * @param transactionReferenceService Servicio para crear la referencia
+   * @param userId ID de usuario autenticado
    * @returns { advance: Transaction, payment: Transaction, reference: TransactionReference }
    */
   async createAdvanceWithPayment(
     advanceDto: CreateTransactionDto,
     paymentDto: CreateTransactionDto,
-    transactionReferenceService: any
+    transactionReferenceService: any,
+    userId: number
   ): Promise<{ advance: Transaction; payment: Transaction; reference: any }> {
     paymentDto.typeCode = TransactionTypeCode.PAYMENT;
-    const payment = await this.create(paymentDto);
+    const payment = await this.create(paymentDto, userId);
     advanceDto.typeCode = TransactionTypeCode.ADVANCE;
-    const advance = await this.create(advanceDto);
+    const advance = await this.create(advanceDto, userId);
     const reference = await transactionReferenceService.createReference(
       'payment',
       advanceDto.producerId,

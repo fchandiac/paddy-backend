@@ -20,7 +20,10 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "db:seed": "ts-node -r tsconfig-paths/register src/scripts/seed.ts",
     "db:clear": "ts-node -r tsconfig-paths/register src/scripts/clear.ts",
-    "db:reset": "npm run db:clear && npm run db:seed"
+    "db:reset": "npm run db:clear && npm run db:seed",
+    "db:drop": "ts-node -r tsconfig-paths/register src/scripts/drop-tables.ts",
+    "db:sync": "ts-node -r tsconfig-paths/register src/scripts/sync.ts",
+    "db:setup": "npm run db:drop && npm run db:sync && npm run db:seed"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",

@@ -42,6 +42,8 @@ import { envs } from 'libs/config';
       password: envs.database.password,
       database: envs.database.DatabaseName,
       synchronize: true,
+      // Al ejecutar tests (NODE_ENV=test) eliminar esquema para recrear tablas con nuevos campos
+      dropSchema: process.env.NODE_ENV === 'test',
       entities: [
         User,
         Producer,

@@ -12,6 +12,7 @@ import { Producer } from './producer.entity';
 import { RiceType } from './rice-type.entity';
 import { Expose } from 'class-transformer';
 import { Template } from './template.entity';
+import { User } from './user.entity';
 import { ReceptionHistory } from '../interfaces/reception-history.interface';
 
 export type ReceptionStatus = 'pending' | 'settled' | 'canceled';
@@ -192,6 +193,16 @@ export class Reception {
   @UpdateDateColumn()
   @Expose()
   updatedAt: Date;
+
+  // Usuario que gestionó la recepción
+  @ManyToOne(() => User, { eager: false, nullable: true })
+  @JoinColumn({ name: 'userId' })
+  @Expose()
+  user: User;
+
+  @Column({ nullable: true })
+  @Expose()
+  userId?: number;
 
   // Historial de cambios de la recepción en formato JSON
   @Column('json', { nullable: true })

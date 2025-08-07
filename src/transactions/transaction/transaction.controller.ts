@@ -13,6 +13,7 @@ import {
   BadRequestException,
   UseInterceptors,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/auth/jwt-auth.guard';
 import { AuditInterceptor, Audit } from '../../common/interceptors/audit.interceptor';
@@ -59,8 +60,12 @@ export class TransactionController {
   @Post()
   @Audit('CREATE', 'TRANSACTION', 'Crear transacción')
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
-  async create(@Body() dto: CreateTransactionDto): Promise<Transaction> {
-    return this.transactionService.create(dto);
+  async create(
+    @Body() dto: CreateTransactionDto,
+    @Request() req: any,
+  ): Promise<Transaction> {
+    const userId = req.user?.id;
+    return this.transactionService.create(dto, userId);
   }
 
   @Get('producer/:producerId')

@@ -43,25 +43,8 @@ export class ReceptionService {
     return 'Reception service is running';
   }
 
-  async create(dto: CreateReceptionDto, userId?: number, userEmail?: string): Promise<Reception> {
-    // Si no tenemos userId pero tenemos email, buscar el usuario por email
-    let finalUserId = userId;
-    if (!finalUserId && userEmail) {
-      console.log('🔍 BACKEND DEBUG - Buscando usuario por email:', userEmail);
-      try {
-        const user = await this.userRepo.findOne({ where: { email: userEmail } });
-        if (user) {
-          finalUserId = user.id;
-          console.log('✅ BACKEND DEBUG - Usuario encontrado:', user.id, user.name || user.email);
-        } else {
-          console.log('❌ BACKEND DEBUG - Usuario no encontrado para email:', userEmail);
-        }
-      } catch (userError) {
-        console.log('⚠️ BACKEND DEBUG - Error buscando usuario:', userError.message);
-      }
-    }
-    
-    console.log('🔐 BACKEND DEBUG - userId final para auditoría:', finalUserId);
+  async create(dto: CreateReceptionDto, userId?: number): Promise<Reception> {
+    const finalUserId = userId;
     
     try {
       const producer = await this.producerRepo.findOne({
@@ -93,11 +76,19 @@ export class ReceptionService {
         ...rest
       } = dto;
     
+      // Cargar entidad User si userId válido
+      // Cargar entidad User según userId
+      let userEntity = null;
+      if (finalUserId) {
+        userEntity = await this.userRepo.findOne({ where: { id: finalUserId } });
+      }
       const newReception = this.receptionRepo.create({
         ...rest,
         producer,
         riceType,
         template: template || null,
+        user: userEntity || null,
+        userId: userEntity ? userEntity.id : null,
       });
 
       const savedReception = await this.receptionRepo.save(newReception);

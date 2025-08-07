@@ -14,8 +14,8 @@ export class SeasonService {
     private readonly userRepo: Repository<User>,
   ) {}
 
-  async create(dto: CreateSeasonDto): Promise<Season> {
-    const user = await this.userRepo.findOne({ where: { id: dto.createdById } });
+  async create(dto: CreateSeasonDto, userId: number): Promise<Season> {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
     if (!user) throw new NotFoundException('Usuario creador no encontrado');
     const season = this.seasonRepo.create({
       name: dto.name,

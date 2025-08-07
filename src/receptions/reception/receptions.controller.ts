@@ -8,14 +8,16 @@ import {
   Delete,
   ParseIntPipe,
   Query,
-  Headers,
   UseInterceptors,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { AuditInterceptor, Audit, AuditUserQuery } from '../../common/interceptors/audit.interceptor';
 import { ReceptionService } from './receptions.service';
 import { CreateReceptionDto, UpdateReceptionDto, UpdateReasonDto } from '../../../libs/dto/reception.dto';
-
+import { JwtAuthGuard } from '../../auth/auth/jwt-auth.guard';
 @Controller('receptions')
+@UseGuards(JwtAuthGuard)
 @UseInterceptors(AuditInterceptor)
 export class ReceptionController {
   constructor(private readonly receptionService: ReceptionService) {}
@@ -32,18 +34,10 @@ export class ReceptionController {
   @Audit('CREATE', 'RECEPTION', 'Crear recepción')
   create(
     @Body() dto: CreateReceptionDto,
-    @Headers('x-user-email') userEmail?: string,
-    @Headers('x-created-by') createdBy?: string,
-    @Headers('x-user-id') headerUserId?: string,
-    @Query('createdBy') queryCreatedBy?: string,
-    @Query('userId') queryUserId?: string,
+    @Request() req: any,
   ) {
-    // ...existing code...
-    const finalCreatedBy = createdBy || queryCreatedBy || userEmail || 'Sistema';
-    const finalUserId = headerUserId || queryUserId;
-    // ...existing code...
-    const userId = finalUserId ? parseInt(finalUserId, 10) : undefined;
-    return this.receptionService.create(dto, userId, userEmail || queryCreatedBy);
+    const userId = req.user?.id;
+    return this.receptionService.create(dto, userId);
   }
 
   // 📄 Listar todas las recepciones

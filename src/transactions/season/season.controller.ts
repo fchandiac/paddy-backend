@@ -1,13 +1,19 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, UseInterceptors, Request } from '@nestjs/common';
 import { SeasonService } from './season.service';
 import { CreateSeasonDto } from 'libs/dto/season.dto';
+import { JwtAuthGuard } from '../../auth/auth/jwt-auth.guard';
+import { AuditInterceptor, Audit } from '../../common/interceptors/audit.interceptor';
 
 @Controller('seasons')
+@UseGuards(JwtAuthGuard)
+@UseInterceptors(AuditInterceptor)
 export class SeasonController {
   constructor(private readonly seasonService: SeasonService) {}
 
   @Post()
-  async create(@Body() dto: CreateSeasonDto) {
-    return this.seasonService.create(dto);
+  @Audit('CREATE', 'SEASON', 'Crear temporada')
+  async create(@Body() dto: CreateSeasonDto, @Request() req: any) {
+    const userId = req.user?.id;
+    return this.seasonService.create(dto, userId);
   }
 }

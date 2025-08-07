@@ -1,14 +1,16 @@
-+------------------------+------------------------------------------------------+------------------+-----------------------------------------------+
-| Domain                 | Test File                                             | EntityType       | Audit Actions                                 |
-+------------------------+------------------------------------------------------+------------------+-----------------------------------------------+
-| Auth Service           | test/auth/auth/auth.e2e-spec.ts                       | SYSTEM, USER     | VIEW, LOGIN                                   |
-| User CRUD              | test/auth/user/user.e2e-spec.ts                       | USER             | CREATE, UPDATE, CHANGE_PASSWORD, DELETE       |
-| Producer CRUD          | test/auth/producer/producer.e2e-spec.ts               | PRODUCER         | CREATE, UPDATE, DELETE                        |
-| RiceType CRUD          | test/receptions/riceType/riceType.e2e-spec.ts         | RICE_TYPE        | CREATE, UPDATE, DELETE                        |
-| AnalysisParam CRUD     | test/receptions/analysisParam/analysis-param.e2e-spec.ts | ANALYSIS_PARAM | CREATE, UPDATE, DELETE                        |
-| Advance E2E            | test/transactions/advances/advance.e2e-spec.ts        | TRANSACTION      | CREATE                                        |
-+------------------------+------------------------------------------------------+------------------+-----------------------------------------------+
 
++------------------------+------------------------------------------------------+-------------------------------+-----------------------------------------------+
+| Domain                 | Test File                                            | EntityType                    | Audit Actions                                 |
++------------------------+------------------------------------------------------+-------------------------------+-----------------------------------------------+
+| Auth Service           | test/auth/auth/auth.e2e-spec.ts                      | SYSTEM, USER                  | VIEW, LOGIN                                   |
+| User CRUD              | test/auth/user/user.e2e-spec.ts                      | USER                          | CREATE, UPDATE, CHANGE_PASSWORD, DELETE       |
+| Producer sin Cuenta    | test/auth/producer/producer.e2e-spec.ts              | PRODUCER_NO_BANK_ACCOUNT      | CREATE                                        |
+| Producer con Cuenta    | test/auth/producer/producer.e2e-spec.ts              | PRODUCER_WITH_BANK_ACCOUNT    | CREATE                                        |
+| Producer CRUD          | test/auth/producer/producer.e2e-spec.ts              | PRODUCER                      | UPDATE, DELETE                                |
+| RiceType CRUD          | test/receptions/riceType/riceType.e2e-spec.ts        | RICE_TYPE                     | CREATE, UPDATE, DELETE                        |
+| AnalysisParam CRUD     | test/receptions/analysisParam/analysis-param.e2e-spec.ts | ANALYSIS_PARAM             | CREATE, UPDATE, DELETE                        |
+| Advance E2E            | test/transactions/advances/advance.e2e-spec.ts       | TRANSACTION                   | CREATE                                        |
++------------------------+------------------------------------------------------+
 
 private getBankNameFromCode(bankCode: number): string
 Obtiene el nombre del banco según su código.
@@ -45,3 +47,13 @@ Actualiza los datos de un productor existente por ID.
 
 async remove(id: number): Promise<void>
 Realiza un borrado suave (soft remove) de un productor por ID.
+
+
+
+AuditLog (audit-log.entity.ts): guarda el userId que realizó la acción de auditoría.
+Reception (reception.entity.ts): almacena el userId del usuario que creó la recepción.
+Season (season.entity.ts): referencia a createdBy (columna createdById) indicando quién creó la temporada.
+Transaction (transaction.entity.ts): incluye user + columna userId para el usuario que gestionó la transacción.
+
+
+

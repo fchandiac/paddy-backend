@@ -4,8 +4,6 @@ export class CreateSeasonDto {
   @IsString()
   name: string;
 
-  @IsInt()
-  createdById: number;
 
   @IsDateString()
   startDate: string;
