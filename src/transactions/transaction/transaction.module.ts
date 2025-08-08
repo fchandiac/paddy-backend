@@ -9,6 +9,7 @@ import { TransactionService } from './transaction.service';
 import { User } from '../../../libs/entities/user.entity'; // ✅ corrige la ruta si estás dentro de src/transactions/transaction/
 import { Producer } from '../../../libs/entities/producer.entity'; // ✅ corrige la ruta si estás dentro de src/transactions/transaction/
 import { JwtModule } from '@nestjs/jwt';
+import { JweModule } from '../../auth/jwe/jwe.module';
 
 
 @Module({
@@ -18,6 +19,7 @@ import { JwtModule } from '@nestjs/jwt';
       secret: process.env.JWT_SECRET || 'supersecret',
       signOptions: { expiresIn: '1d' },
     }),
+    JweModule,
   ],
   controllers: [TransactionController, AdvanceTransactionController],
   providers: [TransactionService, AdvanceTransactionService],

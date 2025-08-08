@@ -15,9 +15,9 @@ import {
 import { AuditInterceptor, Audit, AuditUserQuery } from '../../common/interceptors/audit.interceptor';
 import { ReceptionService } from './receptions.service';
 import { CreateReceptionDto, UpdateReceptionDto, UpdateReasonDto } from '../../../libs/dto/reception.dto';
-import { JwtAuthGuard } from '../../auth/auth/jwt-auth.guard';
+import { JweAuthGuard } from '../../auth/jwe/jwe-auth.guard';
 @Controller('receptions')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JweAuthGuard)
 @UseInterceptors(AuditInterceptor)
 export class ReceptionController {
   constructor(private readonly receptionService: ReceptionService) {}

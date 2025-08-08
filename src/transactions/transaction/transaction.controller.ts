@@ -15,7 +15,7 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../../auth/auth/jwt-auth.guard';
+import { JweAuthGuard } from '../../auth/jwe/jwe-auth.guard';
 import { AuditInterceptor, Audit } from '../../common/interceptors/audit.interceptor';
 import { TransactionService } from './transaction.service';
 import { CreateTransactionDto, FilterTransactionDto } from 'libs/dto/transaction.dto';
@@ -24,7 +24,7 @@ import { Transaction } from 'libs/entities/transaction.entity';
 
 @Controller('transactions')
 @UseInterceptors(AuditInterceptor)
-@UseGuards(JwtAuthGuard)
+@UseGuards(JweAuthGuard)
 export class TransactionController {
   constructor(private readonly transactionService: TransactionService) {}
 

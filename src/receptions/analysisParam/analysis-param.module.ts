@@ -5,16 +5,16 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AnalysisParam } from '../../../libs/entities/analysis-param.entity';
 import { User } from '../../../libs/entities/user.entity';
 import { AuditModule } from '../../audit/audit.module';
-import { JwtAuthGuard } from '../../auth/auth/jwt-auth.guard';
-import { AppJwtModule } from '../../auth/auth/jwt.module';
+import { JweAuthGuard } from '../../auth/jwe/jwe-auth.guard';
+import { JweModule } from '../../auth/jwe/jwe.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([AnalysisParam, User]),
     AuditModule,
-    AppJwtModule,
+    JweModule,
   ],
   controllers: [AnalysisParamController],
-  providers: [AnalysisParamService, JwtAuthGuard],
+  providers: [AnalysisParamService, JweAuthGuard],
 })
 export class AnalysisParamModule {}

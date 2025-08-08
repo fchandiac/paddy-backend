@@ -5,7 +5,7 @@ import {
   UseInterceptors,
   UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../../auth/auth/jwt-auth.guard';
+import { JweAuthGuard } from '../../auth/jwe/jwe-auth.guard';
 import { AuditInterceptor, Audit } from '../../common/interceptors/audit.interceptor';
 import { AdvanceTransactionService } from './advance-transaction.service';
 import { CreateAdvanceTransactionDto } from 'libs/dto/advance-transaction.dto';
@@ -13,7 +13,7 @@ import { Transaction } from 'libs/entities/transaction.entity';
 
 @Controller('advance-transactions')
 @UseInterceptors(AuditInterceptor)
-@UseGuards(JwtAuthGuard)
+@UseGuards(JweAuthGuard)
 export class AdvanceTransactionController {
   constructor(private readonly advanceTransactionService: AdvanceTransactionService) {}
 

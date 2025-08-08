@@ -6,6 +6,9 @@
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
   },
+  "transformIgnorePatterns": [
+    "node_modules/(?!(jose)/)"
+  ],
   "setupFilesAfterEnv": ["<rootDir>/test/setup.ts"],
   "moduleNameMapper": {
     "^libs/(.*)": "<rootDir>/libs/$1",

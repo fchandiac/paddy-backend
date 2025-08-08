@@ -12,9 +12,10 @@ import {
   ValidationPipe,
   UseInterceptors,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { AuditInterceptor, Audit } from '../../common/interceptors/audit.interceptor';
-import { JwtAuthGuard } from '../../auth/auth/jwt-auth.guard';
+import { JweAuthGuard } from '../../auth/jwe/jwe-auth.guard';
 import { AnalysisParamService } from './analysis-param.service';
 import {
   CreateAnalysisParamDto,
@@ -24,7 +25,7 @@ import { AnalysisParam } from '../../../libs/entities/analysis-param.entity';
 
 @Controller('analysis-param')
 @UseInterceptors(AuditInterceptor)
-@UseGuards(JwtAuthGuard)
+@UseGuards(JweAuthGuard)
 export class AnalysisParamController {
   constructor(
     private readonly analysisParamService: AnalysisParamService,
@@ -67,10 +68,11 @@ export class AnalysisParamController {
   @Audit('CREATE', 'ANALYSIS_PARAM', 'Crear parámetro de análisis')
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   async create(
-    @Body() dto: CreateAnalysisParamDto & { userId?: number },
+    @Body() dto: CreateAnalysisParamDto,
+    @Req() req: any,
   ): Promise<AnalysisParam> {
-    const { userId, ...analysisData } = dto;
-    return this.analysisParamService.create(analysisData, userId);
+    const userId = req.user?.id;
+    return this.analysisParamService.create(dto, userId);
   }
 
   @Put(':id')
@@ -78,19 +80,20 @@ export class AnalysisParamController {
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: UpdateAnalysisParamDto & { userId?: number },
+    @Body() dto: UpdateAnalysisParamDto,
+    @Req() req: any,
   ): Promise<AnalysisParam> {
-    const { userId, ...analysisData } = dto;
-    return this.analysisParamService.update(id, analysisData, userId);
+    const userId = req.user?.id;
+    return this.analysisParamService.update(id, dto, userId);
   }
 
   @Delete(':id')
   @Audit('DELETE', 'ANALYSIS_PARAM', 'Eliminar parámetro de análisis')
   async remove(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body?: { userId?: number },
+    @Req() req: any,
   ): Promise<void> {
-    const userId = body?.userId;
+    const userId = req.user?.id;
     return this.analysisParamService.remove(id, userId);
   }
 }

@@ -8,6 +8,8 @@ interface EnvVars {
   DATABASE_USER: string;
   DATABASE_PASSWORD: string;
   DATABASE_NAME: string;
+  JWE_PRIVATE_KEY_PATH: string;
+  JWE_PUBLIC_KEY_PATH: string;
 }
 
 const envVarsSchema: joi.ObjectSchema = joi
@@ -18,6 +20,8 @@ const envVarsSchema: joi.ObjectSchema = joi
     DATABASE_USER: joi.string().required(),
     DATABASE_PASSWORD: joi.string().required(),
     DATABASE_NAME: joi.string().required(),
+    JWE_PRIVATE_KEY_PATH: joi.string().required(),
+    JWE_PUBLIC_KEY_PATH: joi.string().required(),
   })
   .unknown(true);
 
@@ -40,5 +44,10 @@ export const envs = {
     user: envVars.DATABASE_USER,
     password: envVars.DATABASE_PASSWORD,
     DatabaseName: envVars.DATABASE_NAME,
+  },
+
+  jwe: {
+    privateKeyPath: envVars.JWE_PRIVATE_KEY_PATH,
+    publicKeyPath: envVars.JWE_PUBLIC_KEY_PATH,
   },
 };

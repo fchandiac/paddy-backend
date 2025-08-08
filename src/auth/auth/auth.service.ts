@@ -1,16 +1,16 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { JwtService } from '@nestjs/jwt';
 import { Repository } from 'typeorm';
 
 import { User } from 'libs/entities/user.entity';
+import { JweService } from '../jwe/jwe.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
-    private jwtService: JwtService,
+    private jweService: JweService,
   ) {}
 
   async signIn(email: string, pass: string): Promise<{ access_token: string; userId: number; email: string; role: string; name: string; user: { id: number; email: string; role: string; name: string } }> {
@@ -23,7 +23,7 @@ export class AuthService {
     const payload = { sub: user.id, email: user.email, role: user.role };
     
     return {
-      access_token: await this.jwtService.signAsync(payload),
+      access_token: await this.jweService.encrypt(payload, '15m'),
       userId: user.id,
       email: user.email,
       role: user.role,

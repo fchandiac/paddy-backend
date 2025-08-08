@@ -9,15 +9,16 @@ import { Template } from '../../../libs/entities/template.entity'; // ✅ corrig
 import { User } from '../../../libs/entities/user.entity';
 import { Season } from '../../../libs/entities/season.entity';
 import { AppJwtModule } from '../../auth/auth/jwt.module';
-import { JwtAuthGuard } from '../../auth/auth/jwt-auth.guard';
+import { JweModule } from '../../auth/jwe/jwe.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Reception, Producer, RiceType, Template, User, Season]),
     AppJwtModule,
+    JweModule,
   ],
   controllers: [ReceptionController],
-  providers: [ReceptionService, JwtAuthGuard],
+  providers: [ReceptionService],
   exports: [ReceptionService],
 })
 export class ReceptionsModule {}

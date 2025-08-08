@@ -35,6 +35,7 @@
     "class-validator": "^0.14.1",
     "dotenv": "^17.2.0",
     "joi": "^17.13.3",
+    "jose": "^6.0.12",
     "mysql2": "^3.14.0",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
@@ -83,6 +84,10 @@
     "moduleNameMapper": {
       "^libs/(.*)": "<rootDir>/libs/$1",
       "^src/(.*)": "<rootDir>/src/$1"
-    }
+    },
+    "setupFilesAfterEnv": ["<rootDir>/test/setup.ts"],
+    "transformIgnorePatterns": [
+      "node_modules/(?!(jose)/)"
+    ]
   }
 }
